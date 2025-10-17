@@ -1,0 +1,37 @@
+<div class="text-2xl font-bold mb-8">
+    Gestão de Usuários
+</div>
+<p-table 
+    size="large" 
+    [value]="users" 
+    [paginator]="true"
+    [rows]="5"
+    [rowsPerPageOptions]="[5, 10, 20]"
+    >
+    <ng-template #header>
+        <tr>
+            <th [style]="{'background': 'var(--p-primary-50)', 'color': 'var(--p-primary-900)'}" width="50%">Email</th>
+            <th [style]="{'background': 'var(--p-primary-50)', 'color': 'var(--p-primary-900)'}" width="20%">Nome</th>
+            <th [style]="{'background': 'var(--p-primary-50)', 'color': 'var(--p-primary-900)'}" width="20%">Permissões</th>
+            <th [style]="{'background': 'var(--p-primary-50)', 'color': 'var(--p-primary-900)'}" width="10%"></th>
+        </tr>
+    </ng-template>
+    <ng-template #body let-user>
+        <tr>
+            <td>{{ user.email }}</td>
+            <td>{{ user.name }}</td>
+            <td>{{ user.roles }}</td>
+            <td>
+                <p-button tooltipPosition="top" pTooltip="Editar" [outlined]="true" [text]="true" severity="primary" icon="pi pi-pencil" />
+                <p-button tooltipPosition="top" pTooltip="Deletar" [outlined]="true" [text]="true" severity="danger" icon="pi pi-trash" />
+            </td>
+        </tr>
+    </ng-template>
+    @if(users.length <= 0){
+        <ng-template #footer>
+            <td colspan="4" class="text-center p-4 text-gray-500">
+                Nenhum usuário encontrado
+            </td>
+        </ng-template>
+    }
+</p-table>

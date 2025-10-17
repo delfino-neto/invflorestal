@@ -1,0 +1,107 @@
+<app-floating-configurator />
+<div
+    class="bg-surface-50 dark:bg-surface-950 flex items-center justify-center min-h-screen min-w-screen overflow-hidden">
+    <div class="z-1 flex flex-col items-center justify-center">
+
+        <form [formGroup]="form" class="bg-white dark:bg-surface-700 shadow-xl rounded-xl p-12 pt-30 sm:pt-12 h-screen sm:h-auto md:w-xl">
+            <div class="flex justify-center items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24">
+                    <defs>
+                        <mask id="cutout-mask">
+                            <rect width="100%" height="100%" fill="white" />
+                            <path
+                                d="M 5.21875 2 C 0.15575 6.747 2.00175 12.11 4.46875 12.5 C 4.74375 12.519 5.3655 12.5795 5.5625 12.5625 C 5.5625 12.5625 4.21075 9.20475 5.21875 5.84375 C 5.26575 8.16575 6.4705 11.59925 6.8125 12.15625 C 7.9855 12.14425 10.139 8.646 9.5 6.375 C 8.613 3.221 5.21875 2 5.21875 2 z"
+                                fill="black" stroke="black" stroke-width="2" stroke-linejoin="round" />
+                        </mask>
+                    </defs>
+                    <path
+                        d="M 10.875 6.21875 C 7.193096 6.3975586 4.283125 8.99375 3.71875 11.28125 C 3.75475 11.68625 3.808 12.094 3.875 12.375 C 3.875 12.375 8.09775 9.86825 12.84375 10.28125 C 9.73275 11.07525 3.78525 13.2665 1.90625 17.9375 L 4.53125 19 C 4.94525 17.917 5.06075 16.3565 6.09375 15.5625 C 6.85275 16.9425 9.74625 19.262 12.65625 17.625 C 16.69825 15.351 18 9.09375 18 9.09375 C 15.57825 6.8745 13.084143 6.1114648 10.875 6.21875 z"
+                        fill="#2ecc71" mask="url(#cutout-mask)"
+                        transform="translate(0, 1) rotate(-5 10 14) scale(1.2 0.9)" />
+                    <g transform="translate(0.8, 0.8)">
+                        <path
+                            d="M 5.21875 2 C 0.15575 6.747 2.00175 12.11 4.46875 12.5 C 5.5 12.7 6.5 12.6 6.8125 12.15625 C 7.9855 12.14425 10.139 8.646 9.5 6.375 C 8.613 3.221 5.21875 2 5.21875 2 z"
+                            fill="none" stroke="#2ecc71" stroke-width="1.5" stroke-linejoin="round"
+                            stroke-linecap="round" />
+                        <path d="M 5.5625 12.5 Q 4.5 9, 5.21875 5.84375" fill="none" stroke="#2ecc71" stroke-width="0.8"
+                            stroke-linejoin="round" stroke-linecap="round" />
+                    </g>
+                </svg>
+                <div class="font-bold text-3xl">
+                    Inventário Florestal
+                </div>
+            </div>
+
+            <div class="text-center p-2 text-xl">
+                Registre-se para acessar o sistema de inventário florestal
+            </div>
+
+            <div class="flex flex-col my-2">
+                @for (message of messages(); track message; let first = $first) {
+                <p-message icon="pi pi-times-circle" [life]="10000" [severity]="message.severity" [text]="message.content"
+                    [ngClass]="{ 'mt-4': !first }" />
+                }
+            </div>
+
+            <div class="flex flex-col gap-6 mt-6 mb-6">
+                <div class="flex flex-col gap-1">
+                    <label class="text-xl" for="email">E-mail</label>
+                    <p-iconfield class="custom-input">
+                        <p-inputicon class="pi pi-envelope" />
+                        <input formControlName="email" class="w-full text-2xl" pSize="large" placeholder="example@email.com" pInputText id="email" autocomplete="off" />
+                    </p-iconfield>
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xl" for="nome">Nome</label>
+                        <p-iconfield class="custom-input">
+                            <p-inputicon class="pi pi-user" />
+                            <input  formControlName="firstName" class="w-full text-2xl" pSize="large" placeholder="John" pInputText id="nome"
+                                autocomplete="off" />
+                        </p-iconfield>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-xl" for="sobrenome">Sobrenome</label>
+                        <input formControlName="lastName" class="w-full text-2xl" pSize="large" placeholder="John" pInputText id="sobrenome" 
+                        autocomplete="off" />
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1">
+                    <label class="text-xl" for="password">Senha</label>
+                    <p-iconfield class="custom-input">
+                        <p-inputicon class="pi pi-lock" />
+                        <p-password  formControlName="password" id="password" autocomplete="off"  placeholder="*****************" class="full-password" size="large" [toggleMask]="true" />
+                    </p-iconfield>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-xl" for="confirm-password">Confirme a Senha</label>
+                    <p-iconfield class="custom-input">
+                        <p-inputicon class="pi pi-lock" />
+                        <p-password formControlName="confirmPassword" id="confirm-password" autocomplete="off"  [feedback]="false" placeholder="*****************" class="full-password" size="large" [toggleMask]="true" />
+                    </p-iconfield>
+                </div>
+                
+            </div>
+
+            <p-button (click)="doRegister()" [loading]="isLoading" [disabled]="form.invalid" type="submit" size="large" styleClass="w-full" label="Criar Conta"></p-button>
+
+            <div class="text-lg mt-5">
+                Já possui uma conta? <a href="/auth/login" class="text-primary-600 link">Fazer Login</a>
+            </div>
+        </form>
+
+    </div>
+    <div class="w-full absolute bottom-0" [style]="{'pointer-events': 'none'}">
+        <svg class="mountains" viewBox="0 0 1200 400" preserveAspectRatio="none">
+            <path
+                d="M0,400 L100,350 L200,370 L300,330 L400,350 L500,310 L600,330 L700,290 L800,310 L900,270 L1000,290 L1100,250 L1200,270 L1200,400 Z"
+                fill="#8cbeaf" opacity="0.8" />
+            <path d="M0,400 L150,320 L300,340 L450,300 L600,320 L750,280 L900,300 L1050,260 L1200,280 L1200,400 Z"
+                fill="#8cbeaf" opacity="0.6" />
+            <path d="M0,400 L200,290 L400,310 L600,270 L800,290 L1000,250 L1200,270 L1200,400 Z" fill="#8cbeaf"
+                opacity="0.4" />
+        </svg>
+    </div>
+</div>

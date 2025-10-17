@@ -1,0 +1,22 @@
+
+::ng-deep .full-password{
+    width: 100%;
+    .p-inputtext{
+        width: 100%;
+    }
+}
+.link{
+    text-decoration: underline !important;
+}
+
+::ng-deep .app-dark{
+    .mountain-0 {
+        fill: var(--p-primary-950) !important;
+    }
+    .mountain-1 {
+        fill: var(--p-primary-950) !important;
+    }
+    .mountain-2 {
+        fill: var(--p-primary-950) !important;
+    }
+}

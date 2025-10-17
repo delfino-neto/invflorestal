@@ -1,0 +1,72 @@
+<div class="layout-topbar">
+    <div class="layout-topbar-logo-container">
+        <a class="layout-topbar-logo" routerLink="/">
+            <div class="logo bg-primary-50 flex justify-center items-center rounded-lg"
+                [style]="{'width': '50px', 'height': '50px'}">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 20">
+                    <defs>
+                        <mask id="cutout-mask">
+                            <rect width="100%" height="100%" fill="white" />
+                            <path
+                                d="M 5.21875 2 C 0.15575 6.747 2.00175 12.11 4.46875 12.5 C 4.74375 12.519 5.3655 12.5795 5.5625 12.5625 C 5.5625 12.5625 4.21075 9.20475 5.21875 5.84375 C 5.26575 8.16575 6.4705 11.59925 6.8125 12.15625 C 7.9855 12.14425 10.139 8.646 9.5 6.375 C 8.613 3.221 5.21875 2 5.21875 2 z"
+                                fill="black" stroke="black" stroke-width="2" stroke-linejoin="round" />
+                        </mask>
+                    </defs>
+                    <path
+                        d="M 10.875 6.21875 C 7.193096 6.3975586 4.283125 8.99375 3.71875 11.28125 C 3.75475 11.68625 3.808 12.094 3.875 12.375 C 3.875 12.375 8.09775 9.86825 12.84375 10.28125 C 9.73275 11.07525 3.78525 13.2665 1.90625 17.9375 L 4.53125 19 C 4.94525 17.917 5.06075 16.3565 6.09375 15.5625 C 6.85275 16.9425 9.74625 19.262 12.65625 17.625 C 16.69825 15.351 18 9.09375 18 9.09375 C 15.57825 6.8745 13.084143 6.1114648 10.875 6.21875 z"
+                        fill="#2ecc71" mask="url(#cutout-mask)"
+                        transform="translate(0, 1) rotate(-5 10 14) scale(1.2 0.9)" />
+                    <g transform="translate(0.8, 0.8)">
+                        <path
+                            d="M 5.21875 2 C 0.15575 6.747 2.00175 12.11 4.46875 12.5 C 5.5 12.7 6.5 12.6 6.8125 12.15625 C 7.9855 12.14425 10.139 8.646 9.5 6.375 C 8.613 3.221 5.21875 2 5.21875 2 z"
+                            fill="none" stroke="#2ecc71" stroke-width="1.5" stroke-linejoin="round"
+                            stroke-linecap="round" />
+                        <path d="M 5.5625 12.5 Q 4.5 9, 5.21875 5.84375" fill="none" stroke="#2ecc71" stroke-width="0.8"
+                            stroke-linejoin="round" stroke-linecap="round" />
+                    </g>
+                </svg>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-gray-700 font-bold text-xl logo-text">Inventário Florestal</span>
+                <span class="text-gray-700 text-sm logo-text">Sistema de Gestão Florestal</span>
+            </div>
+        </a>
+    </div>
+
+    <div class="layout-topbar-actions">
+        <div class="layout-config-menu">
+            <button aria-label="Toggle Dark Mode" type="button" class="layout-topbar-action" (click)="toggleDarkMode()">
+                <i [ngClass]="{ 'pi ': true, 'pi-moon': layoutService.isDarkTheme(), 'pi-sun': !layoutService.isDarkTheme() }"></i>
+            </button>
+            <div class="relative">
+                <button  aria-label="Change Theme" class="layout-topbar-action layout-topbar-action-highlight" pStyleClass="@next"
+                    enterFromClass="hidden" enterActiveClass="animate-scalein" leaveToClass="hidden"
+                    leaveActiveClass="animate-fadeout" [hideOnOutsideClick]="true">
+                    <i class="pi pi-palette"></i>
+                </button>
+                <app-configurator />
+            </div>
+        </div>
+
+        <div class="flex gap-10 items-center dropdown-user" (click)="menu.toggle($event)">
+            <div class="flex gap-1">
+                <p-avatar icon="pi pi-user" class="mr-2" shape="circle" />
+                <div class="flex flex-col">
+                    <span>{{ name }}</span>
+                    <small class="text-gray-400">{{ username }}</small>
+                </div>
+            </div>
+            <i [ngClass]="['ml-auto pi', 'pi-angle-down']"></i>
+        </div>
+
+        <p-menu #menu [model]="items" [popup]="true">
+            <ng-template #start>
+                <div class="flex flex-col px-4 p-2">
+                    <span>{{ name }}</span>
+                    <small class="text-gray-400">{{ role }}</small>
+                </div>
+                <hr [style]="{'margin': '0'}" />
+            </ng-template>
+        </p-menu>
+    </div>
+</div>

@@ -1,0 +1,26 @@
+.dropdown-user {
+    padding: 0.3em 0.8em;
+    display: flex;
+    border-radius: 6px;
+    transition: all .2s ease;
+    cursor: pointer;
+
+    &:hover {
+        background-color: var(--surface-hover);
+    }
+}
+
+::ng-deep .text-red {
+    * {
+        color: var(--p-red-600) !important;
+    }
+}
+
+::ng-deep .app-dark {
+    .logo {
+        background-color: var(--p-primary-950) !important;
+    }
+    .logo-text{
+        color: var(--p-surface-300);
+    }
+}

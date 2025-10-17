@@ -1,0 +1,96 @@
+<div class="text-lg">
+    Seja bem vindo, {{ username }}
+</div>
+<div class="space-y-6">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
+            <p class="text-gray-600 mt-1">Visão geral do inventário florestal</p>
+        </div>
+        <div class="text-sm text-gray-500">
+            Última atualização: {{ lastUpdate }}
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <p-card *ngFor="let stat of stats" styleClass="shadow-sm border-gray-200 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600">{{ stat.title }}</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ stat.value }}</p>
+                    <p class="text-sm mt-2 flex items-center" [ngClass]="{
+                        'text-green-600': stat.changeType === 'positive',
+                        'text-red-600': stat.changeType === 'negative',
+                        'text-gray-600': stat.changeType === 'neutral'
+                        }">
+                        <i *ngIf="stat.changeType === 'positive'" class="pi pi-arrow-up mr-1"></i>
+                        {{ stat.change }}
+                    </p>
+                </div>
+                <div class="p-3 rounded-lg" [ngClass]="stat.color">
+                    <i *ngIf="stat.icon" [class]="stat.icon + ' text-white text-2xl'"></i>
+                    <i *ngIf="stat.materialIcon" class="material-symbols-outlined text-white">{{ stat.materialIcon }}</i>
+                </div>
+            </div>
+        </p-card>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2 space-y-6">
+            <p-card header="Distribuição de Espécies" styleClass="shadow-sm border-gray-200">
+                <p-chart type="bar" [data]="speciesData" [options]="speciesChartOptions"></p-chart>
+            </p-card>
+
+            <p-card styleClass="shadow-sm border-gray-200">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-900">Mapa de Distribuição</h3>
+                    <button pButton severity="secondary" type="button" label="Ver mapa completo" icon="pi pi-map-marker"
+                        class="p-button-text"></button>
+                </div>
+                <div [style]="{'width': '100%', 'height': '100%'}">
+                    <app-trees-map></app-trees-map>
+                </div>
+            </p-card>
+        </div>
+
+        <div class="space-y-6">
+            <p-card header="Ações Rápidas" styleClass="shadow-sm border-gray-200">
+                <div class="space-y-3">
+                    <button pButton type="button" label="Cadastrar Nova Espécie" icon="pi pi-plus"
+                        class="w-full"></button>
+                    <button pButton type="button" label="Ver Mapa Completo" severity="info" icon="pi pi-map" class="w-full"></button>
+                    <button pButton type="button" label="Exportar CSV" icon="pi pi-download"
+                        class="p-button-secondary w-full"></button>
+                </div>
+            </p-card>
+
+            <!-- Destaques -->
+            <p-card header="Destaques" styleClass="shadow-sm border-gray-200">
+                <div class="space-y-4">
+                    <div *ngFor="let suggestion of suggestions"
+                        class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <i [class]="suggestion.icon + ' text-xl mt-0.5 ' + suggestion.color"></i>
+                        <div>
+                            <h4 class="text-sm font-medium text-gray-900">{{ suggestion.title }}</h4>
+                            <p class="text-sm text-gray-600 mt-1">{{ suggestion.content }}</p>
+                        </div>
+                    </div>
+                </div>
+            </p-card>
+
+            <!-- Atividades Recentes -->
+            <p-card header="Atividades Recentes" styleClass="shadow-sm border-gray-200">
+                <div class="space-y-4">
+                    <div *ngFor="let activity of recentActivities" class="flex items-start space-x-3">
+                        <div class="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
+                        <div class="flex-1">
+                            <p class="text-sm font-medium text-gray-900">{{ activity.action }}</p>
+                            <p class="text-sm text-emerald-600">{{ activity.species }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ activity.time }} • {{ activity.user }}</p>
+                        </div>
+                    </div>
+                </div>
+            </p-card>
+        </div>
+    </div>
+</div>
