@@ -1,11 +1,12 @@
-import { provideHttpClient, withFetch } from '@angular/common/http';
 import { ApplicationConfig, inject, provideAppInitializer } from '@angular/core';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withEnabledBlockingInitialNavigation, withInMemoryScrolling } from '@angular/router';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import Aura from '@primeuix/themes/aura';
 import { providePrimeNG } from 'primeng/config';
-import { appRoutes } from './app.routes';
+import { routes } from './app.routes';
 import { AuthService } from '@/core/services/auth.service';
+import { authInterceptor } from '@/core/interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -13,8 +14,8 @@ export const appConfig: ApplicationConfig = {
             const authService = inject(AuthService);
             return authService.loadCurrentUser(); 
         }),
-        provideRouter(appRoutes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }), withEnabledBlockingInitialNavigation()),
-        provideHttpClient(withFetch()),
+        provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }), withEnabledBlockingInitialNavigation()),
+        provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
         provideAnimationsAsync(),
         providePrimeNG({ 
             theme: { 

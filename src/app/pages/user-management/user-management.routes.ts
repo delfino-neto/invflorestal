@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
 import { UserManagementComponent } from './user-management.component';
 
-export default [
+export const USER_MANAGEMENT_ROUTES: Routes = [
     {
         path: '',
         component: UserManagementComponent
     }
-] as Routes;
+];

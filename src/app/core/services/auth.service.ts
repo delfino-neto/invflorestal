@@ -11,7 +11,7 @@ import { User } from "../models/user/user";
 })
 export class AuthService {
 
-    uri: string = "api/auth";
+    uri: string = "/api/auth";
 
     private currentUser = signal<User | null>(null);
     public authCheckCompleted = signal<boolean>(false);
@@ -56,7 +56,11 @@ export class AuthService {
         );
     }
 
-    register(payload: UserRegisterRequest) {
+    register(payload: UserRegisterRequest): Observable<void> {
         return this.http.post<void>(`${this.uri}/register`, payload);
+    }
+
+    me(): Observable<User | null> {
+        return this.http.get<User | null>(`${this.uri}/me`, { withCredentials: true });
     }
 }

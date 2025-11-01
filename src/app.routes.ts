@@ -1,30 +1,24 @@
-import { RedirectFunction, Routes } from '@angular/router';
+import { Routes } from '@angular/router';
 import { AppLayout } from './app/layout/component/app.layout';
-import { authGuard, notAuthenticated } from '@/core/guards/auth';
-import { ExampleComponent } from '@/pages/example.component';
+import { AUTH_ROUTES } from './app/pages/auth/auth.routes';
+// import { DASHBOARD_ROUTES } from './app/pages/dashboard/dashboard.routes';
+import { DASHBOARD_ROUTES } from './app/pages/dashboard/dashboard.routes';
+import { USER_MANAGEMENT_ROUTES } from './app/pages/user-management/user-management.routes';
+import { SPECIES_ROUTES } from './app/pages/species/species.routes';
+import { authGuard } from '@/core';
 
-export const appRoutes: Routes = [
-    {
-        path: '',
-        component: AppLayout,
+export const routes: Routes = [
+    { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+    { path: 'auth', children: AUTH_ROUTES },
+    { 
+        path: '', 
         canActivate: [authGuard],
+        component: AppLayout, 
         children: [
-            {path: '', redirectTo: 'dashboard', pathMatch: 'full'},
-            {
-                path: 'dashboard',
-                loadChildren: () => import('./app/pages/dashboard/dashboard.routes')
-            },
-            {
-                path: 'users',
-                loadChildren: () => import('./app/pages/user-management/user-management.routes')
-            }
+            { path: 'dashboard', children: DASHBOARD_ROUTES },
+            { path: 'users', children: USER_MANAGEMENT_ROUTES },
+            { path: 'species', children: SPECIES_ROUTES }
         ]
     },
-    {path: 'ex', component: ExampleComponent},
-    { 
-        path: 'auth',
-        canActivate: [notAuthenticated], 
-        loadChildren: () => import('./app/pages/auth/auth.routes') 
-    },
-    { path: '**', redirectTo: '' },
+    { path: '**', redirectTo: 'error' } // Wildcard route for a 404 page
 ];

@@ -37,12 +37,13 @@ export class AppMenu {
                 { 
                     label: 'Espécies',
                     iconClass: 'nature',
-                    disabled: true,
                     items: [
-                    { label: 'Listar', icon: 'pi pi-fw pi-list', routerLink: ['/species'] },
-                    { label: 'Cadastrar', icon: 'pi pi-fw pi-plus', routerLink: ['/species/new'] },
-                    { label: 'Histórico', icon: 'pi pi-fw pi-history', routerLink: ['/species/history'] },
-                    { label: 'Identificação IA', icon: 'pi pi-fw pi-camera', routerLink: ['/species/identify'] }
+                        { label: 'Listar Espécies', icon: 'pi pi-fw pi-list', routerLink: ['/species'] },
+                        { label: 'Cadastrar Espécie', icon: 'pi pi-fw pi-plus', routerLink: ['/species/new'] },
+                        { label: 'Listar Espécies', icon: 'pi pi-fw pi-th-large', routerLink: ['/species/taxonomy'] },
+                        { label: 'Cadastrar Espécie', icon: 'pi pi-fw pi-plus-circle', routerLink: ['/species/taxonomy/new'] },
+                        { label: 'Histórico', icon: 'pi pi-fw pi-history', routerLink: ['/species/history'] },
+                        { label: 'Identificação IA', icon: 'pi pi-fw pi-camera', routerLink: ['/species/identify'] }
                     ]
                 },
                 { 

@@ -4,9 +4,9 @@ import { Login } from './login/login';
 import { Error } from './error';
 import { Register } from './register/register';
 
-export default [
+export const AUTH_ROUTES: Routes = [
     { path: 'access', component: Access },
     { path: 'error', component: Error },
     { path: 'login', component: Login },
     { path: 'register', component: Register }
-] as Routes;
+];
