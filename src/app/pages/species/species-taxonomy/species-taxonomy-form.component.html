@@ -1,0 +1,140 @@
+<div class="taxonomy-form">
+  <p-toast></p-toast>
+  
+  <div class="form-container">
+    <div class="form-header">
+      <h1>
+        <i class="material-icons-outlined">eco</i>
+        {{ isEditMode ? 'Editar' : 'Nova' }} Taxonomia de Espécie
+      </h1>
+    </div>
+
+    <div class="form-content">
+      <form [formGroup]="taxonomyForm" (ngSubmit)="onSubmit()">
+        <div class="form-grid">
+          <!-- Nome Científico -->
+          <div class="form-field full-width required">
+            <label for="scientificName">Nome Científico</label>
+            <input 
+              id="scientificName"
+              type="text" 
+              pInputText 
+              formControlName="scientificName"
+              placeholder="Ex: Cecropia pachystachya"
+              [class.p-invalid]="isFieldInvalid('scientificName')"
+              (input)="onScientificNameChange($event)"
+            />
+            <small 
+              *ngIf="isFieldInvalid('scientificName')" 
+              class="error-message">
+              {{ getFieldError('scientificName') }}
+            </small>
+          </div>
+
+          <!-- Nome Comum -->
+          <div class="form-field full-width">
+            <label for="commonName">Nome Comum</label>
+            <input 
+              id="commonName"
+              type="text" 
+              pInputText 
+              formControlName="commonName"
+              placeholder="Ex: Embaúba"
+              [class.p-invalid]="isFieldInvalid('commonName')"
+            />
+            <small 
+              *ngIf="isFieldInvalid('commonName')" 
+              class="error-message">
+              {{ getFieldError('commonName') }}
+            </small>
+          </div>
+
+          <!-- Família -->
+          <div class="form-field">
+            <label for="family">Família</label>
+            <input 
+              id="family"
+              type="text" 
+              pInputText 
+              formControlName="family"
+              placeholder="Ex: Urticaceae"
+              [class.p-invalid]="isFieldInvalid('family')"
+            />
+            <small 
+              *ngIf="isFieldInvalid('family')" 
+              class="error-message">
+              {{ getFieldError('family') }}
+            </small>
+          </div>
+
+          <!-- Gênero -->
+          <div class="form-field">
+            <label for="genus">Gênero</label>
+            <input 
+              id="genus"
+              type="text" 
+              pInputText 
+              formControlName="genus"
+              placeholder="Ex: Cecropia"
+              [class.p-invalid]="isFieldInvalid('genus')"
+            />
+            <small 
+              *ngIf="isFieldInvalid('genus')" 
+              class="error-message">
+              {{ getFieldError('genus') }}
+            </small>
+          </div>
+
+          <!-- Espécie -->
+          <div class="form-field">
+            <label for="species">Espécie</label>
+            <input 
+              id="species"
+              type="text" 
+              pInputText 
+              formControlName="species"
+              placeholder="Ex: pachystachya"
+            />
+          </div>
+
+          <!-- Código -->
+          <div class="form-field">
+            <label for="code">Código</label>
+            <input 
+              id="code"
+              type="text" 
+              pInputText 
+              formControlName="code"
+              placeholder="Ex: CECPAC"
+              [class.p-invalid]="isFieldInvalid('code')"
+            />
+            <small 
+              *ngIf="isFieldInvalid('code')" 
+              class="error-message">
+              {{ getFieldError('code') }}
+            </small>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button 
+            pButton 
+            type="button" 
+            label="Cancelar" 
+            icon="pi pi-times"
+            class="p-button-text"
+            (click)="onCancel()">
+          </button>
+          <button 
+            pButton 
+            type="submit" 
+            [label]="isEditMode ? 'Atualizar' : 'Salvar'" 
+            icon="pi pi-save"
+            [loading]="isSubmitting"
+            [disabled]="taxonomyForm.invalid || isSubmitting">
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

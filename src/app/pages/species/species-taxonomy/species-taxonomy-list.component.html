@@ -1,0 +1,103 @@
+<div class="taxonomy-list">
+  <p-toast></p-toast>
+  <p-confirmDialog></p-confirmDialog>
+  
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <h2>
+          <i class="material-icons-outlined">eco</i>
+          Taxonomias de Espécies
+        </h2>
+        <button 
+          pButton 
+          type="button" 
+          label="Nova Taxonomia" 
+          icon="pi pi-plus"
+          (click)="navigateToNew()">
+        </button>
+      </div>
+    </ng-template>
+
+    <p-table 
+      [value]="taxonomies" 
+      [loading]="loading"
+      [paginator]="true" 
+      [rows]="10"
+      [totalRecords]="totalRecords"
+      [lazy]="true"
+      (onLazyLoad)="loadTaxonomies($event)"
+      styleClass="p-datatable-striped">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nome Científico</th>
+          <th>Nome Comum</th>
+          <th>Família</th>
+          <th>Gênero</th>
+          <th>Código</th>
+          <th style="width: 120px">Ações</th>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="body" let-taxonomy>
+        <tr>
+          <td><strong>{{ taxonomy.scientificName }}</strong></td>
+          <td>{{ taxonomy.commonName || '-' }}</td>
+          <td>
+            <p-tag 
+              *ngIf="taxonomy.family" 
+              [value]="taxonomy.family"
+              severity="info">
+            </p-tag>
+            <span *ngIf="!taxonomy.family">-</span>
+          </td>
+          <td>{{ taxonomy.genus || '-' }}</td>
+          <td>
+            <code *ngIf="taxonomy.code">{{ taxonomy.code }}</code>
+            <span *ngIf="!taxonomy.code">-</span>
+          </td>
+          <td>
+            <div class="action-buttons">
+              <button 
+                pButton 
+                type="button"
+                icon="pi pi-pencil"
+                class="p-button-text p-button-sm"
+                pTooltip="Editar"
+                (click)="navigateToEdit(taxonomy.id!)">
+              </button>
+              <button 
+                pButton 
+                type="button"
+                icon="pi pi-trash"
+                class="p-button-text p-button-sm p-button-danger"
+                pTooltip="Excluir"
+                (click)="confirmDelete(taxonomy)">
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+      
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="6" class="text-center">
+            <div class="empty-state">
+              <i class="pi pi-search" style="font-size: 3rem; color: var(--text-color-secondary);"></i>
+              <p>Nenhuma taxonomia encontrada</p>
+              <button 
+                pButton 
+                type="button" 
+                label="Criar primeira taxonomia" 
+                icon="pi pi-plus"
+                class="p-button-outlined"
+                (click)="navigateToNew()">
+              </button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</div>

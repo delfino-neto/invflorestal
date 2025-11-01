@@ -1,0 +1,220 @@
+.taxonomy-form {
+  padding: 2rem;
+  min-height: calc(100vh - 4rem);
+  background: var(--surface-ground);
+  
+  .form-container {
+    max-width: 900px;
+    margin: 0 auto;
+    background: var(--surface-card);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+  }
+
+  .form-header {
+    background: linear-gradient(135deg, var(--primary-500), var(--primary-600));
+    color: white;
+    padding: 2rem;
+    text-align: center;
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+
+      i.material-icons-outlined {
+        font-size: 2rem;
+      }
+    }
+  }
+
+  .form-content {
+    padding: 2rem;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    &.full-width {
+      grid-column: 1 / -1;
+    }
+
+    &.required label::after {
+      content: ' *';
+      color: var(--red-500);
+      font-weight: 600;
+    }
+
+    label {
+      font-weight: 600;
+      color: var(--text-color);
+      font-size: 0.9rem;
+    }
+
+    input {
+      padding: 0.75rem;
+      border: 2px solid var(--surface-border);
+      border-radius: 6px;
+      font-size: 1rem;
+      transition: all 0.2s ease;
+      background: var(--surface-0);
+
+      &::placeholder {
+        color: var(--text-color-secondary);
+      }
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(var(--primary-color-rgb), 0.1);
+      }
+
+      &:hover:not(:focus):not(.p-invalid) {
+        border-color: var(--surface-400);
+      }
+
+      &.p-invalid {
+        border-color: var(--red-500);
+        background: rgba(var(--red-500-rgb), 0.05);
+
+        &:focus {
+          box-shadow: 0 0 0 3px rgba(var(--red-500-rgb), 0.1);
+        }
+      }
+    }
+
+    .error-message {
+      color: var(--red-500);
+      font-size: 0.8rem;
+      font-weight: 500;
+      margin-top: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+
+      &::before {
+        content: '⚠';
+        font-size: 0.9rem;
+      }
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--surface-border);
+
+    button {
+      min-width: 120px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 500;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+
+      &.p-button-text {
+        color: var(--text-color-secondary);
+        border: 1px solid var(--surface-300);
+
+        &:hover:not(:disabled) {
+          background: var(--surface-100);
+          color: var(--text-color);
+          border-color: var(--surface-400);
+        }
+      }
+
+      &:not(.p-button-text) {
+        background: var(--primary-color);
+        border: none;
+        color: white;
+
+        &:hover:not(:disabled) {
+          background: var(--primary-600);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(var(--primary-color-rgb), 0.3);
+        }
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+      }
+    }
+  }
+
+  // Responsive
+  @media (max-width: 768px) {
+    padding: 1rem;
+
+    .form-container {
+      border-radius: 8px;
+    }
+
+    .form-header {
+      padding: 1.5rem;
+
+      h1 {
+        font-size: 1.5rem;
+      }
+    }
+
+    .form-content {
+      padding: 1.5rem;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+      gap: 1.25rem;
+    }
+
+    .form-actions {
+      flex-direction: column-reverse;
+      gap: 0.75rem;
+
+      button {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// Loading state
+.taxonomy-form:has(.p-button[loading="true"]) {
+  .form-field input {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+}
+
+// Smooth animations
+.form-field .error-message {
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
