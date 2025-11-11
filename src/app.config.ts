@@ -7,6 +7,7 @@ import { providePrimeNG } from 'primeng/config';
 import { routes } from './app.routes';
 import { AuthService } from '@/core/services/auth.service';
 import { authInterceptor } from '@/core/interceptors/auth.interceptor';
+import { credentialsInterceptor } from '@/core/interceptors/credentials.interceptor';
 
 export const appConfig: ApplicationConfig = {
     providers: [
@@ -15,7 +16,7 @@ export const appConfig: ApplicationConfig = {
             return authService.loadCurrentUser(); 
         }),
         provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }), withEnabledBlockingInitialNavigation()),
-        provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
+        provideHttpClient(withFetch(), withInterceptors([authInterceptor, credentialsInterceptor])),
         provideAnimationsAsync(),
         providePrimeNG({ 
             theme: { 

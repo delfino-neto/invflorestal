@@ -18,7 +18,9 @@ export class SpeciesTaxonomyService {
   }
 
   getSpeciesTaxonomies(page: number, size: number): Observable<Page<SpeciesTaxonomy>> {
-    return this.http.get<Page<SpeciesTaxonomy>>(`${this.apiUrl}?page=${page}&size=${size}`);
+    return this.http.get<Page<SpeciesTaxonomy>>(`${this.apiUrl}?page=${page}&size=${size}`, {
+      withCredentials: true
+    });
   }
 
   getSpeciesTaxonomyById(id: number): Observable<SpeciesTaxonomy> {
