@@ -190,6 +190,10 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
             source: this.helperVectorSource
           });
           this.map.addInteraction(this.helperSnap);
+        } else {
+          // Re-adicionar snap se já existe para garantir que está ativo
+          this.map.removeInteraction(this.helperSnap);
+          this.map.addInteraction(this.helperSnap);
         }
 
         // Se não houver polígono desenhado ainda, ajustar view para mostrar a geometria auxiliar
@@ -295,6 +299,10 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
           source: this.helperPlotsSource
         });
         this.map.addInteraction(this.helperPlotsSnap);
+      } else if (this.helperPlotsSnap && this.helperPlotsSource.getFeatures().length > 0) {
+        // Re-adicionar snap se já existe para garantir que está ativo
+        this.map.removeInteraction(this.helperPlotsSnap);
+        this.map.addInteraction(this.helperPlotsSnap);
       }
     } catch (error) {
       console.error('Erro ao carregar helper plots:', error);
@@ -330,7 +338,8 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
           lineDash: [5, 5] // Linha tracejada para diferenciar
         })
       }),
-      zIndex: 1 // Abaixo da camada principal
+      zIndex: 1, // Abaixo da camada principal
+      renderBuffer: 4096 // Aumentar buffer para melhor performance
     });
 
     // Criar source e layer para helper plots (outros plots)
@@ -338,7 +347,8 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     
     this.helperPlotsLayer = new VectorLayer({
       source: this.helperPlotsSource,
-      zIndex: 1.5 // Entre helper geometry e camada principal
+      zIndex: 1.5, // Entre helper geometry e camada principal
+      renderBuffer: 4096 // Aumentar buffer para melhor performance
     });
 
     // Criar source e layer para vetores principais
@@ -365,7 +375,8 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
           })
         })
       }),
-      zIndex: 2 // Acima da camada helper
+      zIndex: 2, // Acima da camada helper
+      renderBuffer: 4096 // Aumentar buffer para melhor performance no pan
     });
 
     // Criar mapa
@@ -373,7 +384,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       target: this.mapContainer.nativeElement,
       layers: [
         new TileLayer({
-          source: new OSM()
+          source: new OSM(),
         }),
         this.helperVectorLayer, // Camada auxiliar primeiro (atrás)
         this.helperPlotsLayer,  // Camada de plots helper
@@ -381,7 +392,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       ],
       view: new View({
         center: fromLonLat([this.centerLon, this.centerLat]),
-        zoom: this.initialZoom
+        zoom: this.initialZoom,
       })
     });
 
@@ -629,9 +640,37 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
 
         // Ajustar view para mostrar o polígono
         this.zoomToPolygon();
+
+        // Garantir que os snaps estejam ativos após carregar geometria
+        this.ensureSnapsActive();
       }
     } catch (error) {
       console.error('Erro ao carregar geometria:', error);
+    }
+  }
+
+  /**
+   * Garante que todos os snaps estão ativos
+   */
+  private ensureSnapsActive(): void {
+    if (!this.map) return;
+
+    // Re-adicionar snap principal se existir
+    if (this.snap) {
+      this.map.removeInteraction(this.snap);
+      this.map.addInteraction(this.snap);
+    }
+
+    // Re-adicionar snap helper geometry se existir
+    if (this.helperSnap) {
+      this.map.removeInteraction(this.helperSnap);
+      this.map.addInteraction(this.helperSnap);
+    }
+
+    // Re-adicionar snap helper plots se existir
+    if (this.helperPlotsSnap) {
+      this.map.removeInteraction(this.helperPlotsSnap);
+      this.map.addInteraction(this.helperPlotsSnap);
     }
   }
 
