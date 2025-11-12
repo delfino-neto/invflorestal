@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { SpeciesTaxonomy } from '../models/species/species-taxonomy';
 import { SpeciesTaxonomyRequest } from '../models/species/species-taxonomy-request';
@@ -17,10 +17,39 @@ export class SpeciesTaxonomyService {
     return this.http.post<SpeciesTaxonomy>(this.apiUrl, speciesTaxonomy);
   }
 
-  getSpeciesTaxonomies(page: number, size: number): Observable<Page<SpeciesTaxonomy>> {
-    return this.http.get<Page<SpeciesTaxonomy>>(`${this.apiUrl}?page=${page}&size=${size}`, {
+  getSpeciesTaxonomies(
+    page: number, 
+    size: number, 
+    searchTerm?: string, 
+    family?: string, 
+    genus?: string
+  ): Observable<Page<SpeciesTaxonomy>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+    
+    if (searchTerm && searchTerm.trim()) {
+      params = params.set('searchTerm', searchTerm.trim());
+    }
+    if (family) {
+      params = params.set('family', family);
+    }
+    if (genus) {
+      params = params.set('genus', genus);
+    }
+    
+    return this.http.get<Page<SpeciesTaxonomy>>(this.apiUrl, {
+      params,
       withCredentials: true
     });
+  }
+  
+  getDistinctFamilies(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/families`);
+  }
+  
+  getDistinctGenera(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.apiUrl}/genera`);
   }
 
   getSpeciesTaxonomyById(id: number): Observable<SpeciesTaxonomy> {

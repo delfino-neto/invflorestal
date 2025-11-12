@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { debounceTime, Subject } from 'rxjs';
 
 // PrimeNG
 import { TableModule } from 'primeng/table';
@@ -10,6 +12,10 @@ import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { CardModule } from 'primeng/card';
 import { TagModule } from 'primeng/tag';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
 
 // Services & Models
 import { SpeciesTaxonomyService } from '../../../core/services/species-taxonomy.service';
@@ -20,12 +26,17 @@ import { SpeciesTaxonomy } from '../../../core/models/species/species-taxonomy';
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     TableModule,
     ButtonModule,
     ToastModule,
     ConfirmDialogModule,
     CardModule,
-    TagModule
+    TagModule,
+    InputTextModule,
+    SelectModule,
+    IconFieldModule,
+    InputIconModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './species-taxonomy-list.component.html',
@@ -35,24 +46,91 @@ export class SpeciesTaxonomyListComponent implements OnInit {
   taxonomies: SpeciesTaxonomy[] = [];
   loading = false;
   totalRecords = 0;
+  
+  // Filtros
+  searchTerm = '';
+  selectedFamily: string | null = null;
+  selectedGenus: string | null = null;
+  
+  // Listas de opções
+  families: Array<{ label: string; value: string }> = [];
+  genera: Array<{ label: string; value: string }> = [];
+  
+  // Paginação
+  currentPage = 0;
+  currentPageSize = 10;
+  
+  // Subject para debounce da busca
+  private searchSubject = new Subject<string>();
 
   constructor(
     private taxonomyService: SpeciesTaxonomyService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private router: Router
-  ) {}
+  ) {
+    // Configurar debounce para busca
+    this.searchSubject.pipe(
+      debounceTime(500)
+    ).subscribe(() => {
+      this.loadTaxonomies({ first: 0, rows: this.currentPageSize });
+    });
+  }
 
   ngOnInit(): void {
+    this.loadFilterOptions();
     this.loadTaxonomies({ first: 0, rows: 10 });
+  }
+  
+  loadFilterOptions(): void {
+    // Carregar famílias
+    this.taxonomyService.getDistinctFamilies().subscribe({
+      next: (families) => {
+        this.families = families.map(f => ({ label: f, value: f }));
+      },
+      error: (error) => {
+        console.error('Erro ao carregar famílias:', error);
+      }
+    });
+    
+    // Carregar gêneros
+    this.taxonomyService.getDistinctGenera().subscribe({
+      next: (genera) => {
+        this.genera = genera.map(g => ({ label: g, value: g }));
+      },
+      error: (error) => {
+        console.error('Erro ao carregar gêneros:', error);
+      }
+    });
+  }
+  
+  onSearchChange(): void {
+    this.searchSubject.next(this.searchTerm);
+  }
+  
+  onFilterChange(): void {
+    this.loadTaxonomies({ first: 0, rows: this.currentPageSize });
+  }
+  
+  clearFilters(): void {
+    this.searchTerm = '';
+    this.selectedFamily = null;
+    this.selectedGenus = null;
+    this.loadTaxonomies({ first: 0, rows: this.currentPageSize });
   }
 
   loadTaxonomies(event: any): void {
     this.loading = true;
-    const page = event.first / event.rows;
-    const size = event.rows;
-
-    this.taxonomyService.getSpeciesTaxonomies(page, size).subscribe({
+    this.currentPage = event.first / event.rows;
+    this.currentPageSize = event.rows;
+    
+    this.taxonomyService.getSpeciesTaxonomies(
+      this.currentPage,
+      this.currentPageSize,
+      this.searchTerm || undefined,
+      this.selectedFamily || undefined,
+      this.selectedGenus || undefined
+    ).subscribe({
       next: (response) => {
         this.taxonomies = response.content;
         this.totalRecords = response.totalElements;

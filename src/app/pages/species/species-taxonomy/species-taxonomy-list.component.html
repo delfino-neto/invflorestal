@@ -7,7 +7,7 @@
       <div class="p-4 card-header">
         <h2>
           <i class="material-symbols-outlined">potted_plant</i>
-          Catálogo de Espécies
+          Listagem de Espécies
         </h2>
         <button 
           pButton 
@@ -18,6 +18,70 @@
         </button>
       </div>
     </ng-template>
+
+    <!-- Filtros -->
+    <div class="filters-container">
+      <div class="filters-grid">
+        <!-- Busca -->
+        <div class="filter-field">
+          <label for="search">Buscar</label>
+          <p-iconfield>
+            <p-inputicon styleClass="pi pi-search" />
+            <input 
+              class="w-full"
+              id="search"
+              type="text" 
+              pInputText 
+              [(ngModel)]="searchTerm"
+              (ngModelChange)="onSearchChange()"
+              placeholder="Nome científico, comum ou código..."
+            />
+          </p-iconfield>
+        </div>
+
+        <!-- Filtro por Família -->
+        <div class="filter-field">
+          <label for="family">Família</label>
+          <p-select
+            id="family"
+            [(ngModel)]="selectedFamily"
+            [options]="families"
+            (onChange)="onFilterChange()"
+            placeholder="Todas as famílias"
+            [showClear]="true"
+            styleClass="w-full"
+          />
+        </div>
+
+        <!-- Filtro por Gênero -->
+        <div class="filter-field">
+          <label for="genus">Gênero</label>
+          <p-select
+            id="genus"
+            [(ngModel)]="selectedGenus"
+            [options]="genera"
+            (onChange)="onFilterChange()"
+            placeholder="Todos os gêneros"
+            [showClear]="true"
+            styleClass="w-full"
+          />
+        </div>
+
+        <!-- Botão Limpar -->
+        <div class="filter-field filter-actions">
+          <label>&nbsp;</label>
+          <button 
+            pButton 
+            type="button" 
+            label="Limpar Filtros" 
+            icon="pi pi-filter-slash"
+            class="p-button-outlined"
+            (click)="clearFilters()"
+            [disabled]="!searchTerm && !selectedFamily && !selectedGenus">
+          </button>
+        </div>
+      </div>
+    </div>
 
     <p-table 
       [value]="taxonomies" 
@@ -85,11 +149,11 @@
           <td colspan="6" class="text-center">
             <div class="empty-state">
               <i class="pi pi-search" style="font-size: 3rem; color: var(--text-color-secondary);"></i>
-              <p>Nenhuma taxonomia encontrada</p>
+              <p>Nenhuma espécie encontrada</p>
               <button 
                 pButton 
                 type="button" 
-                label="Criar primeira taxonomia" 
+                label="Criar primeira espécie" 
                 icon="pi pi-plus"
                 class="p-button-outlined"
                 (click)="navigateToNew()">
