@@ -1,0 +1,71 @@
+.plot-import-dialog {
+  padding: 0.5rem;
+}
+
+:host ::ng-deep {
+  .p-treetable {
+    .p-treetable-thead > tr > th {
+      background: var(--surface-50);
+      padding: 0.75rem 1rem;
+      font-weight: 600;
+      font-size: 0.875rem;
+      border-bottom: 2px solid var(--surface-200);
+    }
+
+    .p-treetable-tbody > tr {
+      transition: background-color 0.2s;
+    }
+
+    .p-treetable-tbody > tr.selected-row {
+      background: var(--primary-50) !important;
+    }
+
+    .p-treetable-tbody > tr > td {
+      padding: 0.875rem 1rem;
+      border-bottom: 1px solid var(--surface-100);
+      vertical-align: middle;
+    }
+
+    .p-treetable-toggler {
+      width: 2rem;
+      height: 2rem;
+      margin-right: 0.25rem;
+    }
+
+    .p-treetable-tbody > tr:hover {
+      background: var(--surface-50);
+    }
+
+    /* Linha com nó não selecionável */
+    .p-treetable-tbody > tr:has(.p-checkbox.p-disabled) {
+      opacity: 0.5;
+    }
+
+    /* Checkbox desabilitado */
+    .p-checkbox.p-disabled {
+      opacity: 0.2;
+    }
+
+    .p-checkbox.p-disabled .p-checkbox-box {
+      background-color: var(--surface-200) !important;
+      border-color: var(--surface-300) !important;
+      cursor: not-allowed !important;
+    }
+  }
+
+  .material-symbols-outlined {
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 300,
+      'GRAD' 0,
+      'opsz' 20;
+  }
+
+  .p-button {
+    padding: 0.625rem 1.25rem;
+  }
+
+  .p-inputtext {
+    padding: 0.625rem 0.875rem;
+  }
+}

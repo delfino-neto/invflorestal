@@ -23,211 +23,8 @@ import { forkJoin } from 'rxjs';
     InputTextModule,
     TreeTableModule
   ],
-  template: `
-    <div class="plot-import-dialog">
-      <div class="mb-4">
-        <p class="text-sm text-600">
-          Selecione uma área completa ou um plot específico para importar na área atual
-        </p>
-      </div>
-
-      <div class="field mb-4" *ngIf="selectedNodes.length <= 1">
-        <label for="plotCode" class="block font-semibold mb-2">
-          <i class="pi pi-tag mr-2"></i>Código do Plot
-        </label>
-        <input 
-          pInputText 
-          id="plotCode" 
-          [(ngModel)]="plotCode"
-          placeholder="Ex: PLOT-001"
-          class="w-full" 
-          autofocus />
-        <small class="text-500">Código único para o plot importado</small>
-      </div>
-      
-      <div class="field mb-4" *ngIf="selectedNodes.length > 1">
-        <div class="bg-blue-50 border-round p-3 border-1 border-blue-200">
-          <div class="flex align-items-start gap-2">
-            <i class="pi pi-info-circle text-blue-600 mt-1"></i>
-            <div class="text-sm text-blue-800">
-              <strong>Multisseleção ativa:</strong> Os plots serão criados usando os nomes originais das áreas/plots selecionados.
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="field mb-3">
-        <label class="block font-semibold mb-2">
-          <i class="pi pi-folder-open mr-2"></i>Selecione a Origem
-        </label>
-        <p-treeTable 
-          [value]="treeData" 
-          [loading]="loading"
-          selectionMode="checkbox"
-          [(selection)]="selectedNodes"
-          (onNodeSelect)="onNodeSelect($event)"
-          (onNodeUnselect)="onNodeUnselect($event)"
-          [scrollable]="true"
-          scrollHeight="380px"
-          [tableStyle]="{ 'min-width': '100%' }"
-          styleClass="p-treetable-sm">
-          
-          <ng-template pTemplate="header">
-            <tr>
-              <th style="width: 10%"></th>
-              <th style="width: 35%">Nome</th>
-              <th style="width: 20%" class="text-center">Tipo</th>
-              <th style="width: 20%" class="text-right">Área (m²)</th>
-              <th style="width: 15%" class="text-center">Plots</th>
-            </tr>
-          </ng-template>
-
-          <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
-            <tr [ttRow]="rowNode" [ttSelectableRow]="rowNode">
-              <td style="width: 10%">
-                <p-treeTableCheckbox [value]="rowNode"></p-treeTableCheckbox>
-              </td>
-              <td style="width: 35%">
-                <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
-                <span class="ml-2 font-medium">{{ rowData.name }}</span>
-              </td>
-              <td style="width: 20%" class="text-center">
-                <span class="inline-flex align-items-center justify-content-center gap-1 px-2 py-1 border-round"
-                      [class.bg-blue-100]="rowData.type === 'area'"
-                      [class.text-blue-700]="rowData.type === 'area'"
-                      [class.bg-green-100]="rowData.type === 'plot'"
-                      [class.text-green-700]="rowData.type === 'plot'">
-                  <span class="material-symbols-outlined" [style.font-size]="'16px'">
-                    {{ rowData.type === 'area' ? 'landscape' : 'grid_on' }}
-                  </span>
-                  <span class="text-xs font-semibold">
-                    {{ rowData.type === 'area' ? 'Área' : 'Plot' }}
-                  </span>
-                </span>
-              </td>
-              <td style="width: 20%" class="text-right">
-                <span *ngIf="rowData.area" class="text-sm font-medium">
-                  {{ rowData.area | number:'1.2-2' }}
-                </span>
-                <span *ngIf="!rowData.area" class="text-sm text-400">-</span>
-              </td>
-              <td style="width: 15%" class="text-center">
-                <span *ngIf="rowData.type === 'area'" class="text-sm text-600">
-                  {{ rowData.plotCount || 0 }}
-                </span>
-                <span *ngIf="rowData.type !== 'area'" class="text-sm text-400">-</span>
-              </td>
-            </tr>
-          </ng-template>
-
-          <ng-template pTemplate="emptymessage">
-            <tr>
-              <td colspan="4" class="text-center p-4">
-                <div class="flex flex-column align-items-center gap-2 py-3">
-                  <i class="pi pi-inbox text-4xl text-400"></i>
-                  <span class="text-500 font-medium">Nenhuma área disponível para importação</span>
-                </div>
-              </td>
-            </tr>
-          </ng-template>
-        </p-treeTable>
-      </div>
-
-      <div *ngIf="selectedNodes.length > 0" 
-           class="bg-blue-50 border-round p-3 mb-3 border-1 border-blue-200">
-        <div class="flex align-items-start gap-2">
-          <i class="pi pi-info-circle text-blue-600 mt-1"></i>
-          <div class="flex-1">
-            <div class="font-semibold text-blue-900 mb-2">
-              {{selectedNodes.length}} {{selectedNodes.length === 1 ? 'item selecionado' : 'itens selecionados'}}
-            </div>
-            <div class="text-sm text-blue-800 max-h-10rem overflow-y-auto">
-              <div *ngFor="let node of selectedNodes; let i = index" class="mb-1">
-                <strong>{{ getPlotCodeForNode(node, i) }}</strong>
-                <span class="mx-2">←</span>
-                <span>{{ node.data.name }}</span>
-                <span class="text-500 ml-1">
-                  ({{ node.data.type === 'area' ? 
-                      (node.data.plotCount || 0) + ' plots' : 
-                      (node.data.area | number:'1.2-2') + ' m²' }})
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex justify-content-end gap-2 pt-3 border-top-1 surface-border">
-        <p-button 
-          label="Cancelar" 
-          severity="secondary"
-          icon="pi pi-times"
-          (onClick)="cancel()" />
-        <p-button 
-          [label]="selectedNodes.length > 1 ? 'Importar ' + selectedNodes.length + ' Plots' : 'Importar Plot'" 
-          icon="pi pi-download"
-          (onClick)="import()"
-          [disabled]="!canImport()" />
-      </div>
-    </div>
-  `,
-  styles: [`
-    .plot-import-dialog {
-      padding: 0.5rem;
-    }
-
-    :host ::ng-deep {
-      .p-treetable {
-        .p-treetable-thead > tr > th {
-          background: var(--surface-50);
-          padding: 0.75rem 1rem;
-          font-weight: 600;
-          font-size: 0.875rem;
-          border-bottom: 2px solid var(--surface-200);
-        }
-
-        .p-treetable-tbody > tr {
-          transition: background-color 0.2s;
-        }
-
-        .p-treetable-tbody > tr.selected-row {
-          background: var(--primary-50) !important;
-        }
-
-        .p-treetable-tbody > tr > td {
-          padding: 0.875rem 1rem;
-          border-bottom: 1px solid var(--surface-100);
-          vertical-align: middle;
-        }
-
-        .p-treetable-toggler {
-          width: 2rem;
-          height: 2rem;
-          margin-right: 0.25rem;
-        }
-
-        .p-treetable-tbody > tr:hover {
-          background: var(--surface-50);
-        }
-      }
-
-      .material-symbols-outlined {
-        font-variation-settings:
-          'FILL' 0,
-          'wght' 300,
-          'GRAD' 0,
-          'opsz' 20;
-      }
-
-      .p-button {
-        padding: 0.625rem 1.25rem;
-      }
-
-      .p-inputtext {
-        padding: 0.625rem 0.875rem;
-      }
-    }
-  `]
+  templateUrl: './plot-import-dialog.component.html',
+  styleUrls: ['./plot-import-dialog.component.scss']
 })
 export class PlotImportDialogComponent implements OnInit {
   private collectionAreaService = inject(CollectionAreaService);
@@ -282,9 +79,11 @@ export class PlotImportDialogComponent implements OnInit {
                     type: 'plot',
                     area: plot.areaM2,
                     plotData: plot
-                  }
+                  },
+                  selectable: true
                 })),
-                expanded: false
+                expanded: false,
+                selectable: true
               } as TreeNode;
             });
             
@@ -338,21 +137,113 @@ export class PlotImportDialogComponent implements OnInit {
 
   onNodeSelect(event: any) {
     console.log('Node selected:', event);
-    console.log('Selected nodes count:', this.selectedNodes.length);
-    console.log('Selected nodes:', this.selectedNodes.map(n => n.data.name));
+    
+    setTimeout(() => {
+      const selectedNode = event.node;
+      
+      // Se selecionou um PARENT (área)
+      if (selectedNode.children && selectedNode.children.length > 0) {
+        console.log('Selected a PARENT node with', selectedNode.children.length, 'children');
+        
+        // Remove todos os filhos da seleção
+        this.selectedNodes = this.selectedNodes.filter(node => {
+          return !this.isChildOf(node, selectedNode);
+        });
+        
+        // Desabilita os filhos
+        selectedNode.children.forEach((child: TreeNode, idx: number) => {
+          console.log(`Disabling child ${idx}:`, child.data.name);
+          child.selectable = false;
+        });
+        
+        console.log('Selected PARENT - removed and disabled children. Selected nodes:', this.selectedNodes.map(n => n.data.name));
+      } 
+      // Se selecionou um FILHO (plot)
+      else {
+        console.log('Selected a CHILD node');
+        
+        // Remove o parent da seleção (se estiver selecionado)
+        const parent = this.findParentNode(selectedNode);
+        if (parent) {
+          console.log('Found parent:', parent.data.name);
+          this.selectedNodes = this.selectedNodes.filter(node => node !== parent);
+          
+          // Desabilita o parent
+          parent.selectable = false;
+          console.log('Disabled parent:', parent.data.name);
+          
+          console.log('Selected CHILD - removed and disabled parent. Selected nodes:', this.selectedNodes.map(n => n.data.name));
+        }
+      }
+      
+      console.log('Final selected nodes count:', this.selectedNodes.length);
+    }, 0);
   }
 
   onNodeUnselect(event: any) {
     console.log('Node unselected:', event);
-    console.log('Selected nodes count:', this.selectedNodes.length);
+    
+    setTimeout(() => {
+      const unselectedNode = event.node;
+      
+      // Se desselecionou um PARENT (área)
+      if (unselectedNode.children && unselectedNode.children.length > 0) {
+        // Reabilita os filhos
+        unselectedNode.children.forEach((child: TreeNode) => {
+          child.selectable = true;
+        });
+        console.log('Unselected PARENT - re-enabled children');
+      } 
+      // Se desselecionou um FILHO (plot)
+      else {
+        // Verifica se é o último filho selecionado
+        const parent = this.findParentNode(unselectedNode);
+        if (parent) {
+          // Verifica se ainda há filhos deste parent selecionados
+          const hasOtherChildrenSelected = parent.children?.some((child: TreeNode) => 
+            this.selectedNodes.includes(child) && child !== unselectedNode
+          );
+          
+          // Se não há mais filhos selecionados, reabilita o parent
+          if (!hasOtherChildrenSelected) {
+            parent.selectable = true;
+            console.log('Unselected last CHILD - re-enabled parent');
+          }
+        }
+      }
+      
+      console.log('Selected nodes count:', this.selectedNodes.length);
+    }, 0);
+  }
+
+  // Verifica se um nó é filho de outro
+  private isChildOf(node: TreeNode, potentialParent: TreeNode): boolean {
+    if (!potentialParent.children) return false;
+    return potentialParent.children.some(child => child === node);
+  }
+
+  // Encontra o parent de um nó
+  private findParentNode(childNode: TreeNode): TreeNode | null {
+    for (const node of this.treeData) {
+      if (node.children && node.children.some(child => child === childNode)) {
+        return node;
+      }
+    }
+    return null;
+  }
+
+  isCheckboxDisabled(node: TreeNode): boolean {
+    return node.selectable === false;
+  }
+
+  isNodeSelectable(node: any): boolean {
+    return node.node.selectable !== false;
   }
 
   getPlotCodeForNode(node: TreeNode, index: number): string {
-    // Se tiver múltiplas seleções, usa o nome original
     if (this.selectedNodes.length > 1) {
       return node.data.name;
     }
-    // Se tiver apenas uma seleção, usa o código digitado
     return this.plotCode || node.data.name;
   }
 
