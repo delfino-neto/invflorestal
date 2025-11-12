@@ -1,0 +1,86 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.map-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--surface-ground);
+
+  .map {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+
+    ::ng-deep {
+      .ol-viewport {
+        border-radius: var(--border-radius);
+      }
+
+      .ol-zoom {
+        top: 0.5rem;
+        right: 0.5rem;
+        left: auto;
+
+        button {
+          background: var(--surface-card);
+          color: var(--primary-color);
+          font-weight: bold;
+          border-radius: 0.5rem;
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          border: 1px solid var(--surface-border);
+          transition: all 0.2s;
+
+          &:hover {
+            background: var(--primary-color);
+            color: white;
+          }
+        }
+      }
+
+      .ol-attribution {
+        background: rgba(var(--surface-card), 0.95);
+        border-radius: 0.5rem 0 0 0;
+        padding: 0.25rem 0.5rem;
+        color: var(--text-color-secondary);
+        font-size: 0.75rem;
+      }
+    }
+  }
+
+  .clear-button {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    z-index: 10;
+    animation: fadeIn 0.3s ease-out;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    &:hover {
+      transform: scale(1.05);
+    }
+  }
+}
+
+// Responsividade
+@media (max-width: 768px) {
+  .map-container {
+    .clear-button {
+      top: 0.5rem;
+      left: 0.5rem;
+    }
+  }
+}

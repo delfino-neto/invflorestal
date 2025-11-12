@@ -1,0 +1,15 @@
+<div class="map-container" [style.height]="height" [style.min-height]="minHeight">
+  <div #mapContainer class="map"></div>
+  
+  @if (hasDrawnPolygon && showClearButton && !disabled) {
+    <button 
+      pButton 
+      type="button"
+      icon="pi pi-trash"
+      class="p-button-rounded p-button-outlined p-button-danger clear-button"
+      (click)="clearDrawing()"
+      pTooltip="Limpar desenho"
+      tooltipPosition="left">
+    </button>
+  }
+</div>

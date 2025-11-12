@@ -111,15 +111,6 @@
                     </p>
                   </div>
                 </div>
-                <p-button
-                  *ngIf="hasDrawnPolygon"
-                  label="Limpar Desenho"
-                  icon="pi pi-trash"
-                  severity="danger"
-                  [outlined]="true"
-                  size="small"
-                  (onClick)="clearDrawing()"
-                />
               </div>
             </div>
           </p-card>
@@ -174,15 +165,13 @@
                 </div>
               </div>
 
-              <!-- Mapa -->
-              <div #mapContainer class="map-container"></div>              <!-- Controles do Mapa -->
-              <div class="map-controls" *ngIf="hasDrawnPolygon">
-                <p-tag 
-                  severity="success" 
-                  icon="pi pi-check"
-                  value="Polígono pronto para salvar"
-                />
-              </div>
+              <!-- Componente de Mapa -->
+              <app-geometry-map 
+                formControlName="geometry"
+                [height]="'calc(100vh - 300px)'"
+                [minHeight]="'600px'"
+                (geometryChange)="onGeometryChange($event)"
+              />
             </div>
           </p-card>
         </div>
