@@ -105,11 +105,9 @@ export class CollectionAreaFormComponent implements OnInit, AfterViewInit, OnDes
       if (params['id']) {
         this.isEditMode = true;
         this.areaId = +params['id'];
-        this.loadArea();
+        // Não carregar aqui, será carregado após inicializar o mapa
       }
     });
-
-    // Não verificar aqui, será feito após inicializar o mapa
   }
 
   ngAfterViewInit(): void {
@@ -117,6 +115,11 @@ export class CollectionAreaFormComponent implements OnInit, AfterViewInit, OnDes
       this.initializeMap();
       // Mostrar instruções após o mapa estar inicializado
       this.checkIfShouldShowInstructions();
+      
+      // Se estiver em modo de edição, carregar a área após inicializar o mapa
+      if (this.isEditMode && this.areaId) {
+        this.loadArea();
+      }
     }, 100);
   }
 
@@ -299,6 +302,13 @@ export class CollectionAreaFormComponent implements OnInit, AfterViewInit, OnDes
   }
 
   loadGeometryToMap(geometry: string): void {
+    // Verificar se o mapa e vectorSource estão prontos
+    if (!this.vectorSource || !this.map) {
+      console.warn('Mapa ainda não está pronto, tentando novamente...');
+      setTimeout(() => this.loadGeometryToMap(geometry), 100);
+      return;
+    }
+
     try {
       const coordinates = this.parseGeometry(geometry);
       
@@ -311,7 +321,7 @@ export class CollectionAreaFormComponent implements OnInit, AfterViewInit, OnDes
 
         // Ajustar view para mostrar o polígono
         const extent = polygon.getExtent();
-        this.map?.getView().fit(extent, {
+        this.map.getView().fit(extent, {
           padding: [50, 50, 50, 50],
           maxZoom: 16
         });
