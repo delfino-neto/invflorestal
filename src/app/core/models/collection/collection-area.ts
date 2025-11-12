@@ -12,6 +12,5 @@ export interface CollectionArea {
 export interface CollectionAreaRequest {
     name: string;
     geometry: string;
-    createdById: number;
     notes?: string;
 }

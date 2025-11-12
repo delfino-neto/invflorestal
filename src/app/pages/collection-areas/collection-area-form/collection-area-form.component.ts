@@ -383,37 +383,10 @@ export class CollectionAreaFormComponent implements OnInit, AfterViewInit, OnDes
 
     this.isSubmitting = true;
 
-    // Buscar usuário atual do AuthService
-    this.authService.me().subscribe({
-      next: (currentUser) => {
-        if (!currentUser?.id) {
-          this.messageService.add({
-            severity: 'error',
-            summary: 'Erro',
-            detail: 'Usuário não autenticado'
-          });
-          this.isSubmitting = false;
-          return;
-        }
-
-        this.saveArea(geometry, currentUser.id);
-      },
-      error: () => {
-        this.messageService.add({
-          severity: 'error',
-          summary: 'Erro',
-          detail: 'Erro ao obter usuário autenticado'
-        });
-        this.isSubmitting = false;
-      }
-    });
-  }
-
-  private saveArea(geometry: string, userId: number): void {
     const request: CollectionAreaRequest = {
-      ...this.form.value,
-      geometry,
-      createdById: userId
+      name: this.form.value.name,
+      notes: this.form.value.notes,
+      geometry
     };
 
     const operation = this.isEditMode && this.areaId
