@@ -1,0 +1,179 @@
+<p-dialog
+  [header]="dialogHeader"
+  [(visible)]="visible"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '1200px', height: '90vh' }"
+  [contentStyle]="{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }"
+  (onHide)="close()"
+  [closable]="true"
+  [dismissableMask]="false"
+>
+  <div class="dialog-content">
+    <!-- Mapa para Desenho -->
+    <div class="map-section">
+      <h3 class="section-title">
+        <i class="pi pi-map-marker"></i>
+        Desenhe o Plot no Mapa
+      </h3>
+      <div class="map-container">
+        <app-geometry-map
+          [formControl]="geometryControl"
+          [helperGeometry]="areaGeometry || null"
+          helperFillColor="rgba(59, 130, 246, 0.1)"
+          helperStrokeColor="rgb(59, 130, 246)"
+          [helperStrokeWidth]="2"
+        ></app-geometry-map>
+      </div>
+      <div class="map-instructions">
+        <p class="text-sm text-surface-600 dark:text-surface-400">
+          <i class="pi pi-info-circle"></i>
+          Clique no mapa para começar a desenhar o polígono do plot.
+        </p>
+      </div>
+    </div>
+
+    <!-- Formulário -->
+    <div class="form-section">
+      <h3 class="section-title">
+        <i class="pi pi-file-edit"></i>
+        Informações do Plot
+      </h3>
+      
+      <form [formGroup]="form" class="plot-form">
+        <!-- Código do Plot -->
+        <div class="field">
+          <label for="plotCode" class="required">Código do Plot</label>
+          <input
+            id="plotCode"
+            type="text"
+            pInputText
+            formControlName="plotCode"
+            placeholder="Ex: PLOT-A01"
+            class="w-full"
+          />
+          <small
+            *ngIf="form.get('plotCode')?.invalid && form.get('plotCode')?.touched"
+            class="p-error"
+          >
+            Código é obrigatório (mínimo 2 caracteres)
+          </small>
+        </div>
+
+        <!-- Área em m² -->
+        <div class="field">
+          <label for="areaM2" class="required">Área (m²)</label>
+          <p-inputNumber
+            inputId="areaM2"
+            formControlName="areaM2"
+            mode="decimal"
+            [minFractionDigits]="2"
+            [maxFractionDigits]="2"
+            [min]="0.01"
+            placeholder="Ex: 100.00"
+            styleClass="w-full"
+          ></p-inputNumber>
+          <small
+            *ngIf="form.get('areaM2')?.invalid && form.get('areaM2')?.touched"
+            class="p-error"
+          >
+            Área é obrigatória e deve ser maior que 0
+          </small>
+        </div>
+
+        <!-- Inclinação -->
+        <div class="field">
+          <label for="slopeDeg">Inclinação (°)</label>
+          <p-inputNumber
+            inputId="slopeDeg"
+            formControlName="slopeDeg"
+            mode="decimal"
+            [minFractionDigits]="2"
+            [maxFractionDigits]="2"
+            [min]="0"
+            [max]="90"
+            placeholder="Ex: 15.00"
+            styleClass="w-full"
+          ></p-inputNumber>
+        </div>
+
+        <!-- Aspecto -->
+        <div class="field">
+          <label for="aspectDeg">Aspecto (°)</label>
+          <p-inputNumber
+            inputId="aspectDeg"
+            formControlName="aspectDeg"
+            mode="decimal"
+            [minFractionDigits]="2"
+            [maxFractionDigits]="2"
+            [min]="0"
+            [max]="360"
+            placeholder="Ex: 180.00"
+            styleClass="w-full"
+          ></p-inputNumber>
+        </div>
+
+        <!-- Notas -->
+        <div class="field full-width">
+          <label for="notes">Notas</label>
+          <textarea
+            id="notes"
+            pInputText
+            formControlName="notes"
+            rows="3"
+            placeholder="Observações sobre o plot..."
+            class="w-full"
+            style="resize: vertical;"
+          ></textarea>
+        </div>
+      </form>
+
+      <!-- Status Indicator -->
+      <div class="status-indicator mt-4">
+        <div
+          class="flex items-center gap-2 p-3 rounded"
+          [class.bg-green-50]="hasDrawnGeometry"
+          [class.bg-orange-50]="!hasDrawnGeometry"
+        >
+          <i
+            class="pi"
+            [class.pi-check-circle]="hasDrawnGeometry"
+            [class.pi-exclamation-circle]="!hasDrawnGeometry"
+            [class.text-green-600]="hasDrawnGeometry"
+            [class.text-orange-600]="!hasDrawnGeometry"
+          ></i>
+          <span
+            class="text-sm font-medium"
+            [class.text-green-700]="hasDrawnGeometry"
+            [class.text-orange-700]="!hasDrawnGeometry"
+          >
+            {{ hasDrawnGeometry ? 'Geometria desenhada' : 'Desenhe o plot no mapa' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <button
+        pButton
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="close()"
+        [disabled]="isSubmitting"
+      ></button>
+      <button
+        pButton
+        [label]="isEditMode ? 'Atualizar' : 'Criar Plot'"
+        icon="pi pi-check"
+        class="p-button-success"
+        (click)="save()"
+        [disabled]="isSubmitting || form.invalid"
+        [loading]="isSubmitting"
+      ></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<p-toast></p-toast>

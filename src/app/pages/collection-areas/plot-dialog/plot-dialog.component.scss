@@ -1,0 +1,135 @@
+.dialog-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+  height: 100%;
+  overflow: hidden;
+  padding: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .dialog-content {
+    grid-template-columns: 1fr;
+    overflow-y: auto;
+  }
+}
+
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Map Section */
+.map-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.map-container {
+  flex: 1;
+  min-height: 400px;
+  border: 2px solid var(--surface-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.map-instructions {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: var(--blue-50);
+  border-left: 3px solid var(--blue-500);
+  border-radius: 4px;
+}
+
+.map-instructions i {
+  margin-right: 0.5rem;
+  color: var(--blue-600);
+}
+
+/* Form Section */
+.form-section {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+.plot-form {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field.full-width {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: var(--text-color);
+}
+
+.field label.required::after {
+  content: ' *';
+  color: var(--red-500);
+}
+
+.helper-text {
+  font-size: 0.75rem;
+  color: var(--text-color-secondary);
+  margin-top: 0.25rem;
+}
+
+.p-error {
+  font-size: 0.75rem;
+  color: var(--red-500);
+  margin-top: 0.25rem;
+}
+
+/* Status Indicator */
+.status-indicator {
+  border-top: 1px solid var(--surface-border);
+  padding-top: 1rem;
+}
+
+/* Footer */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-top: 1px solid var(--surface-border);
+}
+
+/* Custom scrollbar */
+.form-section::-webkit-scrollbar {
+  width: 6px;
+}
+
+.form-section::-webkit-scrollbar-track {
+  background: var(--surface-50);
+  border-radius: 3px;
+}
+
+.form-section::-webkit-scrollbar-thumb {
+  background: var(--surface-300);
+  border-radius: 3px;
+}
+
+.form-section::-webkit-scrollbar-thumb:hover {
+  background: var(--surface-400);
+}

@@ -2,7 +2,9 @@ import {
   Component, 
   OnInit, 
   AfterViewInit, 
-  OnDestroy, 
+  OnDestroy,
+  OnChanges,
+  SimpleChanges,
   ElementRef, 
   ViewChild,
   Input,
@@ -63,7 +65,7 @@ import KML from 'ol/format/KML';
   templateUrl: './geometry-map.component.html',
   styleUrls: ['./geometry-map.component.scss']
 })
-export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, ControlValueAccessor {
+export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges, ControlValueAccessor {
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef<HTMLDivElement>;
 
   // Inputs para customização
@@ -78,6 +80,12 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
   @Input() strokeColor: string = 'rgb(16, 185, 129)';
   @Input() strokeWidth: number = 3;
   @Input() disabled: boolean = false;
+  
+  // Helper geometry (geometria auxiliar de referência, ex: área da CollectionArea)
+  @Input() helperGeometry: string | null = null;
+  @Input() helperFillColor: string = 'rgba(59, 130, 246, 0.1)';
+  @Input() helperStrokeColor: string = 'rgb(59, 130, 246)';
+  @Input() helperStrokeWidth: number = 2;
 
   // Output para eventos
   @Output() geometryChange = new EventEmitter<string | null>();
@@ -88,9 +96,15 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
   map?: Map;
   vectorSource!: VectorSource;
   vectorLayer!: VectorLayer<VectorSource>;
+  
+  // Helper layer (geometria de referência)
+  helperVectorSource!: VectorSource;
+  helperVectorLayer!: VectorLayer<VectorSource>;
+  
   draw?: Draw;
   modify?: Modify;
   snap?: Snap;
+  helperSnap?: Snap; // Snap para a geometria helper
   hasDrawnPolygon = false;
 
   // Estado das ferramentas
@@ -108,7 +122,10 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
 
   constructor(private messageService: MessageService) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    // Observar mudanças na geometria auxiliar
+    // Nota: Para mudanças dinâmicas, usar ngOnChanges seria melhor
+  }
 
   ngAfterViewInit(): void {
     setTimeout(() => {
@@ -122,10 +139,99 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
     }
   }
 
+  /**
+   * Detecta mudanças nos inputs (principalmente helperGeometry)
+   */
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['helperGeometry'] && !changes['helperGeometry'].firstChange) {
+      this.updateHelperGeometry();
+    }
+  }
+
+  /**
+   * Atualiza a geometria auxiliar (helper) no mapa
+   */
+  private updateHelperGeometry(): void {
+    if (!this.helperVectorSource || !this.map) {
+      return;
+    }
+
+    // Limpar geometria auxiliar anterior
+    this.helperVectorSource.clear();
+
+    // Se não houver geometria auxiliar, apenas retornar
+    if (!this.helperGeometry) {
+      return;
+    }
+
+    try {
+      const coordinates = this.parseGeometry(this.helperGeometry);
+      
+      if (coordinates.length > 0) {
+        const polygon = new Polygon([coordinates.map(coord => fromLonLat(coord))]);
+        const feature = new Feature({ geometry: polygon });
+        
+        this.helperVectorSource.addFeature(feature);
+
+        // Criar/recriar helperSnap se ainda não existir
+        if (!this.helperSnap) {
+          this.helperSnap = new Snap({
+            source: this.helperVectorSource
+          });
+          this.map.addInteraction(this.helperSnap);
+        }
+
+        // Se não houver polígono desenhado ainda, ajustar view para mostrar a geometria auxiliar
+        if (!this.hasDrawnPolygon) {
+          this.zoomToHelperGeometry();
+        }
+      }
+    } catch (error) {
+      console.error('Erro ao carregar geometria auxiliar:', error);
+    }
+  }
+
+  /**
+   * Ajusta o zoom para mostrar a geometria auxiliar
+   */
+  private zoomToHelperGeometry(): void {
+    if (!this.map || !this.helperVectorSource) return;
+    
+    const features = this.helperVectorSource.getFeatures();
+    if (features.length === 0) return;
+    
+    const extent = features[0].getGeometry()?.getExtent();
+    if (extent) {
+      this.map.getView().fit(extent, {
+        padding: [50, 50, 50, 50],
+        maxZoom: this.maxZoom,
+        duration: 500
+      });
+    }
+  }
+
   initializeMap(): void {
     if (!this.mapContainer) return;
 
-    // Criar source e layer para vetores
+    // Criar source e layer para geometria auxiliar (helper)
+    this.helperVectorSource = new VectorSource();
+    
+    this.helperVectorLayer = new VectorLayer({
+      source: this.helperVectorSource,
+      style: new Style({
+        fill: new Fill({
+          color: this.helperFillColor
+        }),
+        stroke: new Stroke({
+          color: this.helperStrokeColor,
+          width: this.helperStrokeWidth,
+          lineDash: [5, 5] // Linha tracejada para diferenciar
+        })
+      }),
+      zIndex: 1 // Abaixo da camada principal
+    });
+
+    // Criar source e layer para vetores principais
     this.vectorSource = new VectorSource();
     
     this.vectorLayer = new VectorLayer({
@@ -148,7 +254,8 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
             width: 2
           })
         })
-      })
+      }),
+      zIndex: 2 // Acima da camada helper
     });
 
     // Criar mapa
@@ -158,13 +265,19 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
         new TileLayer({
           source: new OSM()
         }),
-        this.vectorLayer
+        this.helperVectorLayer, // Camada auxiliar primeiro (atrás)
+        this.vectorLayer        // Camada principal por cima
       ],
       view: new View({
         center: fromLonLat([this.centerLon, this.centerLat]),
         zoom: this.initialZoom
       })
     });
+
+    // Carregar geometria auxiliar se fornecida
+    if (this.helperGeometry) {
+      this.updateHelperGeometry();
+    }
 
     // Adicionar evento para mudar cursor quando hover sobre features
     this.map.on('pointermove', (evt: any) => {
@@ -247,10 +360,18 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
       }
     });
 
-    // Snap para facilitar o ajuste
+    // Snap para facilitar o ajuste - incluindo helper geometry
     this.snap = new Snap({
       source: this.vectorSource
     });
+
+    // Adicionar snap também para a geometria helper (mantém referência para reusar)
+    if (this.helperVectorSource) {
+      this.helperSnap = new Snap({
+        source: this.helperVectorSource
+      });
+      this.map.addInteraction(this.helperSnap);
+    }
 
     // Adicionar modify e snap ao mapa (sempre ativos)
     this.map.addInteraction(this.modify);
@@ -279,6 +400,19 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
     
     if (this.map && this.draw) {
       this.map.addInteraction(this.draw);
+      
+      // IMPORTANTE: Snap deve ser adicionado DEPOIS do Draw para funcionar corretamente
+      // Re-adicionar o snap principal
+      if (this.snap) {
+        this.map.removeInteraction(this.snap);
+        this.map.addInteraction(this.snap);
+      }
+      
+      // Re-adicionar snap para helper geometry
+      if (this.helperSnap) {
+        this.map.removeInteraction(this.helperSnap);
+        this.map.addInteraction(this.helperSnap);
+      }
     }
   }
 

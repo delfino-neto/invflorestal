@@ -1,0 +1,254 @@
+<div class="collection-area-detail-container">
+  <!-- Header -->
+  <div class="header-section">
+    <div class="header-left">
+      <div class="header-info">
+        <h1 class="area-title">
+          <i class="pi pi-map-marker"></i>
+          {{ area?.name || 'Carregando...' }}
+        </h1>
+        <p class="area-subtitle">Painel de Gerenciamento de Plots e Espécimes</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button
+        pButton
+        icon="pi pi-arrow-left"
+        label="Voltar"
+        class="p-button-outlined p-button-secondary p-button-sm"
+        (click)="goBack()"
+        [disabled]="loading"
+      ></button>
+      <button
+        pButton
+        icon="pi pi-pencil"
+        label="Editar Área"
+        class="p-button-outlined p-button-sm"
+        (click)="editArea()"
+        [disabled]="loading"
+      ></button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="info-cards-grid">
+    <p-skeleton height="90px" *ngFor="let i of [1,2,3,4,5,6]"></p-skeleton>
+  </div>
+
+  <!-- Info Cards -->
+  <div *ngIf="!loading && area" class="info-cards-grid">
+    <!-- Total de Plots -->
+    <div class="info-card stats-card">
+      <div class="card-icon bg-blue-100 dark:bg-blue-900">
+        <i class="pi pi-th-large text-blue-600 dark:text-blue-300"></i>
+      </div>
+      <div class="card-content">
+        <span class="card-label">Plots</span>
+        <span class="card-value">{{ plots.length }}</span>
+      </div>
+    </div>
+
+    <!-- Área Total -->
+    <div class="info-card area-card">
+      <div class="card-icon bg-green-100 dark:bg-green-900">
+        <i class="pi pi-chart-pie text-green-600 dark:text-green-300"></i>
+      </div>
+      <div class="card-content">
+        <span class="card-label">Área Total</span>
+        <span class="card-value">{{ getTotalArea() | number: '1.0-0' }} m²</span>
+      </div>
+    </div>
+
+    <!-- Total de Espécimes -->
+    <div class="info-card specimens-card">
+      <div class="card-icon bg-emerald-100 dark:bg-emerald-900">
+        <i class="pi pi-circle text-emerald-600 dark:text-emerald-300"></i>
+      </div>
+      <div class="card-content">
+        <span class="card-label">Espécimes</span>
+        <span class="card-value">-</span>
+        <span class="card-hint">Em breve</span>
+      </div>
+    </div>
+
+    <!-- Espécies Únicas -->
+    <div class="info-card species-card">
+      <div class="card-icon bg-teal-100 dark:bg-teal-900">
+        <i class="pi pi-bookmark text-teal-600 dark:text-teal-300"></i>
+      </div>
+      <div class="card-content">
+        <span class="card-label">Espécies</span>
+        <span class="card-value">-</span>
+        <span class="card-hint">Em breve</span>
+      </div>
+    </div>
+
+    <!-- Criado por -->
+    <div class="info-card creator-card">
+      <div class="card-icon bg-purple-100 dark:bg-purple-900">
+        <i class="pi pi-user text-purple-600 dark:text-purple-300"></i>
+      </div>
+      <div class="card-content">
+        <span class="card-label">Criado por</span>
+        <span class="card-value">{{ area.createdByFullName || 'N/A' }}</span>
+        <span class="card-hint">{{ formatDateShort(area.createdAt) }}</span>
+      </div>
+    </div>
+
+    <!-- Última Modificação -->
+    <div class="info-card modified-card">
+      <div class="card-icon bg-orange-100 dark:bg-orange-900">
+        <i class="pi pi-clock text-orange-600 dark:text-orange-300"></i>
+      </div>
+      <div class="card-content">
+        <span class="card-label">Modificado</span>
+        <span class="card-value">{{ formatDateShort(area.updatedAt) || 'Nunca' }}</span>
+        <span class="card-hint">{{ formatTimeAgo(area.updatedAt) }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notas (se houver) -->
+  <div *ngIf="!loading && area && area.notes" class="notes-section">
+    <i class="pi pi-info-circle"></i>
+    <span>{{ area.notes }}</span>
+  </div>
+
+  <!-- Layout Principal -->
+  <div class="main-layout">
+    <!-- Sidebar com Lista de Plots -->
+    <div class="sidebar">
+      <!-- Lista de Plots -->
+      <p-card class="plots-list-card">
+        <ng-template pTemplate="header">
+          <div class="card-header">
+            <div class="card-header-title">
+              <i class="pi pi-th-large"></i>
+              <h3>Plots</h3>
+            </div>
+            <span class="plot-count">{{ plots.length }}</span>
+          </div>
+        </ng-template>
+        
+        <div *ngIf="loadingPlots" class="loading-plots">
+          <p-skeleton height="60px" *ngFor="let i of [1,2,3]" class="mb-2"></p-skeleton>
+        </div>
+
+        <div *ngIf="!loadingPlots && plots.length === 0" class="empty-plots">
+          <i class="pi pi-inbox text-4xl text-surface-300 mb-3"></i>
+          <p class="text-surface-500">Nenhum plot cadastrado</p>
+          <button
+            pButton
+            icon="pi pi-plus"
+            label="Adicionar Plot"
+            class="p-button-sm p-button-outlined mt-3"
+            (click)="openNewPlotDialog()"
+          ></button>
+        </div>
+
+        <div *ngIf="!loadingPlots && plots.length > 0" class="plots-list">
+          <div
+            *ngFor="let plot of plots"
+            class="plot-item"
+            [class.selected]="selectedPlot?.id === plot.id"
+            (click)="selectedPlot = plot"
+          >
+            <div class="plot-main">
+              <div class="plot-icon">
+                <i class="pi pi-chart-scatter"></i>
+              </div>
+              <div class="plot-content">
+                <div class="plot-title-row">
+                  <span class="plot-code">{{ plot.plotCode }}</span>
+                  <span class="plot-area-badge">{{ plot.areaM2 | number: '1.0-0' }} m²</span>
+                </div>
+                <div class="plot-meta" *ngIf="plot.slopeDeg || plot.aspectDeg">
+                  <span *ngIf="plot.slopeDeg" class="meta-item">
+                    <i class="pi pi-angle-up"></i>{{ plot.slopeDeg }}°
+                  </span>
+                  <span *ngIf="plot.aspectDeg" class="meta-item">
+                    <i class="pi pi-compass"></i>{{ plot.aspectDeg }}°
+                  </span>
+                </div>
+                <p *ngIf="plot.notes" class="plot-notes">{{ plot.notes }}</p>
+              </div>
+            </div>
+            <div class="plot-actions">
+              <button
+                pButton
+                icon="pi pi-pencil"
+                class="p-button-text p-button-sm p-button-rounded"
+                (click)="openEditPlotDialog(plot); $event.stopPropagation()"
+                pTooltip="Editar"
+                tooltipPosition="left"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-trash"
+                class="p-button-text p-button-sm p-button-rounded p-button-danger"
+                (click)="deletePlot(plot); $event.stopPropagation()"
+                pTooltip="Excluir"
+                tooltipPosition="left"
+              ></button>
+            </div>
+          </div>
+        </div>
+
+        <ng-template pTemplate="footer">
+          <button
+            pButton
+            icon="pi pi-plus"
+            label="Adicionar Plot"
+            class="p-button-primary w-full"
+            (click)="openNewPlotDialog()"
+            [disabled]="loadingPlots"
+          ></button>
+        </ng-template>
+      </p-card>
+    </div>
+
+    <!-- Área Principal - Mapa -->
+    <div class="main-content">
+      <!-- Mapa da Área com Plots -->
+      <p-card class="map-card">
+        <ng-template pTemplate="header">
+          <div class="card-header-with-action">
+            <div class="card-header-title">
+              <i class="pi pi-map"></i>
+              <h3>Visualização da Área e Plots</h3>
+            </div>
+          </div>
+        </ng-template>
+        
+        <div class="map-section">
+          <div *ngIf="loading" class="skeleton-map">
+            <p-skeleton height="600px"></p-skeleton>
+          </div>
+          <div *ngIf="!loading && area" class="map-placeholder">
+            <i class="pi pi-map text-6xl text-surface-300"></i>
+            <p class="text-surface-500 mt-4 text-center">
+              Mapa mostrando a área de coleta e seus plots
+            </p>
+            <p class="text-surface-400 mt-2 text-sm text-center">
+              Área em verde | Plots em azul
+            </p>
+          </div>
+        </div>
+      </p-card>
+    </div>
+  </div>
+</div>
+
+<!-- Plot Dialog -->
+<app-plot-dialog
+  *ngIf="showPlotDialog"
+  [visible]="showPlotDialog"
+  [areaId]="areaId"
+  [plot]="selectedPlot"
+  [areaGeometry]="area?.geometry"
+  (onClose)="showPlotDialog = false"
+  (onSave)="onPlotSaved()"
+></app-plot-dialog>
+
+<p-confirmDialog></p-confirmDialog>
+<p-toast></p-toast>
