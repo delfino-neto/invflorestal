@@ -1,15 +1,65 @@
-<div class="map-container" [style.height]="height" [style.min-height]="minHeight">
-  <div #mapContainer class="map"></div>
-  
-  @if (hasDrawnPolygon && showClearButton && !disabled) {
-    <button 
-      pButton 
+<div class="map-container" 
+     [style.height]="height" 
+     [style.min-height]="minHeight"
+     [class.drawing-mode]="isDrawingActive"
+     [class.edit-mode]="hasDrawnPolygon && !isDrawingActive">
+  <!-- Barra de Ferramentas Compacta -->
+  <div class="map-toolbar-compact">
+    <!-- Botão de Desenho/Parar -->
+    <p-button
+      variant="outlined"
+      type="button"
+      [icon]="isDrawingActive ? 'pi pi-times' : 'pi pi-pencil'"
+      [severity]="isDrawingActive ? 'danger' : 'success'"
+      [label]="isDrawingActive ? 'Parar' : 'Desenhar'"
+      [class.active]="isDrawingActive"
+      [disabled]="disabled || hasDrawnPolygon"
+      (click)="toggleDrawing()"
+      [pTooltip]="isDrawingActive ? 'Parar de desenhar' : 'Desenhar polígono'"
+      tooltipPosition="bottom"
+      size="small">
+    </p-button>
+
+    <!-- Botão de Zoom -->
+    <button
+      pButton
+      type="button"
+      icon="pi pi-search-plus"
+      class="tool-btn p-button-text"
+      [disabled]="disabled || !hasDrawnPolygon"
+      (click)="zoomToPolygon()"
+      pTooltip="Ajustar zoom"
+      tooltipPosition="bottom"
+      size="small">
+    </button>
+
+    <!-- Botão de Limpar -->
+    <button
+      pButton
       type="button"
       icon="pi pi-trash"
-      class="p-button-rounded p-button-outlined p-button-danger clear-button"
+      class="tool-btn p-button-text p-button-danger"
+      [disabled]="disabled || !hasDrawnPolygon"
       (click)="clearDrawing()"
-      pTooltip="Limpar desenho"
-      tooltipPosition="left">
+      pTooltip="Limpar tudo"
+      tooltipPosition="bottom"
+      size="small">
     </button>
-  }
+
+    <!-- Status Badge -->
+    @if (hasDrawnPolygon) {
+      <span class="status-badge success">
+        <i class="pi pi-check"></i>
+        Completo
+      </span>
+    } @else if (isDrawingActive) {
+      <span class="status-badge drawing">
+        <i class="pi pi-pencil"></i>
+        Desenhando...
+      </span>
+    }
+  </div>
+
+  <!-- Mapa -->
+  <div #mapContainer class="map"></div>
 </div>

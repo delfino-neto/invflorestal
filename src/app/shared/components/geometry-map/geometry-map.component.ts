@@ -16,6 +16,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 // PrimeNG
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
+import { ToolbarModule } from 'primeng/toolbar';
+import { DividerModule } from 'primeng/divider';
 
 // OpenLayers
 import Map from 'ol/Map';
@@ -30,6 +32,7 @@ import { Feature } from 'ol';
 import { Polygon } from 'ol/geom';
 import { Fill, Stroke, Style, Circle as CircleStyle } from 'ol/style';
 import { Coordinate } from 'ol/coordinate';
+import BaseEvent from 'ol/events/Event';
 
 @Component({
   selector: 'app-geometry-map',
@@ -37,7 +40,9 @@ import { Coordinate } from 'ol/coordinate';
   imports: [
     CommonModule,
     ButtonModule,
-    TooltipModule
+    TooltipModule,
+    ToolbarModule,
+    DividerModule
   ],
   providers: [
     {
@@ -78,6 +83,10 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
   modify?: Modify;
   snap?: Snap;
   hasDrawnPolygon = false;
+
+  // Estado das ferramentas
+  isDrawingActive = false;
+  private isModifying = false;
 
   // ControlValueAccessor
   private onChange: (value: string | null) => void = () => {};
@@ -141,12 +150,130 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
       })
     });
 
-    if (!this.disabled) {
-      this.addDrawInteraction();
+    // Adicionar evento para mudar cursor quando hover sobre features
+    this.map.on('pointermove', (evt: any) => {
+      if (this.disabled || this.isDrawingActive) return;
+      
+      const mapElement = this.map!.getTargetElement() as HTMLElement;
+      if (!mapElement || !this.hasDrawnPolygon) return;
+
+      // Se estiver modificando, manter cursor grabbing
+      if (this.isModifying) {
+        mapElement.style.cursor = 'grabbing';
+        return;
+      }
+
+      // Caso contrário, verificar se está sobre o polígono
+      const pixel = this.map!.getEventPixel(evt.originalEvent);
+      const hit = this.map!.hasFeatureAtPixel(pixel);
+      mapElement.style.cursor = hit ? 'grab' : 'default';
+    });
+
+    // Inicializar interações de modificação e snap (sempre disponíveis)
+    this.initializeModifyAndSnap();
+  }
+
+  initializeModifyAndSnap(): void {
+    if (!this.map || this.disabled) return;
+
+    // Modificar geometria existente
+    this.modify = new Modify({
+      source: this.vectorSource,
+      style: new Style({
+        image: new CircleStyle({
+          radius: 8,
+          fill: new Fill({
+            color: 'rgba(239, 68, 68, 0.8)'
+          }),
+          stroke: new Stroke({
+            color: '#fff',
+            width: 2
+          })
+        })
+      })
+    });
+
+    // Evento ao modificar
+    this.modify.on('modifystart', () => {
+      this.isModifying = true;
+      const mapElement = this.map?.getTargetElement() as HTMLElement;
+      if (mapElement) {
+        mapElement.style.cursor = 'grabbing';
+      }
+    });
+
+    this.modify.on('modifyend', (evt) => {
+      this.isModifying = false;
+      const mapElement = this.map?.getTargetElement() as HTMLElement;
+      if (mapElement) {
+        // mapElement.style.cursor = 'default';
+        if (this.disabled || this.isDrawingActive) return;
+      
+        const mapElement = this.map!.getTargetElement() as HTMLElement;
+        if (!mapElement || !this.hasDrawnPolygon) return;
+
+        // Se estiver modificando, manter cursor grabbing
+        if (this.isModifying) {
+          mapElement.style.cursor = 'grabbing';
+          return;
+        }
+
+        // Caso contrário, verificar se está sobre o polígono
+        const pixel = this.map!.getEventPixel(evt.mapBrowserEvent.originalEvent);
+        const hit = this.map!.hasFeatureAtPixel(pixel);
+        mapElement.style.cursor = hit ? 'grab' : 'default';
+      }
+      
+      const geometry = this.getGeometryFromMap();
+      if (geometry) {
+        this.onChange(geometry);
+        this.geometryChange.emit(geometry);
+      }
+    });
+
+    // Snap para facilitar o ajuste
+    this.snap = new Snap({
+      source: this.vectorSource
+    });
+
+    // Adicionar modify e snap ao mapa (sempre ativos)
+    this.map.addInteraction(this.modify);
+    this.map.addInteraction(this.snap);
+  }
+
+  // Controle de ferramentas
+  toggleDrawing(): void {
+    if (this.disabled) return;
+    
+    if (this.isDrawingActive) {
+      this.deactivateDrawTool();
+    } else {
+      this.activateDrawTool();
     }
   }
 
-  addDrawInteraction(): void {
+  activateDrawTool(): void {
+    if (this.disabled || this.hasDrawnPolygon) return;
+    
+    this.isDrawingActive = true;
+    
+    if (!this.draw) {
+      this.createDrawInteraction();
+    }
+    
+    if (this.map && this.draw) {
+      this.map.addInteraction(this.draw);
+    }
+  }
+
+  deactivateDrawTool(): void {
+    if (!this.map || !this.draw) return;
+    
+    this.map.removeInteraction(this.draw);
+    this.isDrawingActive = false;
+  }
+
+  createDrawInteraction(): void {
     if (!this.map || this.disabled) return;
 
     // Desenhar polígono
@@ -181,7 +308,9 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
     // Evento ao finalizar desenho
     this.draw.on('drawend', () => {
       this.hasDrawnPolygon = true;
+      // Desativar ferramenta de desenho após finalizar
       setTimeout(() => {
+        this.deactivateDrawTool();
         const geometry = this.getGeometryFromMap();
         if (geometry) {
           this.onChange(geometry);
@@ -191,41 +320,6 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
         }
       }, 100);
     });
-
-    // Modificar geometria existente
-    this.modify = new Modify({
-      source: this.vectorSource,
-      style: new Style({
-        image: new CircleStyle({
-          radius: 8,
-          fill: new Fill({
-            color: 'rgba(239, 68, 68, 0.8)'
-          }),
-          stroke: new Stroke({
-            color: '#fff',
-            width: 2
-          })
-        })
-      })
-    });
-
-    // Evento ao modificar
-    this.modify.on('modifyend', () => {
-      const geometry = this.getGeometryFromMap();
-      if (geometry) {
-        this.onChange(geometry);
-        this.geometryChange.emit(geometry);
-      }
-    });
-
-    // Snap para facilitar o ajuste
-    this.snap = new Snap({
-      source: this.vectorSource
-    });
-
-    this.map.addInteraction(this.draw);
-    this.map.addInteraction(this.modify);
-    this.map.addInteraction(this.snap);
   }
 
   removeDrawInteraction(): void {
@@ -254,14 +348,27 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
         this.hasDrawnPolygon = true;
 
         // Ajustar view para mostrar o polígono
-        const extent = polygon.getExtent();
-        this.map.getView().fit(extent, {
-          padding: [50, 50, 50, 50],
-          maxZoom: this.maxZoom
-        });
+        this.zoomToPolygon();
       }
     } catch (error) {
       console.error('Erro ao carregar geometria:', error);
+    }
+  }
+
+  // Método auxiliar para zoom no polígono
+  zoomToPolygon(): void {
+    if (!this.map || !this.hasDrawnPolygon) return;
+    
+    const features = this.vectorSource.getFeatures();
+    if (features.length === 0) return;
+    
+    const extent = features[0].getGeometry()?.getExtent();
+    if (extent) {
+      this.map.getView().fit(extent, {
+        padding: [50, 50, 50, 50],
+        maxZoom: this.maxZoom,
+        duration: 500
+      });
     }
   }
 
@@ -345,10 +452,5 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
-    if (isDisabled) {
-      this.removeDrawInteraction();
-    } else {
-      this.addDrawInteraction();
-    }
   }
 }
