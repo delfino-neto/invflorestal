@@ -144,6 +144,13 @@
             class="p-button-sm p-button-outlined mt-3"
             (click)="openNewPlotDialog()"
           ></button>
+          <button
+            pButton
+            icon="pi pi-download"
+            label="Importar Plot"
+            class="p-button-sm p-button-outlined p-button-secondary mt-2"
+            (click)="openImportPlotDialog()"
+          ></button>
         </div>
 
         <div *ngIf="!loadingPlots && plots.length > 0" class="plots-list">
@@ -195,14 +202,24 @@
         </div>
 
         <ng-template pTemplate="footer">
-          <button
-            pButton
-            icon="pi pi-plus"
-            label="Adicionar Plot"
-            class="p-button-primary w-full"
-            (click)="openNewPlotDialog()"
-            [disabled]="loadingPlots"
-          ></button>
+          <div class="flex flex-column gap-2">
+            <button
+              pButton
+              icon="pi pi-plus"
+              label="Adicionar Plot"
+              class="p-button-primary w-full"
+              (click)="openNewPlotDialog()"
+              [disabled]="loadingPlots"
+            ></button>
+            <button
+              pButton
+              icon="pi pi-download"
+              label="Importar Plot"
+              class="p-button-secondary p-button-outlined w-full"
+              (click)="openImportPlotDialog()"
+              [disabled]="loadingPlots"
+            ></button>
+          </div>
         </ng-template>
       </p-card>
     </div>

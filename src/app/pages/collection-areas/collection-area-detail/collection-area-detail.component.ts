@@ -15,6 +15,7 @@ import { DialogModule } from 'primeng/dialog';
 import { TableModule } from 'primeng/table';
 import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 
 // Services & Models
 import { CollectionAreaService } from '@/core/services/collection-area.service';
@@ -24,6 +25,7 @@ import { Plot, PlotRequest } from '@/core/models/collection/plot';
 
 // Shared Components
 import { PlotDialogComponent } from '../plot-dialog/plot-dialog.component';
+import { PlotImportDialogComponent } from '../plot-import-dialog/plot-import-dialog.component';
 import { MapVisualizerComponent } from '@/shared/components/map-visualizer';
 
 @Component({
@@ -44,7 +46,7 @@ import { MapVisualizerComponent } from '@/shared/components/map-visualizer';
     PlotDialogComponent,
     MapVisualizerComponent
   ],
-  providers: [MessageService, ConfirmationService],
+  providers: [MessageService, ConfirmationService, DialogService],
   templateUrl: './collection-area-detail.component.html',
   styleUrls: ['./collection-area-detail.component.scss']
 })
@@ -69,6 +71,7 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
   highlightedGeometryIndex?: number;
   
   private destroy$ = new Subject<void>();
+  private importDialogRef?: DynamicDialogRef;
   areaId!: number;
 
   constructor(
@@ -77,7 +80,8 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
     private collectionAreaService: CollectionAreaService,
     private plotService: PlotService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService
+    private confirmationService: ConfirmationService,
+    private dialogService: DialogService
   ) {}
 
   ngOnInit(): void {
@@ -91,6 +95,7 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.importDialogRef?.close();
   }
 
   loadArea(): void {
@@ -146,6 +151,33 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
     this.plotGeometry = undefined;
     this.isEditingPlot = false;
     this.showPlotDialog = true;
+  }
+
+  openImportPlotDialog(): void {
+    this.importDialogRef = this.dialogService.open(PlotImportDialogComponent, {
+      header: 'Importar Plot',
+      width: '850px',
+      modal: true,
+      dismissableMask: true,
+      styleClass: 'plot-import-dialog-wrapper',
+      data: {
+        targetAreaId: this.areaId
+      }
+    }) || undefined;
+
+    this.importDialogRef?.onClose.subscribe((importedPlot) => {
+      if (importedPlot) {
+        this.loadPlots();
+        // Highlight do plot importado após recarregar
+        setTimeout(() => {
+          const plotIndex = this.plots.findIndex(p => p.id === importedPlot.id);
+          if (plotIndex !== -1) {
+            this.highlightedGeometryIndex = plotIndex + 1;
+            this.selectedPlot = importedPlot;
+          }
+        }, 500);
+      }
+    });
   }
 
   openEditPlotDialog(plot: Plot): void {

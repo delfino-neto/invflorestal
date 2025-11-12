@@ -5,6 +5,26 @@ import { Observable } from 'rxjs';
 import { Page } from './index';
 import { ApiUtils } from '../utils/api.utils';
 
+export interface PlotImportRequest {
+  targetAreaId: number;
+  importType: 'AREA' | 'PLOT';
+  sourceAreaId?: number;
+  sourcePlotId?: number;
+  plotCode: string;
+}
+
+export interface BulkPlotImportRequest {
+  targetAreaId: number;
+  items: ImportItem[];
+}
+
+export interface ImportItem {
+  importType: 'AREA' | 'PLOT';
+  sourceAreaId?: number;
+  sourcePlotId?: number;
+  plotCode: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -37,5 +57,13 @@ export class PlotService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(ApiUtils.buildUrl(this.apiUrl, id));
+  }
+
+  importPlot(request: PlotImportRequest): Observable<Plot> {
+    return this.http.post<Plot>(`${this.apiUrl}/import`, request);
+  }
+
+  importPlots(request: BulkPlotImportRequest): Observable<Plot[]> {
+    return this.http.post<Plot[]>(`${this.apiUrl}/import/bulk`, request);
   }
 }
