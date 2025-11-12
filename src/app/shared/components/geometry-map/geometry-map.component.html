@@ -3,6 +3,10 @@
      [style.min-height]="minHeight"
      [class.drawing-mode]="isDrawingActive"
      [class.edit-mode]="hasDrawnPolygon && !isDrawingActive">
+  
+  <!-- Toast para mensagens -->
+  <p-toast position="top-right"></p-toast>
+
   <!-- Barra de Ferramentas Compacta -->
   <div class="map-toolbar-compact">
     <!-- Botão de Desenho/Parar -->
@@ -16,6 +20,33 @@
       [disabled]="disabled || hasDrawnPolygon"
       (click)="toggleDrawing()"
       [pTooltip]="isDrawingActive ? 'Parar de desenhar' : 'Desenhar polígono'"
+      tooltipPosition="bottom"
+      size="small">
+    </p-button>
+
+    <!-- Botão de Importar -->
+    <p-fileUpload
+      #fileUpload
+      mode="basic"
+      [auto]="true"
+      [disabled]="disabled || hasDrawnPolygon"
+      (onSelect)="onFileSelect($event)"
+      accept=".geojson,.json,.kml,.wkt,.txt"
+      [maxFileSize]="5000000"
+      [customUpload]="true"
+      class="hidden"
+      >
+    </p-fileUpload>
+
+    <p-button
+      variant="outlined"
+      type="button"
+      [icon]="'pi pi-upload'"
+      [severity]="'info'"
+      [label]="'Importar'"
+      [disabled]="disabled || hasDrawnPolygon"
+      (click)="fileUpload.onBasicUploaderClick()"
+      [pTooltip]="'Importar polígono (GeoJSON, KML, WKT)'"
       tooltipPosition="bottom"
       size="small">
     </p-button>

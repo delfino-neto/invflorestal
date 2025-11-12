@@ -18,6 +18,9 @@ import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { ToolbarModule } from 'primeng/toolbar';
 import { DividerModule } from 'primeng/divider';
+import { FileUploadModule } from 'primeng/fileupload';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
 
 // OpenLayers
 import Map from 'ol/Map';
@@ -29,10 +32,13 @@ import VectorSource from 'ol/source/Vector';
 import { Draw, Modify, Snap } from 'ol/interaction';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import { Feature } from 'ol';
-import { Polygon } from 'ol/geom';
+import { Polygon, MultiPolygon } from 'ol/geom';
 import { Fill, Stroke, Style, Circle as CircleStyle } from 'ol/style';
 import { Coordinate } from 'ol/coordinate';
 import BaseEvent from 'ol/events/Event';
+import GeoJSON from 'ol/format/GeoJSON';
+import WKT from 'ol/format/WKT';
+import KML from 'ol/format/KML';
 
 @Component({
   selector: 'app-geometry-map',
@@ -42,14 +48,17 @@ import BaseEvent from 'ol/events/Event';
     ButtonModule,
     TooltipModule,
     ToolbarModule,
-    DividerModule
+    DividerModule,
+    FileUploadModule,
+    ToastModule
   ],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
       useExisting: forwardRef(() => GeometryMapComponent),
       multi: true
-    }
+    },
+    MessageService
   ],
   templateUrl: './geometry-map.component.html',
   styleUrls: ['./geometry-map.component.scss']
@@ -88,9 +97,16 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
   isDrawingActive = false;
   private isModifying = false;
 
+  // Formatadores OpenLayers
+  private geoJSONFormat = new GeoJSON();
+  private wktFormat = new WKT();
+  private kmlFormat = new KML();
+
   // ControlValueAccessor
   private onChange: (value: string | null) => void = () => {};
   private onTouched: () => void = () => {};
+
+  constructor(private messageService: MessageService) {}
 
   ngOnInit(): void {}
 
@@ -429,6 +445,225 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, C
       this.map.updateSize();
     }
   }
+
+  // ========== IMPORTAÇÃO DE GEOMETRIAS ==========
+
+  /**
+   * Importa geometria de um arquivo
+   */
+  onFileSelect(event: any): void {
+    const file = event.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    
+    reader.onload = (e: any) => {
+      const content = e.target.result;
+      this.importGeometry(content, file.name);
+    };
+
+    reader.readAsText(file);
+  }
+
+  /**
+   * Importa geometria de diferentes formatos
+   */
+  importGeometry(content: string, filename: string): void {
+    try {
+      let features: Feature[] = [];
+      const extension = filename.split('.').pop()?.toLowerCase();
+
+      // Tentar detectar e importar baseado no formato
+      if (extension === 'geojson' || extension === 'json') {
+        features = this.importGeoJSON(content);
+      } else if (extension === 'kml') {
+        features = this.importKML(content);
+      } else if (extension === 'wkt' || extension === 'txt') {
+        features = this.importWKT(content);
+      } else {
+        // Tentar auto-detectar
+        features = this.autoDetectFormat(content);
+      }
+
+      if (features.length > 0) {
+        this.loadFeaturesIntoMap(features);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Importação Bem-sucedida',
+          detail: `Polígono importado de ${filename}`,
+          life: 3000
+        });
+      } else {
+        throw new Error('Nenhuma geometria válida encontrada');
+      }
+    } catch (error: any) {
+      console.error('Erro ao importar geometria:', error);
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Erro na Importação',
+        detail: error.message || 'Formato de arquivo não suportado',
+        life: 5000
+      });
+    }
+  }
+
+  /**
+   * Importa de GeoJSON
+   */
+  private importGeoJSON(content: string): Feature[] {
+    try {
+      const features = this.geoJSONFormat.readFeatures(content, {
+        dataProjection: 'EPSG:4326',
+        featureProjection: 'EPSG:3857'
+      });
+      
+      if (features.length === 0) {
+        throw new Error('Nenhuma geometria encontrada no arquivo GeoJSON');
+      }
+      
+      return this.filterPolygons(features);
+    } catch (e: any) {
+      console.error('Erro ao processar GeoJSON:', e);
+      throw new Error(`Erro ao processar GeoJSON: ${e.message || 'formato inválido'}`);
+    }
+  }
+
+  /**
+   * Importa de KML
+   */
+  private importKML(content: string): Feature[] {
+    try {
+      const features = this.kmlFormat.readFeatures(content, {
+        dataProjection: 'EPSG:4326',
+        featureProjection: 'EPSG:3857'
+      });
+      return this.filterPolygons(features);
+    } catch (e) {
+      throw new Error('Formato KML inválido');
+    }
+  }
+
+  /**
+   * Importa de WKT
+   */
+  private importWKT(content: string): Feature[] {
+    try {
+      const feature = this.wktFormat.readFeature(content.trim(), {
+        dataProjection: 'EPSG:4326',
+        featureProjection: 'EPSG:3857'
+      });
+      return this.filterPolygons([feature]);
+    } catch (e) {
+      throw new Error('Formato WKT inválido');
+    }
+  }
+
+  /**
+   * Tenta auto-detectar o formato
+   */
+  private autoDetectFormat(content: string): Feature[] {
+    const trimmed = content.trim();
+
+    // Tentar GeoJSON
+    if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
+      try {
+        return this.importGeoJSON(trimmed);
+      } catch (e) {
+        // Continuar tentando outros formatos
+      }
+    }
+
+    // Tentar KML
+    if (trimmed.startsWith('<')) {
+      try {
+        return this.importKML(trimmed);
+      } catch (e) {
+        // Continuar tentando outros formatos
+      }
+    }
+
+    // Tentar WKT
+    if (trimmed.toUpperCase().startsWith('POLYGON')) {
+      try {
+        return this.importWKT(trimmed);
+      } catch (e) {
+        // Continuar tentando outros formatos
+      }
+    }
+
+    throw new Error('Formato não reconhecido. Use GeoJSON, KML ou WKT.');
+  }
+
+  /**
+   * Filtra apenas polígonos das features e converte MultiPolygon em Polygon
+   */
+  private filterPolygons(features: Feature[]): Feature[] {
+    const polygons: Feature[] = [];
+
+    for (const feature of features) {
+      const geometry = feature.getGeometry();
+      
+      if (!geometry) continue;
+
+      const geomType = geometry.getType();
+
+      if (geomType === 'Polygon') {
+        // Já é um polígono, adicionar diretamente
+        polygons.push(feature);
+      } else if (geomType === 'MultiPolygon') {
+        // Converter MultiPolygon em múltiplos Polygons
+        const multiPolygon = geometry as MultiPolygon;
+        const polygonGeometries = multiPolygon.getPolygons();
+        
+        // Pegar apenas o primeiro polígono do MultiPolygon
+        if (polygonGeometries.length > 0) {
+          const newFeature = new Feature({
+            geometry: polygonGeometries[0]
+          });
+          polygons.push(newFeature);
+        }
+      }
+    }
+
+    return polygons;
+  }
+
+  /**
+   * Carrega features no mapa
+   */
+  private loadFeaturesIntoMap(features: Feature[]): void {
+    if (features.length === 0) {
+      throw new Error('Nenhum polígono encontrado no arquivo');
+    }
+
+    // Limpar mapa e adicionar primeira feature (polígono)
+    this.vectorSource.clear();
+    this.vectorSource.addFeature(features[0]);
+    this.hasDrawnPolygon = true;
+
+    // Ajustar zoom para mostrar o polígono
+    this.zoomToPolygon();
+
+    // Emitir mudança
+    const geometry = this.getGeometryFromMap();
+    if (geometry) {
+      this.onChange(geometry);
+      this.onTouched();
+      this.geometryChange.emit(geometry);
+    }
+
+    // Se houver mais de um polígono ou foi MultiPolygon, avisar
+    if (features.length > 1) {
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Múltiplas Geometrias',
+        detail: `Apenas a primeira geometria foi importada (${features.length} encontradas)`,
+        life: 4000
+      });
+    }
+  }
+
+  // ========== FIM IMPORTAÇÃO ==========
 
   // ControlValueAccessor implementation
   writeValue(value: string | null): void {

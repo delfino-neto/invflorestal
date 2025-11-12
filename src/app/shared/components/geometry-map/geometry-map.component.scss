@@ -62,6 +62,22 @@
       }
     }
 
+    // Estilos para o botão de upload
+    ::ng-deep {
+      p-fileupload {
+        .p-fileupload-choose {
+          padding: 0.5rem 1rem;
+          font-size: 0.875rem;
+          border-radius: 1.5rem;
+
+          &:not(:disabled):hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          }
+        }
+      }
+    }
+
     .status-badge {
       display: flex;
       align-items: center;
