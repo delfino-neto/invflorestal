@@ -1,0 +1,195 @@
+<div class="collection-area-form-container">
+  <!-- Header -->
+  <div class="form-header">
+    <div class="header-content">
+      <div class="header-left">
+        <div class="icon-wrapper">
+          <i class="pi pi-map"></i>
+        </div>
+        <div class="header-text">
+          <h1 class="header-title">
+            {{ isEditMode ? 'Editar Área de Coleta' : 'Nova Área de Coleta' }}
+          </h1>
+          <p class="header-subtitle">
+            {{ isEditMode ? 'Atualize as informações da área de inventário' : 'Desenhe e defina uma nova área de inventário florestal' }}
+          </p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <p-button
+          label="Cancelar"
+          icon="pi pi-times"
+          severity="secondary"
+          [outlined]="true"
+          (onClick)="onCancel()"
+          [disabled]="isSubmitting"
+        />
+        <p-button
+          label="{{ isEditMode ? 'Salvar' : 'Criar' }}"
+          icon="pi pi-check"
+          (onClick)="onSubmit()"
+          [loading]="isSubmitting"
+          [disabled]="form.invalid || !hasDrawnPolygon"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div class="form-content">
+    <form [formGroup]="form">
+      <div class="form-grid">
+        <!-- Painel Esquerdo: Formulário -->
+        <div class="form-panel">
+          <p-card>
+            <ng-template pTemplate="header">
+              <div class="card-header-custom">
+                <i class="pi pi-info-circle text-xl"></i>
+                <span class="font-semibold">Informações da Área</span>
+              </div>
+            </ng-template>
+
+            <div class="form-fields">
+              <!-- Nome -->
+              <div class="form-field">
+                <label for="name" class="form-label required">
+                  Nome da Área
+                </label>
+                <input
+                  pInputText
+                  id="name"
+                  formControlName="name"
+                  placeholder="Ex: Mata Atlântica - Zona A"
+                  class="w-full"
+                  [class.ng-invalid]="isFieldInvalid('name')"
+                  [class.ng-dirty]="isFieldInvalid('name')"
+                />
+                <small class="form-error" *ngIf="isFieldInvalid('name')">
+                  {{ getFieldError('name') }}
+                </small>
+                <small class="form-hint">
+                  Escolha um nome descritivo para identificar esta área
+                </small>
+              </div>
+
+              <!-- Notas -->
+              <div class="form-field">
+                <label for="notes" class="form-label">
+                  Observações
+                </label>
+                <textarea
+                  id="notes"
+                  formControlName="notes"
+                  placeholder="Adicione informações relevantes sobre esta área..."
+                  rows="5"
+                  class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                ></textarea>
+                <small class="form-hint">
+                  Informações sobre vegetação, acesso, características especiais, etc.
+                </small>
+              </div>
+
+              <!-- Status do Polígono -->
+              <div class="polygon-status">
+                <p-divider />
+                <div class="status-indicator">
+                  <i 
+                    class="pi text-2xl"
+                    [class.pi-map]="!hasDrawnPolygon"
+                    [class.pi-check-circle]="hasDrawnPolygon"
+                    [class.text-gray-400]="!hasDrawnPolygon"
+                    [class.text-emerald-500]="hasDrawnPolygon"
+                  ></i>
+                  <div>
+                    <p class="font-semibold text-gray-800 dark:text-gray-100">
+                      {{ hasDrawnPolygon ? 'Polígono Desenhado' : 'Aguardando Desenho' }}
+                    </p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">
+                      {{ hasDrawnPolygon 
+                        ? 'Você pode ajustar arrastando os pontos no mapa' 
+                        : 'Use o mapa ao lado para desenhar a área de coleta' 
+                      }}
+                    </p>
+                  </div>
+                </div>
+                <p-button
+                  *ngIf="hasDrawnPolygon"
+                  label="Limpar Desenho"
+                  icon="pi pi-trash"
+                  severity="danger"
+                  [outlined]="true"
+                  size="small"
+                  (onClick)="clearDrawing()"
+                />
+              </div>
+            </div>
+          </p-card>
+        </div>
+
+        <!-- Painel Direito: Mapa -->
+        <div class="map-panel">
+          <p-card>
+            <ng-template pTemplate="header">
+              <div class="card-header-custom">
+                <i class="pi pi-map text-xl"></i>
+                <span class="font-semibold">Desenho da Área</span>
+              </div>
+            </ng-template>
+
+            <div class="map-container-wrapper">
+              <!-- Modal de Instruções com Backdrop -->
+              <div class="instructions-modal" *ngIf="showInstructions" [@fadeInOut]>
+                <!-- Backdrop -->
+                <div class="modal-backdrop" (click)="onBackdropClick()"></div>
+                
+                <!-- Modal Content -->
+                <div class="modal-content" (click)="$event.stopPropagation()">
+                  <div class="modal-header">
+                    <div class="icon-wrapper">
+                      <i class="pi pi-map"></i>
+                    </div>
+                    <h3 class="modal-title">Desenhe a área no mapa</h3>
+                    <p class="modal-subtitle">Siga os passos abaixo para criar o polígono</p>
+                  </div>
+                  
+                  <div class="modal-body">
+                    <div class="instruction-item" *ngFor="let instruction of drawingInstructions; let i = index">
+                      <div class="step-number">{{ i + 1 }}</div>
+                      <span class="step-text">{{ instruction }}</span>
+                    </div>
+                    
+                    <div class="instructions-tip">
+                      <i class="pi pi-info-circle"></i>
+                      <span>Você pode ajustar arrastando os pontos depois</span>
+                    </div>
+                  </div>
+                  
+                  <div class="modal-footer">
+                    <p-button
+                      label="Entendi"
+                      icon="pi pi-check"
+                      (onClick)="closeInstructions()"
+                      [outlined]="false"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <!-- Mapa -->
+              <div #mapContainer class="map-container"></div>              <!-- Controles do Mapa -->
+              <div class="map-controls" *ngIf="hasDrawnPolygon">
+                <p-tag 
+                  severity="success" 
+                  icon="pi pi-check"
+                  value="Polígono pronto para salvar"
+                />
+              </div>
+            </div>
+          </p-card>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast para mensagens -->
+<p-toast position="top-right" />
