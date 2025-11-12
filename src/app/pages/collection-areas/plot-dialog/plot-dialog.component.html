@@ -156,14 +156,15 @@
 
   <ng-template pTemplate="footer">
     <div class="dialog-footer">
-      <button
-        pButton
+      <p-button
+        variant="outlined"
+        severity="secondary"
         label="Cancelar"
         icon="pi pi-times"
         class="p-button-text"
         (click)="close()"
         [disabled]="isSubmitting"
-      ></button>
+      ></p-button>
       <button
         pButton
         [label]="isEditMode ? 'Atualizar' : 'Criar Plot'"
