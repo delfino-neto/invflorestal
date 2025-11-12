@@ -71,11 +71,11 @@ export class SpeciesTaxonomyListComponent implements OnInit {
   }
 
   navigateToNew(): void {
-    this.router.navigate(['/species/taxonomy/new']);
+    this.router.navigate(['/species/new']);
   }
 
   navigateToEdit(id: number): void {
-    this.router.navigate(['/species/taxonomy/edit', id]);
+    this.router.navigate(['/species/edit', id]);
   }
 
   confirmDelete(taxonomy: SpeciesTaxonomy): void {
@@ -95,7 +95,7 @@ export class SpeciesTaxonomyListComponent implements OnInit {
         this.messageService.add({
           severity: 'success',
           summary: 'Sucesso',
-          detail: 'Taxonomia excluída com sucesso'
+          detail: 'Espécie excluída com sucesso'
         });
         this.loadTaxonomies({ first: 0, rows: 10 });
       },
@@ -103,7 +103,7 @@ export class SpeciesTaxonomyListComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Erro',
-          detail: 'Erro ao excluir taxonomia'
+          detail: 'Erro ao excluir espécie'
         });
         console.error('Erro ao excluir:', error);
       }

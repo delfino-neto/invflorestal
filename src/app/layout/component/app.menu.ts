@@ -38,10 +38,7 @@ export class AppMenu {
                     label: 'Espécies',
                     iconClass: 'nature',
                     items: [
-                        { label: 'Listar Espécies', icon: 'pi pi-fw pi-list', routerLink: ['/species'] },
-                        { label: 'Cadastrar Espécie', icon: 'pi pi-fw pi-plus', routerLink: ['/species/new'] },
-                        { label: 'Listar Espécies', icon: 'pi pi-fw pi-th-large', routerLink: ['/species/taxonomy'] },
-                        { label: 'Cadastrar Espécie', icon: 'pi pi-fw pi-plus-circle', routerLink: ['/species/taxonomy/new'] },
+                        { label: 'Listar Espécies', icon: 'pi pi-fw pi-th-large', routerLink: ['/species'] },
                         { label: 'Histórico', icon: 'pi pi-fw pi-history', routerLink: ['/species/history'] },
                         { label: 'Identificação IA', icon: 'pi pi-fw pi-camera', routerLink: ['/species/identify'] }
                     ]

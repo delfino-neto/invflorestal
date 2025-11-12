@@ -128,7 +128,7 @@ export class SpeciesTaxonomyFormComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.router.navigate(['/species/taxonomy']);
+    this.router.navigate(['/species']);
   }
 
   onScientificNameChange(event: any): void {
