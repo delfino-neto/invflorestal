@@ -2,7 +2,7 @@
   padding: 2rem;
   min-height: calc(100vh - 4rem);
   background: var(--surface-ground);
-  
+
   .form-container {
     max-width: 900px;
     margin: 0 auto;
@@ -158,8 +158,6 @@
       }
     }
   }
-
-  // Responsive
   @media (max-width: 768px) {
     padding: 1rem;
 
@@ -194,16 +192,12 @@
     }
   }
 }
-
-// Loading state
 .taxonomy-form:has(.p-button[loading="true"]) {
   .form-field input {
     pointer-events: none;
     opacity: 0.7;
   }
 }
-
-// Smooth animations
 .form-field .error-message {
   animation: slideIn 0.3s ease-out;
 }

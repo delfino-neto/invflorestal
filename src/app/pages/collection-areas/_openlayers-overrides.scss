@@ -1,31 +1,24 @@
-// Estilos globais para OpenLayers nos componentes de Collection Areas
-
-// Esconder atribuições do OpenLayers nos previews
 .map-preview {
   :deep(.ol-attribution) {
     display: none !important;
   }
-  
+
   :deep(.ol-control) {
     display: none !important;
   }
 }
-
-// Estilos para mapa em tela cheia (quando implementado)
 .map-fullscreen {
   .ol-zoom {
     top: 0.5em;
     right: 0.5em;
     left: auto;
   }
-  
+
   .ol-attribution {
     right: 0.5em;
     bottom: 0.5em;
   }
 }
-
-// Transições suaves para layers
 .ol-layer {
   transition: opacity 0.3s ease-in-out;
 }
