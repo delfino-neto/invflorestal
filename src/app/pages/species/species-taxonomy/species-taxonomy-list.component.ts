@@ -62,10 +62,10 @@ export class SpeciesTaxonomyListComponent implements OnInit {
         this.messageService.add({
           severity: 'error',
           summary: 'Erro',
-          detail: 'Erro ao carregar taxonomias'
+          detail: 'Erro ao carregar espécies'
         });
         this.loading = false;
-        console.error('Erro ao carregar taxonomias:', error);
+        console.error('Erro ao carregar espécies:', error);
       }
     });
   }

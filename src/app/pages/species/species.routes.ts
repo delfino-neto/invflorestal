@@ -4,7 +4,7 @@ export const SPECIES_ROUTES: Routes = [
     {
         path: 'taxonomy',
         loadComponent: () => import('./species-taxonomy/species-taxonomy-list.component').then(m => m.SpeciesTaxonomyListComponent),
-        data: { breadcrumb: 'Listagem de Taxonomias' }
+        data: { breadcrumb: 'Listagem de Espécies' }
     },
     {
         path: 'taxonomy/new',
