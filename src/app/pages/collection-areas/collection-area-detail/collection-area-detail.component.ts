@@ -24,6 +24,7 @@ import { Plot, PlotRequest } from '@/core/models/collection/plot';
 
 // Shared Components
 import { PlotDialogComponent } from '../plot-dialog/plot-dialog.component';
+import { MapVisualizerComponent } from '@/shared/components/map-visualizer';
 
 @Component({
   selector: 'app-collection-area-detail',
@@ -40,7 +41,8 @@ import { PlotDialogComponent } from '../plot-dialog/plot-dialog.component';
     TableModule,
     TagModule,
     TooltipModule,
-    PlotDialogComponent
+    PlotDialogComponent,
+    MapVisualizerComponent
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './collection-area-detail.component.html',
@@ -58,6 +60,10 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
   showPlotDialog = false;
   isEditingPlot = false;
   plotGeometry?: string;
+  
+  // Cache para geometrias do mapa
+  private cachedMapGeometries: Array<{ geometry: string; label?: string; fillColor?: string; strokeColor?: string; strokeWidth?: number }> = [];
+  private lastPlotsVersion = 0; // Para detectar mudanças nos plots
   
   private destroy$ = new Subject<void>();
   areaId!: number;
@@ -116,6 +122,9 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
         next: (response) => {
           this.plots = response.content;
           this.loadingPlots = false;
+          // Invalidar cache quando plots mudam
+          this.cachedMapGeometries = [];
+          this.lastPlotsVersion = 0;
         },
         error: (error) => {
           console.error('Erro ao carregar plots:', error);
@@ -253,6 +262,71 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
         geometry: plot.geometry,
         label: plot.plotCode
       }));
+  }
+
+  // Prepara geometrias para o MapVisualizer (com cache)
+  getMapGeometries(): Array<{ geometry: string; label?: string; fillColor?: string; strokeColor?: string; strokeWidth?: number }> {
+    // Criar uma versão baseada no tamanho e ids dos plots
+    const currentVersion = this.plots.length + (this.area?.id || 0);
+    
+    // Se nada mudou, retornar o cache
+    if (currentVersion === this.lastPlotsVersion && this.cachedMapGeometries.length > 0) {
+      return this.cachedMapGeometries;
+    }
+    
+    // Atualizar versão
+    this.lastPlotsVersion = currentVersion;
+    
+    const geometries: Array<{ geometry: string; label?: string; fillColor?: string; strokeColor?: string; strokeWidth?: number }> = [];
+
+    // Adicionar área da coleção (azul tracejado)
+    if (this.area?.geometry) {
+      geometries.push({
+        geometry: this.area.geometry,
+        label: this.area.name,
+        fillColor: 'rgba(59, 130, 246, 0.1)',
+        strokeColor: 'rgb(59, 130, 246)',
+        strokeWidth: 2
+      });
+    }
+
+    // Cores para os plots
+    const plotColors = [
+      'rgba(239, 68, 68, 0.3)',   // Red
+      'rgba(249, 115, 22, 0.3)',  // Orange
+      'rgba(234, 179, 8, 0.3)',   // Yellow
+      'rgba(34, 197, 94, 0.3)',   // Green
+      'rgba(168, 85, 247, 0.3)',  // Purple
+      'rgba(236, 72, 153, 0.3)',  // Pink
+      'rgba(20, 184, 166, 0.3)',  // Teal
+      'rgba(16, 185, 129, 0.3)',  // Emerald
+    ];
+
+    // Adicionar plots
+    this.plots.forEach((plot, index) => {
+      const fillColor = plotColors[index % plotColors.length];
+      const strokeColor = this.rgbaToRgb(fillColor, 0.8);
+      
+      geometries.push({
+        geometry: plot.geometry,
+        label: plot.plotCode,
+        fillColor: fillColor,
+        strokeColor: strokeColor,
+        strokeWidth: 2
+      });
+    });
+
+    // Cachear resultado
+    this.cachedMapGeometries = geometries;
+    return geometries;
+  }
+
+  private rgbaToRgb(rgba: string, opacity: number): string {
+    const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+      return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${opacity})`;
+    }
+    return rgba;
   }
 
   // Para o mapa: combinar geometria da área com plots

@@ -1,0 +1,57 @@
+<div class="map-visualizer-container" [style.height]="height">
+  <!-- Toolbar -->
+  <div class="map-toolbar-compact">
+    <p-button
+      #labelsBtn
+      variant="outlined"
+      type="button"
+      severity="info"
+      (click)="labelsMenu.toggle($event)"
+      pTooltip="Controlar camadas de texto"
+      tooltipPosition="bottom"
+      size="small">
+        <ng-template pTemplate="icon">
+            <i [style]="{'font-size': '12pt'}" class="material-symbols-outlined">text_fields</i>
+        </ng-template>
+    </p-button>
+
+    <p-menu #labelsMenu appendTo="body" [model]="[]" [popup]="true" styleClass="labels-menu">
+      <ng-template pTemplate="start">
+        <div class="labels-menu-content">
+          <div class="menu-header">
+            <i [style]="{'font-size': '1rem'}" class="material-symbols-outlined">text_fields</i>
+            <span>Camadas de Texto</span>
+          </div>
+          
+          <div class="menu-item">
+            <p-checkbox
+              [(ngModel)]="showAreaLabels"
+              [binary]="true"
+              inputId="showAreaLabels"
+              (onChange)="updateFeaturesStyles()"
+            />
+            <label for="showAreaLabels" class="menu-label">
+              <i class="material-symbols-outlined">location_on</i>
+              <span>Nome da Área</span>
+            </label>
+          </div>
+
+          <div class="menu-item">
+            <p-checkbox
+              [(ngModel)]="showPlotLabels"
+              [binary]="true"
+              inputId="showPlotLabels"
+              (onChange)="updateFeaturesStyles()"
+            />
+            <label for="showPlotLabels" class="menu-label">
+              <i class="material-symbols-outlined">grid_on</i>
+              <span>Códigos dos Plots</span>
+            </label>
+          </div>
+        </div>
+      </ng-template>
+    </p-menu>
+  </div>
+  
+  <div #mapContainer class="map-container"></div>
+</div>

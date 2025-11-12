@@ -224,14 +224,11 @@
           <div *ngIf="loading" class="skeleton-map">
             <p-skeleton height="600px"></p-skeleton>
           </div>
-          <div *ngIf="!loading && area" class="map-placeholder">
-            <i class="pi pi-map text-6xl text-surface-300"></i>
-            <p class="text-surface-500 mt-4 text-center">
-              Mapa mostrando a área de coleta e seus plots
-            </p>
-            <p class="text-surface-400 mt-2 text-sm text-center">
-              Área em verde | Plots em azul
-            </p>
+          <div *ngIf="!loading && area">
+            <app-map-visualizer
+              [geometries]="getMapGeometries()"
+              height="600px"
+            ></app-map-visualizer>
           </div>
         </div>
       </p-card>

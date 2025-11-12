@@ -539,17 +539,6 @@
   flex: 1;
 }
 
-.map-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  background: var(--surface-50);
-  border-radius: 8px;
-  border: 2px dashed var(--surface-border);
-}
-
 .skeleton-map {
   width: 100%;
   height: 100%;
