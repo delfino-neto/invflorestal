@@ -51,6 +51,156 @@
     }
   }
   
+  // Feedback de filtros ativos
+  .active-filters {
+    margin-top: 1rem;
+    padding: 1rem 1.25rem;
+    background: #fafafa;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    
+    .filters-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      
+      > i {
+        color: #6b7280;
+        font-size: 1rem;
+      }
+      
+      > span:first-of-type {
+        font-weight: 600;
+        color: #374151;
+        font-size: 0.8125rem;
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+      }
+      
+      .filter-chips {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+      
+      .results-count {
+        margin-left: auto;
+        font-size: 0.8125rem;
+        color: #6b7280;
+        font-weight: 600;
+        padding: 0.375rem 0.75rem;
+        background: white;
+        border-radius: 16px;
+        border: 1px solid #e5e7eb;
+      }
+    }
+  }
+  
+  // Chips de filtro personalizados
+  ::ng-deep .filter-chip {
+    transition: all 0.2s ease;
+    border-radius: 16px;
+    font-weight: 500;
+    
+    &:hover {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+    
+    &.search-chip {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
+      
+      .p-chip-remove-icon {
+        color: #64748b;
+        
+        &:hover {
+          background: #e2e8f0;
+          color: #334155;
+        }
+      }
+    }
+    
+    &.family-chip {
+      background: #e0f2fe;
+      color: #0369a1;
+      border: 1px solid #bae6fd;
+      
+      .p-chip-remove-icon {
+        color: #0284c7;
+        
+        &:hover {
+          background: #bae6fd;
+          color: #075985;
+        }
+      }
+    }
+    
+    &.genus-chip {
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+      
+      .p-chip-remove-icon {
+        color: #16a34a;
+        
+        &:hover {
+          background: #bbf7d0;
+          color: #166534;
+        }
+      }
+    }
+    
+    .p-chip-text {
+      font-weight: 500;
+      font-size: 0.8125rem;
+      line-height: 1.4;
+    }
+    
+    .p-chip-remove-icon {
+      font-size: 0.875rem;
+      margin-left: 0.375rem;
+      transition: all 0.15s ease;
+      border-radius: 50%;
+      width: 1.25rem;
+      height: 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  }
+  
+  // Barra de progresso
+  .loading-bar {
+    margin: 1rem 0;
+    
+    ::ng-deep .p-progressbar {
+      height: 4px;
+      background: var(--surface-200);
+      border-radius: 2px;
+      overflow: hidden;
+      
+      .p-progressbar-value {
+        background: linear-gradient(90deg, var(--primary-color), var(--primary-600));
+        animation: progress-animation 1.5s ease-in-out infinite;
+      }
+    }
+  }
+  
+  @keyframes progress-animation {
+    0% {
+      transform: translateX(-100%);
+    }
+    50% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  
   .action-buttons {
     display: flex;
     gap: 0.25rem;
@@ -107,6 +257,23 @@
         
         button {
           width: 100%;
+        }
+      }
+    }
+    
+    .active-filters {
+      .filters-info {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+        
+        .filter-chips {
+          width: 100%;
+        }
+        
+        .results-count {
+          margin-left: 0;
+          align-self: flex-end;
         }
       }
     }

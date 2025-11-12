@@ -16,6 +16,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { SelectModule } from 'primeng/select';
 import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
+import { ProgressBarModule } from 'primeng/progressbar';
+import { ChipModule } from 'primeng/chip';
 
 // Services & Models
 import { SpeciesTaxonomyService } from '../../../core/services/species-taxonomy.service';
@@ -36,7 +38,9 @@ import { SpeciesTaxonomy } from '../../../core/models/species/species-taxonomy';
     InputTextModule,
     SelectModule,
     IconFieldModule,
-    InputIconModule
+    InputIconModule,
+    ProgressBarModule,
+    ChipModule
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './species-taxonomy-list.component.html',
@@ -105,6 +109,7 @@ export class SpeciesTaxonomyListComponent implements OnInit {
   }
   
   onSearchChange(): void {
+    this.loading = true;
     this.searchSubject.next(this.searchTerm);
   }
   
@@ -117,6 +122,25 @@ export class SpeciesTaxonomyListComponent implements OnInit {
     this.selectedFamily = null;
     this.selectedGenus = null;
     this.loadTaxonomies({ first: 0, rows: this.currentPageSize });
+  }
+  
+  clearSearch(): void {
+    this.searchTerm = '';
+    this.loadTaxonomies({ first: 0, rows: this.currentPageSize });
+  }
+  
+  clearFamily(): void {
+    this.selectedFamily = null;
+    this.loadTaxonomies({ first: 0, rows: this.currentPageSize });
+  }
+  
+  clearGenus(): void {
+    this.selectedGenus = null;
+    this.loadTaxonomies({ first: 0, rows: this.currentPageSize });
+  }
+  
+  hasActiveFilters(): boolean {
+    return !!(this.searchTerm || this.selectedFamily || this.selectedGenus);
   }
 
   loadTaxonomies(event: any): void {
