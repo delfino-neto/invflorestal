@@ -1,0 +1,332 @@
+:host {
+  display: block;
+  height: 100%;
+  max-width: 320px; // Largura aumentada do card
+}
+
+:host ::ng-deep {
+  .area-card {
+    height: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--surface-200);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+      border-color: var(--emerald-400);
+    }
+
+    &:is(.dark *) {
+      border-color: var(--surface-700);
+      
+      &:hover {
+        border-color: var(--emerald-500);
+      }
+    }
+
+    .p-card-body {
+      padding: 0;
+      height: 100%;
+    }
+
+    .p-card-content {
+      padding: 0;
+      height: 100%;
+    }
+  }
+
+  .species-chip {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    font-weight: 600;
+    font-size: 0.75rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    
+    &:is(.dark *) {
+      background: rgba(30, 41, 59, 0.95);
+    }
+
+    .pi {
+      color: var(--emerald-500);
+      font-size: 0.875rem;
+    }
+  }
+
+  .metadata-avatar {
+    color: white;
+    font-weight: 600;
+    font-size: 0.6875rem;
+    width: 2rem;
+    height: 2rem;
+    flex-shrink: 0;
+  }
+
+  .status-tag {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+}
+
+// Layout principal: vertical com proporções 3/5 (mapa) e 2/5 (detalhes)
+.card-layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+// Seção do mapa - 3/5 da altura total
+.map-section {
+  position: relative;
+  height: 204px; // 3/5 de 340px = 204px
+  background: var(--surface-100);
+  overflow: hidden;
+  cursor: default; // Indicar que o mapa é estático
+
+  &:is(.dark *) {
+    background: var(--surface-800);
+  }
+}
+
+.map-preview {
+  width: 100%;
+  height: 100%;
+  pointer-events: none; // Desabilitar interações com o mapa
+  
+  // Ocultar atribuições do OpenStreetMap
+  :deep(.ol-attribution) {
+    display: none;
+  }
+
+  // Desabilitar cursor de arraste
+  :deep(.ol-viewport) {
+    cursor: default !important;
+  }
+}
+
+.map-overlay {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  pointer-events: none; // Não bloquear cliques no mapa
+}
+
+// Seção de detalhes - 2/5 da altura total
+.details-section {
+  display: flex;
+  flex-direction: column;
+  padding: 1.25rem;
+  background: var(--surface-0);
+  gap: 1rem;
+  justify-content: space-between;
+
+  &:is(.dark *) {
+    background: var(--surface-900);
+  }
+}
+
+// Row 1: Nome e Status
+.header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+// Row 2: Usuário, Data e Ações
+.bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--surface-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  &:is(.dark *) {
+    color: var(--surface-0);
+  }
+}
+
+.date-info {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.6875rem;
+  color: var(--surface-500);
+  
+  &:is(.dark *) {
+    color: var(--surface-400);
+  }
+  
+  i {
+    font-size: 0.6875rem;
+  }
+}
+
+.area-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--surface-900);
+  margin: 0;
+  line-height: 1.2;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  
+  &:is(.dark *) {
+    color: var(--surface-0);
+  }
+}
+
+.status-tag {
+  font-size: 0.625rem;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+// Responsividade - mantém proporções em telas menores
+@media (max-width: 768px) {
+  :host {
+    max-width: 280px; // Largura proporcional em mobile
+  }
+  
+  .card-layout {
+    height: 280px; // Altura proporcional em mobile
+  }
+  
+  .map-section {
+    height: 168px; // 3/5 de 280px = 168px
+  }
+  
+  .details-section {
+    height: 112px; // 2/5 de 280px = 112px
+    padding: 1rem;
+  }
+
+  .area-title {
+    font-size: 0.875rem;
+  }
+  
+  .user-name {
+    font-size: 0.75rem;
+  }
+  
+  .date-info {
+    font-size: 0.625rem;
+  }
+}
+
+.metadata-item {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.metadata-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.metadata-label {
+  font-size: 0.625rem;
+  color: var(--surface-500);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  
+  &:is(.dark *) {
+    color: var(--surface-400);
+  }
+}
+
+.metadata-value {
+  font-size: 0.75rem;
+  color: var(--surface-900);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  
+  &:is(.dark *) {
+    color: var(--surface-0);
+  }
+}
+
+.card-actions {
+  display: flex;
+  gap: 0.375rem;
+  flex-shrink: 0;
+  
+  button {
+    transition: all 0.2s;
+    font-size: 0.75rem;
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+
+    &:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    &.icon-only {
+      min-width: 2rem;
+      
+      :deep(.p-button-icon) {
+        margin: 0;
+        font-size: 0.75rem;
+      }
+    }
+  }
+}
+
+// Responsividade - mantém proporções em telas menores
+@media (max-width: 768px) {
+  .card-layout {
+    height: 250px; // Altura menor em mobile
+  }
+  
+  .map-section {
+    height: 150px; // 3/5 de 250px = 150px
+  }
+  
+  .details-section {
+    height: 100px; // 2/5 de 250px = 100px
+    padding: 0.75rem;
+  }
+
+  .area-title {
+    font-size: 0.875rem;
+  }
+}

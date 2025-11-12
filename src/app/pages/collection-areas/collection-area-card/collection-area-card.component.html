@@ -1,0 +1,79 @@
+<p-card class="area-card">
+  <div class="card-layout">
+    <!-- Map Preview - 2/3 -->
+    <div class="map-section">
+      <div #mapContainer class="map-preview"></div>
+      <div class="map-overlay">
+        <p-chip 
+          [label]="speciesCount + ' espécies'"
+          icon="pi pi-chart-bar"
+          styleClass="species-chip"
+        ></p-chip>
+      </div>
+    </div>
+
+    <!-- Details Section - 2/5 -->
+    <div class="details-section">
+      <!-- Row 1: Nome e Status -->
+      <div class="header-row">
+        <h3 class="area-title">{{ area.name }}</h3>
+        <p-tag 
+          value="Ativo" 
+          severity="success" 
+          styleClass="status-tag"
+          icon="pi pi-check-circle"
+        ></p-tag>
+      </div>
+
+      <!-- Row 2: Responsável, Data e Ações -->
+      <div class="bottom-row">
+        <div class="user-info">
+          <p-avatar 
+            [label]="getInitials(area.createdByFullName)" 
+            shape="square"
+            styleClass="metadata-avatar"
+            [style]="{ 'background-color': getUserAvatarColor(area.createdByFullName) }"
+          ></p-avatar>
+          <div class="user-details">
+            <span class="user-name">{{ area.createdByFullName || 'N/A' }}</span>
+            <span class="date-info">
+              <i class="pi pi-calendar-plus"></i>
+              {{ formatDate(area.createdAt) }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="card-actions">
+          <button
+            pButton
+            icon="pi pi-eye"
+            class="p-button-outlined p-button-sm icon-only"
+            (click)="onView()"
+            pTooltip="Ver detalhes"
+            tooltipPosition="top"
+          ></button>
+          <button
+            pButton
+            icon="pi pi-pencil"
+            class="p-button-outlined p-button-sm icon-only"
+            (click)="onEdit()"
+            pTooltip="Editar"
+            tooltipPosition="top"
+          ></button>
+          <button
+            pButton
+            icon="pi pi-trash"
+            class="p-button-outlined p-button-danger p-button-sm icon-only"
+            (click)="onDelete()"
+            pTooltip="Excluir"
+            tooltipPosition="top"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</p-card>
+
+<p-confirmDialog></p-confirmDialog>
+<p-toast></p-toast>

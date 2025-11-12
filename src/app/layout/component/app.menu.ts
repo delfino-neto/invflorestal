@@ -35,6 +35,15 @@ export class AppMenu {
         if(this.authService.getRoles()?.includes("ADMIN")){
             this.model[0].items.push(...[
                 { 
+                    label: 'Inventário',
+                    icon: 'pi pi-fw pi-sitemap',
+                    items: [
+                        { label: 'Áreas de Coleta', icon: 'pi pi-fw pi-map-marker', routerLink: ['/collection-areas'] },
+                        { label: 'Parcelas', icon: 'pi pi-fw pi-th-large', routerLink: ['/plots'], disabled: true },
+                        { label: 'Espécimes', icon: 'pi pi-fw pi-objects-column', routerLink: ['/specimens'], disabled: true }
+                    ]
+                },
+                { 
                     label: 'Espécies',
                     iconClass: 'nature',
                     items: [
