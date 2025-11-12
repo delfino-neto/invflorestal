@@ -65,6 +65,9 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
   private cachedMapGeometries: Array<{ geometry: string; label?: string; fillColor?: string; strokeColor?: string; strokeWidth?: number }> = [];
   private lastPlotsVersion = 0; // Para detectar mudanças nos plots
   
+  // Controle de highlight no mapa
+  highlightedGeometryIndex?: number;
+  
   private destroy$ = new Subject<void>();
   areaId!: number;
 
@@ -193,6 +196,21 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
         }
       }
     });
+  }
+
+  selectPlotOnMap(plot: Plot): void {
+    // Encontrar o índice do plot nas geometrias (área é index 0, plots começam em 1)
+    const plotIndex = this.plots.findIndex(p => p.id === plot.id);
+    if (plotIndex !== -1) {
+      // +1 porque a área está no index 0
+      this.highlightedGeometryIndex = plotIndex + 1;
+      this.selectedPlot = plot;
+    }
+  }
+
+  clearSelection(): void {
+    this.highlightedGeometryIndex = undefined;
+    this.selectedPlot = undefined;
   }
 
   goBack(): void {

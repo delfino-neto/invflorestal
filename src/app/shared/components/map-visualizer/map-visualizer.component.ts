@@ -57,6 +57,9 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
   
   // Geometrias para visualizar
   @Input() geometries: GeometryItem[] = [];
+  
+  // Index da geometria destacada
+  @Input() highlightedIndex?: number;
 
   // Estado interno
   map?: Map;
@@ -73,6 +76,9 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
   
   // Cache das features para re-renderização
   private featuresCache: Array<{ feature: Feature; item: GeometryItem; isArea: boolean; index: number }> = [];
+  
+  // Índice anterior destacado (para detectar mudanças)
+  private previousHighlightedIndex?: number;
 
   constructor() {}
 
@@ -93,6 +99,19 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['geometries'] && !changes['geometries'].firstChange) {
       this.updateGeometries();
+    }
+    
+    if (changes['highlightedIndex']) {
+      const newIndex = changes['highlightedIndex'].currentValue;
+      if (newIndex !== this.previousHighlightedIndex) {
+        this.previousHighlightedIndex = newIndex;
+        this.updateFeaturesStyles();
+        
+        // Se há um índice destacado, navegar até ele
+        if (newIndex !== undefined && newIndex !== null) {
+          this.flyToGeometry(newIndex);
+        }
+      }
     }
   }
 
@@ -188,14 +207,29 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
       return;
     }
 
+    // Verificar se esta geometria está destacada
+    const isHighlighted = this.highlightedIndex === index;
+    
+    // Ajustar cores se estiver destacado
+    let fillColor = item.fillColor || 'rgba(16, 185, 129, 0.2)';
+    let strokeColor = item.strokeColor || 'rgb(16, 185, 129)';
+    let strokeWidth = item.strokeWidth || 2;
+    
+    if (isHighlighted) {
+      // Aumentar opacidade e largura da borda para destacar
+      fillColor = this.increaseFillOpacity(fillColor);
+      strokeWidth = strokeWidth + 2;
+    }
+
     const style = new Style({
       fill: new Fill({
-        color: item.fillColor || 'rgba(16, 185, 129, 0.2)'
+        color: fillColor
       }),
       stroke: new Stroke({
-        color: item.strokeColor || 'rgb(16, 185, 129)',
-        width: item.strokeWidth || 2
-      })
+        color: strokeColor,
+        width: strokeWidth
+      }),
+      zIndex: isHighlighted ? 100 : 1 // Geometria destacada fica por cima
     });
 
     // Adicionar label se fornecido e se a camada está visível
@@ -207,13 +241,13 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
     if (shouldShowLabel) {
       style.setText(new Text({
         text: item.label,
-        font: 'bold 12px sans-serif',
+        font: isHighlighted ? 'bold 14px sans-serif' : 'bold 12px sans-serif',
         fill: new Fill({
           color: '#333'
         }),
         stroke: new Stroke({
           color: '#fff',
-          width: 3
+          width: isHighlighted ? 4 : 3
         }),
         textAlign: 'center',
         textBaseline: 'middle'
@@ -246,6 +280,17 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
 
   isGeometryVisible(index: number): boolean {
     return this.geometryVisibility[index] !== false;
+  }
+
+  highlightAndFlyTo(index: number): void {
+    this.highlightedIndex = index;
+    this.updateFeaturesStyles();
+    this.flyToGeometry(index);
+  }
+
+  clearHighlight(): void {
+    this.highlightedIndex = undefined;
+    this.updateFeaturesStyles();
   }
 
   private fitToGeometries(): void {
@@ -283,6 +328,39 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
     }
 
     return [];
+  }
+
+  private increaseFillOpacity(color: string): string {
+    // Aumentar a opacidade de uma cor rgba
+    const match = color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+),?\s*([\d.]+)?\)/);
+    if (match) {
+      const [, r, g, b, a] = match;
+      const opacity = a ? parseFloat(a) : 1;
+      // Aumentar opacidade em 50%
+      const newOpacity = Math.min(opacity + 0.3, 0.9);
+      return `rgba(${r}, ${g}, ${b}, ${newOpacity})`;
+    }
+    return color;
+  }
+
+  flyToGeometry(index: number): void {
+    if (!this.map) return;
+    
+    const cached = this.featuresCache.find(c => c.index === index);
+    if (!cached) return;
+    
+    const geometry = cached.feature.getGeometry();
+    if (!geometry) return;
+    
+    const extent = geometry.getExtent();
+    
+    // Fazer fit completo da geometria com padding generoso para visualização total
+    this.map.getView().fit(extent, {
+      padding: [150, 150, 150, 150],
+      duration: 800,
+      maxZoom: 18, // Permite zoom maior para plots pequenos
+      minResolution: undefined // Remove limite de zoom out
+    });
   }
 
   updateMapSize(): void {

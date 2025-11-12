@@ -151,7 +151,7 @@
             *ngFor="let plot of plots"
             class="plot-item"
             [class.selected]="selectedPlot?.id === plot.id"
-            (click)="selectedPlot = plot"
+            (click)="selectPlotOnMap(plot)"
           >
             <div class="plot-main">
               <div class="plot-icon">
@@ -227,6 +227,7 @@
           <div *ngIf="!loading && area">
             <app-map-visualizer
               [geometries]="getMapGeometries()"
+              [highlightedIndex]="highlightedGeometryIndex"
               height="600px"
             ></app-map-visualizer>
           </div>
