@@ -59,7 +59,7 @@
             <i [ngClass]="['ml-auto pi', 'pi-angle-down']"></i>
         </div>
 
-        <p-menu #menu [model]="items" [popup]="true">
+        <p-menu #menu [model]="items" [appendTo]="'body'" [popup]="true">
             <ng-template #start>
                 <div class="flex flex-col px-4 p-2">
                     <span>{{ name }}</span>

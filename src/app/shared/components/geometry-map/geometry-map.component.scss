@@ -41,22 +41,6 @@
         }
       }
 
-      &:not(.active):not(.p-button-text) {
-        background: var(--surface-100);
-        border-color: var(--surface-200);
-        color: var(--text-color);
-
-        &:hover:not(:disabled) {
-          background: var(--surface-200);
-        }
-      }
-
-      &.p-button-text {
-        &:hover:not(:disabled) {
-          background: var(--surface-100);
-        }
-      }
-
       &:disabled {
         opacity: 0.4;
       }

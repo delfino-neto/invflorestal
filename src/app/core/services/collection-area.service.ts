@@ -18,8 +18,12 @@ export class CollectionAreaService {
     return this.http.post<CollectionArea>(this.apiUrl, request);
   }
 
-  search(page: number = 0, size: number = 10): Observable<Page<CollectionArea>> {
-    const params = ApiUtils.createPaginationParams(page, size);
+  search(page: number = 0, size: number = 10, term?: string): Observable<Page<CollectionArea>> {
+    const params = ApiUtils.createParams({
+      page,
+      size,
+      search: term || null
+    });
     return this.http.get<Page<CollectionArea>>(this.apiUrl, { params });
   }
 

@@ -14,8 +14,7 @@
       variant="outlined"
       type="button"
       [icon]="isDrawingActive ? 'pi pi-times' : 'pi pi-pencil'"
-      [severity]="isDrawingActive ? 'danger' : 'success'"
-      [label]="isDrawingActive ? 'Parar' : 'Desenhar'"
+      [severity]="isDrawingActive ? 'danger' : 'info'"
       [class.active]="isDrawingActive"
       [disabled]="disabled || hasDrawnPolygon"
       (click)="toggleDrawing()"
@@ -24,7 +23,6 @@
       size="small">
     </p-button>
 
-    <!-- Botão de Importar -->
     <p-fileUpload
       #fileUpload
       mode="basic"
@@ -42,8 +40,7 @@
       variant="outlined"
       type="button"
       [icon]="'pi pi-upload'"
-      [severity]="'info'"
-      [label]="'Importar'"
+      [severity]="'contrast'"
       [disabled]="disabled || hasDrawnPolygon"
       (click)="fileUpload.onBasicUploaderClick()"
       [pTooltip]="'Importar polígono (GeoJSON, KML, WKT)'"
@@ -52,30 +49,29 @@
     </p-button>
 
     <!-- Botão de Zoom -->
-    <button
-      pButton
+    <p-button
+      variant="outlined"
       type="button"
       icon="pi pi-search-plus"
-      class="tool-btn p-button-text"
       [disabled]="disabled || !hasDrawnPolygon"
       (click)="zoomToPolygon()"
       pTooltip="Ajustar zoom"
       tooltipPosition="bottom"
       size="small">
-    </button>
+    </p-button>
 
     <!-- Botão de Limpar -->
-    <button
-      pButton
+    <p-button
+      variant="outlined"
       type="button"
       icon="pi pi-trash"
-      class="tool-btn p-button-text p-button-danger"
+      severity="danger"
       [disabled]="disabled || !hasDrawnPolygon"
       (click)="clearDrawing()"
       pTooltip="Limpar tudo"
       tooltipPosition="bottom"
       size="small">
-    </button>
+    </p-button>
 
     <!-- Status Badge -->
     @if (hasDrawnPolygon) {

@@ -76,7 +76,7 @@ export class CollectionAreaListComponent implements OnInit, OnDestroy {
   loadAreas(): void {
     this.loading = true;
     this.collectionAreaService
-      .search(this.currentPage, this.pageSize)
+      .search(this.currentPage, this.pageSize, this.searchTerm)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: Page<CollectionArea>) => {
@@ -98,7 +98,6 @@ export class CollectionAreaListComponent implements OnInit, OnDestroy {
   }
 
   onSearch(): void {
-    // TODO: Implementar busca quando o backend suportar
     this.currentPage = 0;
     this.loadAreas();
   }
