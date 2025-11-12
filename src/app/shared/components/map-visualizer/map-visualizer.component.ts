@@ -68,8 +68,11 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
   showAreaLabels = true;
   showPlotLabels = true;
   
+  // Controle de visibilidade individual de cada geometria (index -> visible)
+  geometryVisibility: { [key: number]: boolean } = {};
+  
   // Cache das features para re-renderização
-  private featuresCache: Array<{ feature: Feature; item: GeometryItem; isArea: boolean }> = [];
+  private featuresCache: Array<{ feature: Feature; item: GeometryItem; isArea: boolean; index: number }> = [];
 
   constructor() {}
 
@@ -150,11 +153,16 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
           // Identificar se é área (primeiro elemento) ou plot
           const isArea = index === 0;
           
+          // Inicializar visibilidade (default: true)
+          if (this.geometryVisibility[index] === undefined) {
+            this.geometryVisibility[index] = true;
+          }
+          
           // Aplicar estilo
-          this.applyFeatureStyle(feature, item, isArea);
+          this.applyFeatureStyle(feature, item, isArea, index);
           
           // Cachear feature
-          this.featuresCache.push({ feature, item, isArea });
+          this.featuresCache.push({ feature, item, isArea, index });
           
           this.vectorSource.addFeature(feature);
         }
@@ -170,7 +178,16 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
     }
   }
 
-  private applyFeatureStyle(feature: Feature, item: GeometryItem, isArea: boolean): void {
+  private applyFeatureStyle(feature: Feature, item: GeometryItem, isArea: boolean, index: number): void {
+    // Verificar se a geometria individual está visível
+    const isVisible = this.geometryVisibility[index] !== false;
+    
+    if (!isVisible) {
+      // Se a layer está oculta, aplicar estilo invisível
+      feature.setStyle(new Style({}));
+      return;
+    }
+
     const style = new Style({
       fill: new Fill({
         color: item.fillColor || 'rgba(16, 185, 129, 0.2)'
@@ -217,9 +234,18 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
   }
 
   updateFeaturesStyles(): void {
-    this.featuresCache.forEach(({ feature, item, isArea }) => {
-      this.applyFeatureStyle(feature, item, isArea);
+    this.featuresCache.forEach(({ feature, item, isArea, index }) => {
+      this.applyFeatureStyle(feature, item, isArea, index);
     });
+  }
+
+  toggleGeometryVisibility(index: number): void {
+    this.geometryVisibility[index] = !this.geometryVisibility[index];
+    this.updateFeaturesStyles();
+  }
+
+  isGeometryVisible(index: number): boolean {
+    return this.geometryVisibility[index] !== false;
   }
 
   private fitToGeometries(): void {

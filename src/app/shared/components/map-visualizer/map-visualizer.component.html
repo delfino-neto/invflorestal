@@ -1,11 +1,60 @@
 <div class="map-visualizer-container" [style.height]="height">
   <!-- Toolbar -->
   <div class="map-toolbar-compact">
+    <!-- Botão de Camadas de Geometria -->
+    <p-button
+      #layersBtn
+      variant="outlined"
+      type="button"
+      severity="info"
+      (click)="layersMenu.toggle($event)"
+      pTooltip="Controlar camadas de visualização"
+      tooltipPosition="bottom"
+      size="small">
+        <ng-template pTemplate="icon">
+            <i [style]="{'font-size': '12pt'}" class="material-symbols-outlined">layers</i>
+        </ng-template>
+    </p-button>
+
+    <p-menu #layersMenu appendTo="body" [model]="[]" [popup]="true" styleClass="labels-menu">
+      <ng-template pTemplate="start">
+        <div class="labels-menu-content">
+          <div class="menu-header">
+            <i [style]="{'font-size': '1rem'}" class="material-symbols-outlined">layers</i>
+            <span>Camadas de Visualização</span>
+          </div>
+          
+          @for (item of geometries; track $index) {
+            <div class="menu-item">
+              <p-checkbox
+                [ngModel]="isGeometryVisible($index)"
+                (ngModelChange)="toggleGeometryVisibility($index)"
+                [binary]="true"
+                [inputId]="'geometry-' + $index"
+              />
+              <label [for]="'geometry-' + $index" class="menu-label">
+                <i class="material-symbols-outlined">{{ $index === 0 ? 'location_on' : 'grid_on' }}</i>
+                <span>{{ item.label || ($index === 0 ? 'Área' : 'Plot ' + $index) }}</span>
+              </label>
+            </div>
+          }
+
+          @if (geometries.length === 0) {
+            <div class="menu-empty">
+              <i class="material-symbols-outlined">layers_clear</i>
+              <span>Nenhuma geometria disponível</span>
+            </div>
+          }
+        </div>
+      </ng-template>
+    </p-menu>
+
+    <!-- Botão de Camadas de Texto -->
     <p-button
       #labelsBtn
       variant="outlined"
       type="button"
-      severity="info"
+      [severity]="(showAreaLabels && showPlotLabels) ? 'info' : 'secondary'"
       (click)="labelsMenu.toggle($event)"
       pTooltip="Controlar camadas de texto"
       tooltipPosition="bottom"
