@@ -246,6 +246,7 @@
   [areaId]="areaId"
   [plot]="selectedPlot"
   [areaGeometry]="area?.geometry"
+  [otherPlots]="getOtherPlots()"
   (onClose)="showPlotDialog = false"
   (onSave)="onPlotSaved()"
 ></app-plot-dialog>

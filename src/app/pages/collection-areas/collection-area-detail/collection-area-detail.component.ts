@@ -238,6 +238,23 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
     return this.plots.reduce((sum, plot) => sum + Number(plot.areaM2 || 0), 0);
   }
 
+  // Retorna os outros plots (exceto o selecionado) para usar como helper
+  getOtherPlots(): Array<{ geometry: string; label: string }> {
+    if (!this.selectedPlot) {
+      return this.plots.map(plot => ({
+        geometry: plot.geometry,
+        label: plot.plotCode
+      }));
+    }
+    
+    return this.plots
+      .filter(plot => plot.id !== this.selectedPlot?.id)
+      .map(plot => ({
+        geometry: plot.geometry,
+        label: plot.plotCode
+      }));
+  }
+
   // Para o mapa: combinar geometria da área com plots
   getCombinedGeometries(): { area?: string; plots: Array<{ id?: number; geometry: string; code: string }> } {
     return {

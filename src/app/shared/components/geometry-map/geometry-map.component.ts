@@ -35,7 +35,7 @@ import { Draw, Modify, Snap } from 'ol/interaction';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import { Feature } from 'ol';
 import { Polygon, MultiPolygon } from 'ol/geom';
-import { Fill, Stroke, Style, Circle as CircleStyle } from 'ol/style';
+import { Fill, Stroke, Style, Circle as CircleStyle, Text } from 'ol/style';
 import { Coordinate } from 'ol/coordinate';
 import BaseEvent from 'ol/events/Event';
 import GeoJSON from 'ol/format/GeoJSON';
@@ -87,6 +87,9 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
   @Input() helperStrokeColor: string = 'rgb(59, 130, 246)';
   @Input() helperStrokeWidth: number = 2;
 
+  // Multiple helper plots (outros plots da mesma área)
+  @Input() helperPlots: Array<{ geometry: string; label: string; color?: string }> = [];
+
   // Output para eventos
   @Output() geometryChange = new EventEmitter<string | null>();
   @Output() drawStart = new EventEmitter<void>();
@@ -100,11 +103,16 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
   // Helper layer (geometria de referência)
   helperVectorSource!: VectorSource;
   helperVectorLayer!: VectorLayer<VectorSource>;
+
+  // Helper plots layer (outros plots)
+  helperPlotsSource!: VectorSource;
+  helperPlotsLayer!: VectorLayer<VectorSource>;
   
   draw?: Draw;
   modify?: Modify;
   snap?: Snap;
   helperSnap?: Snap; // Snap para a geometria helper
+  helperPlotsSnap?: Snap; // Snap para os plots helper
   hasDrawnPolygon = false;
 
   // Estado das ferramentas
@@ -140,11 +148,14 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
   }
 
   /**
-   * Detecta mudanças nos inputs (principalmente helperGeometry)
+   * Detecta mudanças nos inputs (principalmente helperGeometry e helperPlots)
    */
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['helperGeometry'] && !changes['helperGeometry'].firstChange) {
       this.updateHelperGeometry();
+    }
+    if (changes['helperPlots'] && !changes['helperPlots'].firstChange) {
+      this.updateHelperPlots();
     }
   }
 
@@ -210,6 +221,97 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     }
   }
 
+  /**
+   * Atualiza os plots helper (outros plots da mesma área)
+   */
+  private updateHelperPlots(): void {
+    if (!this.helperPlotsSource || !this.map) {
+      return;
+    }
+
+    // Limpar plots anteriores
+    this.helperPlotsSource.clear();
+
+    // Se não houver plots, apenas retornar
+    if (!this.helperPlots || this.helperPlots.length === 0) {
+      return;
+    }
+
+    // Cores pré-definidas para os plots
+    const defaultColors = [
+      'rgba(239, 68, 68, 0.3)',   // Red
+      'rgba(249, 115, 22, 0.3)',  // Orange
+      'rgba(234, 179, 8, 0.3)',   // Yellow
+      'rgba(34, 197, 94, 0.3)',   // Green
+      'rgba(59, 130, 246, 0.3)',  // Blue
+      'rgba(168, 85, 247, 0.3)',  // Purple
+      'rgba(236, 72, 153, 0.3)',  // Pink
+      'rgba(20, 184, 166, 0.3)',  // Teal
+    ];
+
+    try {
+      this.helperPlots.forEach((plot, index) => {
+        const coordinates = this.parseGeometry(plot.geometry);
+        
+        if (coordinates.length > 0) {
+          const polygon = new Polygon([coordinates.map(coord => fromLonLat(coord))]);
+          const feature = new Feature({ geometry: polygon });
+          
+          // Usar cor fornecida ou cor padrão baseada no índice
+          const fillColor = plot.color || defaultColors[index % defaultColors.length];
+          const strokeColor = this.rgbaToRgb(fillColor, 0.8);
+          
+          // Estilo com label
+          feature.setStyle(new Style({
+            fill: new Fill({
+              color: fillColor
+            }),
+            stroke: new Stroke({
+              color: strokeColor,
+              width: 2
+            }),
+            text: new Text({
+              text: plot.label,
+              font: 'bold 12px sans-serif',
+              fill: new Fill({
+                color: '#333'
+              }),
+              stroke: new Stroke({
+                color: '#fff',
+                width: 3
+              }),
+              textAlign: 'center',
+              textBaseline: 'middle'
+            })
+          }));
+          
+          this.helperPlotsSource.addFeature(feature);
+        }
+      });
+
+      // Criar/recriar helperPlotsSnap se ainda não existir
+      if (!this.helperPlotsSnap && this.helperPlotsSource.getFeatures().length > 0) {
+        this.helperPlotsSnap = new Snap({
+          source: this.helperPlotsSource
+        });
+        this.map.addInteraction(this.helperPlotsSnap);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar helper plots:', error);
+    }
+  }
+
+  /**
+   * Converte RGBA para RGB com opacidade ajustada
+   */
+  private rgbaToRgb(rgba: string, opacity: number): string {
+    const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    if (match) {
+      return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${opacity})`;
+    }
+    return rgba;
+  }
+
   initializeMap(): void {
     if (!this.mapContainer) return;
 
@@ -229,6 +331,14 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
         })
       }),
       zIndex: 1 // Abaixo da camada principal
+    });
+
+    // Criar source e layer para helper plots (outros plots)
+    this.helperPlotsSource = new VectorSource();
+    
+    this.helperPlotsLayer = new VectorLayer({
+      source: this.helperPlotsSource,
+      zIndex: 1.5 // Entre helper geometry e camada principal
     });
 
     // Criar source e layer para vetores principais
@@ -266,6 +376,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
           source: new OSM()
         }),
         this.helperVectorLayer, // Camada auxiliar primeiro (atrás)
+        this.helperPlotsLayer,  // Camada de plots helper
         this.vectorLayer        // Camada principal por cima
       ],
       view: new View({
@@ -277,6 +388,11 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     // Carregar geometria auxiliar se fornecida
     if (this.helperGeometry) {
       this.updateHelperGeometry();
+    }
+
+    // Carregar helper plots se fornecidos
+    if (this.helperPlots && this.helperPlots.length > 0) {
+      this.updateHelperPlots();
     }
 
     // Adicionar evento para mudar cursor quando hover sobre features
@@ -373,6 +489,14 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       this.map.addInteraction(this.helperSnap);
     }
 
+    // Adicionar snap também para os helper plots
+    if (this.helperPlotsSource && this.helperPlotsSource.getFeatures().length > 0) {
+      this.helperPlotsSnap = new Snap({
+        source: this.helperPlotsSource
+      });
+      this.map.addInteraction(this.helperPlotsSnap);
+    }
+
     // Adicionar modify e snap ao mapa (sempre ativos)
     this.map.addInteraction(this.modify);
     this.map.addInteraction(this.snap);
@@ -412,6 +536,12 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       if (this.helperSnap) {
         this.map.removeInteraction(this.helperSnap);
         this.map.addInteraction(this.helperSnap);
+      }
+
+      // Re-adicionar snap para helper plots
+      if (this.helperPlotsSnap) {
+        this.map.removeInteraction(this.helperPlotsSnap);
+        this.map.addInteraction(this.helperPlotsSnap);
       }
     }
   }

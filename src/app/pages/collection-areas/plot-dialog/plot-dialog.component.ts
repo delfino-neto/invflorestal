@@ -42,6 +42,7 @@ export class PlotDialogComponent implements OnInit, OnChanges {
   @Input() areaId!: number;
   @Input() plot?: Plot;
   @Input() areaGeometry?: string;
+  @Input() otherPlots: Array<{ geometry: string; label: string }> = [];
   
   @Output() onClose = new EventEmitter<void>();
   @Output() onSave = new EventEmitter<Plot>();
