@@ -110,10 +110,10 @@ export class CollectionAreaCardComponent implements OnInit, AfterViewInit, OnDes
         source: vectorSource,
         style: new Style({
           fill: new Fill({
-            color: 'rgba(16, 185, 129, 0.2)' // emerald-500 com transparência
+            color: 'rgba(59, 130, 246, 0.2)'
           }),
           stroke: new Stroke({
-            color: 'rgb(16, 185, 129)', // emerald-500
+            color: 'rgb(59, 130, 246)',
             width: 2
           })
         })

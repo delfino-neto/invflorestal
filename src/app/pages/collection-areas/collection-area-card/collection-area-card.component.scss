@@ -3,6 +3,10 @@
   height: 100%;
 }
 
+.cursor-pointer {
+  cursor: pointer;
+}
+
 :host ::ng-deep {
   .area-card {
     height: 100%;
@@ -80,7 +84,6 @@
   height: 204px;
   background: var(--surface-100);
   overflow: hidden;
-  cursor: default;
 
   &:is(.dark *) {
     background: var(--surface-800);

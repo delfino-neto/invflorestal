@@ -1,7 +1,7 @@
-<p-card class="area-card">
+<p-card class="area-card cursor-pointer">
   <div class="card-layout">
     <!-- Map Preview - 2/3 -->
-    <div class="map-section">
+    <div class="map-section cursor-pointer" (click)="onView()">
       <div #mapContainer class="map-preview"></div>
       <div class="map-overlay">
         <p-chip 
@@ -38,7 +38,7 @@
             <span class="user-name">{{ area.createdByFullName || 'N/A' }}</span>
             <span class="date-info">
               <i class="pi pi-calendar-plus"></i>
-              {{ formatDate(area.createdAt) }}
+              {{ area.updatedAt ? formatDate(area.updatedAt) : formatDate(area.createdAt) }}
             </span>
           </div>
         </div>

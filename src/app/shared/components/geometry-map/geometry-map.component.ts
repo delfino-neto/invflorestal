@@ -76,15 +76,15 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
   @Input() initialZoom: number = 12;
   @Input() maxZoom: number = 16;
   @Input() showClearButton: boolean = true;
-  @Input() fillColor: string = 'rgba(16, 185, 129, 0.2)';
-  @Input() strokeColor: string = 'rgb(16, 185, 129)';
+  @Input() fillColor: string = 'rgba(59, 130, 246, 0.2)';
+  @Input() strokeColor: string = 'rgb(59, 130, 246)';
   @Input() strokeWidth: number = 3;
   @Input() disabled: boolean = false;
   
   // Helper geometry (geometria auxiliar de referência, ex: área da CollectionArea)
   @Input() helperGeometry: string | null = null;
-  @Input() helperFillColor: string = 'rgba(59, 130, 246, 0.1)';
-  @Input() helperStrokeColor: string = 'rgb(59, 130, 246)';
+  @Input() helperFillColor: string = 'rgba(0, 0, 0, 0.2)';
+  @Input() helperStrokeColor: string = 'rgba(0, 0, 0, 1)';
   @Input() helperStrokeWidth: number = 2;
 
   // Multiple helper plots (outros plots da mesma área)
@@ -571,17 +571,17 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       type: 'Polygon',
       style: new Style({
         fill: new Fill({
-          color: 'rgba(16, 185, 129, 0.1)'
+          color: 'rgba(59, 130, 246, 0.1)'
         }),
         stroke: new Stroke({
-          color: 'rgba(16, 185, 129, 0.7)',
+          color: 'rgba(59, 130, 246, 0.7)',
           lineDash: [10, 10],
           width: 2
         }),
         image: new CircleStyle({
           radius: 5,
           fill: new Fill({
-            color: 'rgba(16, 185, 129, 0.7)'
+            color: 'rgba(59, 130, 246, 0.7)'
           })
         })
       })
