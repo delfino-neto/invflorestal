@@ -1,30 +1,5 @@
 <div class="plot-import-dialog">
 
-  <div class="field mb-4" *ngIf="selectedNodes.length <= 1">
-    <label for="plotCode" class="block font-semibold mb-2">
-      <i class="pi pi-tag mr-2"></i>Código do Plot
-    </label>
-    <input 
-      pInputText 
-      id="plotCode" 
-      [(ngModel)]="plotCode"
-      placeholder="Ex: PLOT-001"
-      class="w-full" 
-      autofocus />
-    <small class="text-500">Código único para o plot importado</small>
-  </div>
-  
-  <div class="field mb-4" *ngIf="selectedNodes.length > 1">
-    <div class="bg-blue-50 border-round p-3 border-1 border-blue-200">
-      <div class="flex align-items-start gap-2">
-        <i class="pi pi-info-circle text-blue-600 mt-1"></i>
-        <div class="text-sm text-blue-800">
-          <strong>Multisseleção ativa:</strong> Os plots serão criados usando os nomes originais das áreas/plots selecionados.
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div class="field mb-3">
     <label class="block font-semibold mb-2">
       <i class="pi pi-folder-open mr-2"></i>Selecione a Origem
@@ -43,8 +18,8 @@
       
       <ng-template pTemplate="header">
         <tr>
-          <th style="width: 10%"></th>
-          <th style="width: 35%">Nome</th>
+          <th style="width: 5%"></th>
+          <th style="width: 40%">Nome</th>
           <th style="width: 20%" class="text-center">Tipo</th>
           <th style="width: 20%" class="text-right">Área (m²)</th>
           <th style="width: 15%" class="text-center">Plots</th>
@@ -53,12 +28,12 @@
 
       <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
         <tr [ttRow]="rowNode" [ttSelectableRow]="rowNode">
-          <td style="width: 10%">
+          <td style="width: 5%">
             <p-treeTableCheckbox 
               [value]="rowNode" 
               [disabled]="!isNodeSelectable(rowNode)"></p-treeTableCheckbox>
           </td>
-          <td style="width: 35%">
+          <td style="width: 40%">
             <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
             <span class="ml-2 font-medium" [class.text-400]="!isNodeSelectable(rowNode)">{{ rowData.name }}</span>
           </td>
@@ -102,6 +77,31 @@
         </tr>
       </ng-template>
     </p-treeTable>
+  </div>
+
+  <div class="field mt-4 mb-4" *ngIf="selectedNodes.length <= 1">
+    <label for="plotCode" class="block font-semibold mb-2">
+      <i class="pi pi-tag mr-2"></i>Código do Plot
+    </label>
+    <input 
+      pInputText 
+      id="plotCode" 
+      [(ngModel)]="plotCode"
+      placeholder="Ex: PLOT-001"
+      class="w-full" 
+      autofocus />
+    <small class="text-500">Código único para o plot importado</small>
+  </div>
+  
+  <div class="field mt-4 mb-4" *ngIf="selectedNodes.length > 1">
+    <div class="bg-blue-50 border-round p-3 border-1 border-blue-200">
+      <div class="flex align-items-start gap-2">
+        <i class="pi pi-info-circle text-blue-600 mt-1"></i>
+        <div class="text-sm text-blue-800">
+          <strong>Multisseleção ativa:</strong> Os plots serão criados usando os nomes originais das áreas/plots selecionados.
+        </div>
+      </div>
+    </div>
   </div>
 
   <div *ngIf="selectedNodes.length > 0" 
