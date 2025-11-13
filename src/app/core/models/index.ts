@@ -10,5 +10,6 @@ export * from './collection/collection-area';
 export * from './collection/plot';
 
 export * from './specimen/specimen-object';
+export * from './specimen/species-info';
 
 export * from './media/media';
