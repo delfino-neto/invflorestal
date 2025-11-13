@@ -4,8 +4,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MessageService, ConfirmationService } from 'primeng/api';
 import { debounceTime, Subject } from 'rxjs';
-
-// PrimeNG
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
@@ -18,8 +16,6 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { ChipModule } from 'primeng/chip';
-
-// Services & Models
 import { SpeciesTaxonomyService } from '../../../core/services/species-taxonomy.service';
 import { SpeciesTaxonomy } from '../../../core/models/species/species-taxonomy';
 
@@ -50,21 +46,13 @@ export class SpeciesTaxonomyListComponent implements OnInit {
   taxonomies: SpeciesTaxonomy[] = [];
   loading = false;
   totalRecords = 0;
-  
-  // Filtros
   searchTerm = '';
   selectedFamily: string | null = null;
   selectedGenus: string | null = null;
-  
-  // Listas de opções
   families: Array<{ label: string; value: string }> = [];
   genera: Array<{ label: string; value: string }> = [];
-  
-  // Paginação
   currentPage = 0;
   currentPageSize = 10;
-  
-  // Subject para debounce da busca
   private searchSubject = new Subject<string>();
 
   constructor(
@@ -73,7 +61,6 @@ export class SpeciesTaxonomyListComponent implements OnInit {
     private confirmationService: ConfirmationService,
     private router: Router
   ) {
-    // Configurar debounce para busca
     this.searchSubject.pipe(
       debounceTime(500)
     ).subscribe(() => {
@@ -87,7 +74,6 @@ export class SpeciesTaxonomyListComponent implements OnInit {
   }
   
   loadFilterOptions(): void {
-    // Carregar famílias
     this.taxonomyService.getDistinctFamilies().subscribe({
       next: (families) => {
         this.families = families.map(f => ({ label: f, value: f }));
@@ -97,7 +83,6 @@ export class SpeciesTaxonomyListComponent implements OnInit {
       }
     });
     
-    // Carregar gêneros
     this.taxonomyService.getDistinctGenera().subscribe({
       next: (genera) => {
         this.genera = genera.map(g => ({ label: g, value: g }));

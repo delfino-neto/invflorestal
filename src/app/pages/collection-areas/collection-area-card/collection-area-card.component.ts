@@ -152,31 +152,22 @@ export class CollectionAreaCardComponent implements OnInit, AfterViewInit, OnDes
 
   parseGeometry(geometry: string): [number, number][] {
     try {
-      console.log('Parsing geometry:', geometry);
-      
-      // Tentar parsear como formato PostgreSQL: ((x1,y1),(x2,y2),...)
       if (geometry.startsWith('((') && geometry.endsWith('))')) {
-        // Remove os parênteses externos
         const cleanedGeometry = geometry.slice(2, -2);
         
-        // Separa cada par de coordenadas
         const coordinates = cleanedGeometry.split('),(').map(pair => {
           const [lon, lat] = pair.split(',').map(Number);
           return [lon, lat] as [number, number];
         });
         
-        console.log('Parsed PostgreSQL format:', coordinates);
         return coordinates;
       }
       
-      // Tentar parsear como GeoJSON
       const geojson = JSON.parse(geometry);
       if (geojson.type === 'Polygon' && geojson.coordinates) {
-        console.log('Parsed GeoJSON format:', geojson.coordinates[0]);
         return geojson.coordinates[0] as [number, number][];
       }
       
-      // Tentar como WKT simplificado: POLYGON((lon lat, lon lat, ...))
       const match = geometry.match(/POLYGON\s*\(\(([\d\s,.-]+)\)\)/i);
       if (match) {
         const coordsString = match[1];
@@ -184,7 +175,6 @@ export class CollectionAreaCardComponent implements OnInit, AfterViewInit, OnDes
           const [lon, lat] = pair.trim().split(/\s+/).map(Number);
           return [lon, lat] as [number, number];
         });
-        console.log('Parsed WKT format:', coordinates);
         return coordinates;
       }
 

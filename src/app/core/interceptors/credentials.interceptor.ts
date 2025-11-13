@@ -12,7 +12,6 @@ export const credentialsInterceptor = (
     request: HttpRequest<unknown>, 
     next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> => {
-    console.log('Credentials Interceptor invoked');
     request = request.clone({
       withCredentials: true
     });

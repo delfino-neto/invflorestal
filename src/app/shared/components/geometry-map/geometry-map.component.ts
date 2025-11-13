@@ -375,8 +375,8 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
           })
         })
       }),
-      zIndex: 2, // Acima da camada helper
-      renderBuffer: 4096 // Aumentar buffer para melhor performance no pan
+      zIndex: 2,
+      renderBuffer: 4096
     });
 
     // Criar mapa
@@ -386,9 +386,9 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
         new TileLayer({
           source: new OSM(),
         }),
-        this.helperVectorLayer, // Camada auxiliar primeiro (atrás)
-        this.helperPlotsLayer,  // Camada de plots helper
-        this.vectorLayer        // Camada principal por cima
+        this.helperVectorLayer,
+        this.helperPlotsLayer,
+        this.vectorLayer
       ],
       view: new View({
         center: fromLonLat([this.centerLon, this.centerLat]),
@@ -413,13 +413,11 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       const mapElement = this.map!.getTargetElement() as HTMLElement;
       if (!mapElement || !this.hasDrawnPolygon) return;
 
-      // Se estiver modificando, manter cursor grabbing
       if (this.isModifying) {
         mapElement.style.cursor = 'grabbing';
         return;
       }
 
-      // Caso contrário, verificar se está sobre o polígono
       const pixel = this.map!.getEventPixel(evt.originalEvent);
       const hit = this.map!.hasFeatureAtPixel(pixel);
       mapElement.style.cursor = hit ? 'grab' : 'default';

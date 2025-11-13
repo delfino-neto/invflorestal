@@ -3,13 +3,9 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
-
-// PrimeNG
 import { ToastModule } from 'primeng/toast';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
-
-// Services & Models
 import { SpeciesTaxonomyService } from '../../../core/services/species-taxonomy.service';
 import { SpeciesTaxonomy } from '../../../core/models/species/species-taxonomy';
 
@@ -138,17 +134,14 @@ export class SpeciesTaxonomyFormComponent implements OnInit {
       const genus = parts[0];
       const species = parts[1];
       
-      // Auto-preenche gênero se não estiver preenchido
       if (!this.taxonomyForm.get('genus')?.value && genus) {
         this.taxonomyForm.patchValue({ genus });
       }
       
-      // Auto-preenche espécie se não estiver preenchido
       if (!this.taxonomyForm.get('species')?.value && species) {
         this.taxonomyForm.patchValue({ species });
       }
       
-      // Gera código automaticamente baseado no gênero e espécie
       if (genus && species && !this.taxonomyForm.get('code')?.value) {
         const code = this.generateCode(genus, species);
         this.taxonomyForm.patchValue({ code });
