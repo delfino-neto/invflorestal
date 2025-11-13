@@ -1,0 +1,343 @@
+<div class="specimen-list-container">
+  <p-toast />
+  <p-confirmDialog />
+
+  <!-- Header -->
+  <div class="header-section mb-6">
+    <div class="flex justify-between items-start mb-4">
+      <div class="flex-1">
+        <h1 class="text-4xl font-bold text-surface-900 dark:text-surface-0 mb-2 flex items-center gap-3">
+          <i class="pi pi-sitemap text-primary"></i>
+          Espécimes Cadastrados
+        </h1>
+        <p class="text-surface-600 dark:text-surface-400 text-lg">
+          Visualize e gerencie os espécimes registrados nos inventários florestais
+        </p>
+      </div>
+      <button
+        pButton
+        icon="pi pi-plus"
+        label="Novo Espécime"
+        class="p-button-success p-button-lg"
+        (click)="navigateToNew()"
+      ></button>
+    </div>
+
+    <!-- Search and Controls -->
+    <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
+      <p-iconfield iconPosition="left" class="w-full md:w-96">
+        <p-inputicon styleClass="pi pi-search" />
+        <input
+          type="text"
+          pInputText
+          [(ngModel)]="searchTerm"
+          (input)="onSearch($event)"
+          placeholder="Buscar por espécie, parcela ou observador..."
+          class="w-full"
+        />
+      </p-iconfield>
+
+      <div class="flex items-center gap-2">
+        <span class="text-sm text-surface-600 dark:text-surface-400">
+          Visualização:
+        </span>
+        <div class="flex gap-1 p-1 bg-surface-50 dark:bg-surface-800 rounded-lg">
+          <button
+            pButton
+            icon="pi pi-th-large"
+            [class.p-button-outlined]="layout !== 'grid'"
+            class="p-button-sm"
+            (click)="layout = 'grid'"
+            pTooltip="Visualização em Grade"
+            tooltipPosition="bottom"
+          ></button>
+          <button
+            pButton
+            icon="pi pi-list"
+            [class.p-button-outlined]="layout !== 'list'"
+            class="p-button-sm"
+            (click)="layout = 'list'"
+            pTooltip="Visualização em Lista"
+            tooltipPosition="bottom"
+          ></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DataView -->
+  <p-dataView
+    #dv
+    [value]="specimens"
+    [layout]="layout"
+    [paginator]="false"
+    [loading]="loading"
+  >
+    <!-- Empty State -->
+    <ng-template pTemplate="empty">
+      <div class="empty-state flex flex-col items-center justify-center py-20">
+        <i class="pi pi-sitemap text-8xl text-surface-300 dark:text-surface-700 mb-6"></i>
+        <h3 class="text-2xl font-semibold text-surface-700 dark:text-surface-300 mb-2">
+          Nenhum espécime encontrado
+        </h3>
+        <p class="text-surface-500 dark:text-surface-400 mb-6">
+          Comece cadastrando os espécimes encontrados no inventário florestal
+        </p>
+        <button
+          pButton
+          icon="pi pi-plus"
+          label="Cadastrar Primeiro Espécime"
+          class="p-button-lg"
+          (click)="navigateToNew()"
+        ></button>
+      </div>
+    </ng-template>
+
+    <!-- Grid View Template -->
+    <ng-template let-specimens #grid>
+      <div class="col-12">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div *ngFor="let specimen of specimens">
+            <div class="specimen-card">
+              <!-- Galeria de Imagens (3/5 = 60%) -->
+              <div class="specimen-carousel">
+                <p-galleria 
+                  *ngIf="specimen.imageUrls && specimen.imageUrls.length > 0; else noImages"
+                  [value]="specimen.imageUrls" 
+                  [numVisible]="1"
+                  [circular]="true"
+                  [autoPlay]="true"
+                  [transitionInterval]="3000"
+                  [showThumbnails]="false"
+                  [showItemNavigators]="specimen.imageUrls.length > 1"
+                  [showIndicators]="specimen.imageUrls.length > 1"
+                  [containerStyle]="{'max-width': '100%'}"
+                  [containerClass]="'galleria-container'">
+                  <ng-template pTemplate="item" let-item>
+                    <div class="galleria-image-container">
+                      <img [src]="item" [alt]="specimen.speciesScientificName" class="galleria-image" />
+                    </div>
+                  </ng-template>
+                </p-galleria>
+                <ng-template #noImages>
+                  <div class="no-image-placeholder">
+                    <i class="pi pi-image"></i>
+                    <span>Sem imagens</span>
+                  </div>
+                </ng-template>
+                
+                <!-- Badge de ID sobreposto -->
+                <div class="specimen-id-badge">
+                  <p-tag value="ID: {{ specimen.id }}" severity="secondary" />
+                </div>
+              </div>
+
+              <!-- Detalhes do Espécime (2/5 = 40%) -->
+              <div class="specimen-details-section">
+                <!-- Header com Parcela -->
+                <div class="details-header">
+                  <div class="flex items-center gap-2">
+                    <i class="pi pi-map-marker"></i>
+                    <p-tag
+                      [value]="specimen.plotCode || 'Parcela #' + specimen.plotId"
+                      icon="pi pi-th-large"
+                      severity="success"
+                    />
+                  </div>
+                </div>
+
+                <!-- Espécie -->
+                <div class="species-info">
+                  <div class="flex items-start gap-2">
+                    <i class="pi pi-leaf"></i>
+                    <div class="flex-1">
+                      <h3 class="species-name">
+                        {{ specimen.speciesScientificName }}
+                      </h3>
+                      <p class="common-name">
+                        {{ specimen.speciesCommonName || 'Nome comum não disponível' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <p-divider />
+
+                <!-- Informações Compactas -->
+                <div class="compact-info">
+                  <!-- Localização -->
+                  <div class="info-item">
+                    <i class="pi pi-globe"></i>
+                    <span class="info-value">
+                      {{ formatCoordinates(specimen.latitude, specimen.longitude) }}
+                    </span>
+                  </div>
+
+                  <!-- Observador -->
+                  <div class="info-item">
+                    <i class="pi pi-user"></i>
+                    <span class="info-value">{{ specimen.observerFullName }}</span>
+                  </div>
+
+                  <!-- Data -->
+                  <div class="info-item">
+                    <i class="pi pi-calendar"></i>
+                    <span class="info-value">{{ formatDate(specimen.createdAt) }}</span>
+                  </div>
+                </div>
+
+                <!-- Ações -->
+                <div class="card-actions">
+                  <button
+                    pButton
+                    icon="pi pi-eye"
+                    label="Ver"
+                    class="p-button-text p-button-sm flex-1"
+                    (click)="navigateToView(specimen.id!)"
+                  ></button>
+                  <button
+                    pButton
+                    icon="pi pi-pencil"
+                    class="p-button-text p-button-warning p-button-sm"
+                    (click)="navigateToEdit(specimen.id!)"
+                    pTooltip="Editar"
+                  ></button>
+                  <button
+                    pButton
+                    icon="pi pi-trash"
+                    class="p-button-text p-button-danger p-button-sm"
+                    (click)="confirmDelete(specimen)"
+                    pTooltip="Excluir"
+                  ></button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+
+    <!-- List View Template -->
+    <ng-template let-specimens #list>
+      <div class="flex flex-col gap-4">
+        <div *ngFor="let specimen of specimens" class="specimen-list-item p-4 bg-surface-0 dark:bg-surface-800 rounded-lg border border-surface-200 dark:border-surface-700 hover:shadow-md transition-all">
+          <div class="flex flex-col md:flex-row gap-4 items-start">
+            <!-- Left: Icon and ID -->
+            <div class="flex items-center gap-3">
+              <div class="specimen-icon-wrapper bg-primary-50 dark:bg-primary-900 p-3 rounded-lg">
+                <i class="pi pi-sitemap text-3xl text-primary"></i>
+              </div>
+              <div>
+                <p-tag
+                  value="ID: {{ specimen.id }}"
+                  severity="secondary"
+                ></p-tag>
+              </div>
+            </div>
+
+            <!-- Center: Main Info -->
+            <div class="flex-1">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Species -->
+                <div>
+                  <div class="flex items-center gap-2 mb-1">
+                    <i class="pi pi-leaf text-green-600"></i>
+                    <span class="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase">Espécie</span>
+                  </div>
+                  <h3 class="text-lg font-bold text-surface-900 dark:text-surface-0">
+                    {{ specimen.speciesScientificName }}
+                  </h3>
+                  <p class="text-sm text-surface-600 dark:text-surface-400 italic">
+                    {{ specimen.speciesCommonName || 'Nome comum não disponível' }}
+                  </p>
+                </div>
+
+                <!-- Plot and Location -->
+                <div>
+                  <div class="flex items-center gap-2 mb-1">
+                    <i class="pi pi-map-marker text-primary"></i>
+                    <span class="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase">Parcela & Localização</span>
+                  </div>
+                  <p class="text-sm font-semibold text-surface-900 dark:text-surface-0 mb-1">
+                    {{ specimen.plotCode || 'Parcela #' + specimen.plotId }}
+                  </p>
+                  <p class="text-xs text-surface-600 dark:text-surface-400 font-mono">
+                    {{ formatCoordinates(specimen.latitude, specimen.longitude) }}
+                  </p>
+                </div>
+
+                <!-- Observer -->
+                <div>
+                  <div class="flex items-center gap-2 mb-1">
+                    <i class="pi pi-user text-primary"></i>
+                    <span class="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase">Observador</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <p-avatar
+                      [label]="getInitials(specimen.observerFullName)"
+                      shape="circle"
+                      size="normal"
+                      [style]="{ 'background-color': '#059669', 'color': '#ffffff' }"
+                    ></p-avatar>
+                    <span class="text-sm font-semibold text-surface-900 dark:text-surface-0">
+                      {{ specimen.observerFullName }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Date -->
+                <div>
+                  <div class="flex items-center gap-2 mb-1">
+                    <i class="pi pi-calendar text-primary"></i>
+                    <span class="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase">Registro</span>
+                  </div>
+                  <p class="text-sm text-surface-900 dark:text-surface-0">
+                    {{ formatDate(specimen.createdAt) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Actions -->
+            <div class="flex md:flex-col gap-2">
+              <button
+                pButton
+                icon="pi pi-eye"
+                label="Ver"
+                class="p-button-outlined p-button-sm"
+                (click)="navigateToView(specimen.id!)"
+                pTooltip="Ver detalhes e histórico"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-pencil"
+                class="p-button-outlined p-button-warning p-button-sm"
+                (click)="navigateToEdit(specimen.id!)"
+                pTooltip="Editar"
+              ></button>
+              <button
+                pButton
+                icon="pi pi-trash"
+                class="p-button-outlined p-button-danger p-button-sm"
+                (click)="confirmDelete(specimen)"
+                pTooltip="Excluir"
+              ></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </ng-template>
+  </p-dataView>
+
+  <!-- Paginador Separado -->
+  <div *ngIf="!loading && specimens.length > 0" class="mt-8">
+    <p-paginator
+      [rows]="pageSize"
+      [totalRecords]="totalRecords"
+      [rowsPerPageOptions]="[12, 24, 36]"
+      (onPageChange)="onPageChange($event)"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} espécimes"
+    ></p-paginator>
+  </div>
+</div>

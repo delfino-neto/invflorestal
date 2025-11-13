@@ -47,7 +47,14 @@ export class AppMenu {
                             }
                         },
                         { label: 'Parcelas', icon: 'pi pi-fw pi-th-large', routerLink: ['/plots'], disabled: true },
-                        { label: 'Espécimes', icon: 'pi pi-fw pi-objects-column', routerLink: ['/specimens'], disabled: true }
+                        { 
+                            label: 'Espécimes', 
+                            icon: 'pi pi-fw pi-sitemap', 
+                            routerLink: ['/specimens'],
+                            routerLinkActiveOptions: {
+                                exact: false,
+                            }
+                        }
                     ]
                 },
                 { 

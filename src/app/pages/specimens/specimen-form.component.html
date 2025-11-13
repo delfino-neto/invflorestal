@@ -1,0 +1,166 @@
+<div class="specimen-form-container">
+  <p-toast />
+
+  <div class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <div class="mb-6">
+      <h1 class="text-4xl font-bold text-surface-900 dark:text-surface-0 mb-2 flex items-center gap-3">
+        <i class="pi pi-sitemap text-primary"></i>
+        {{ isEditMode ? 'Editar' : 'Novo' }} Espécime
+      </h1>
+      <p class="text-surface-600 dark:text-surface-400">
+        {{ isEditMode ? 'Atualize as informações do espécime' : 'Cadastre um novo espécime no inventário florestal' }}
+      </p>
+    </div>
+
+    <!-- Form Card -->
+    <p-card>
+      <ng-template pTemplate="content">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Species -->
+            <div class="col-span-full">
+              <label for="speciesId" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                <i class="pi pi-leaf mr-2"></i>Espécie *
+              </label>
+              <p-select
+                id="speciesId"
+                formControlName="speciesId"
+                [options]="species"
+                placeholder="Selecione uma espécie"
+                [filter]="true"
+                filterPlaceholder="Buscar espécie..."
+                [showClear]="true"
+                [loading]="loadingData.species"
+                class="w-full"
+                [class.ng-invalid]="isFieldInvalid('speciesId')"
+                [class.ng-dirty]="isFieldInvalid('speciesId')"
+              />
+              <small *ngIf="isFieldInvalid('speciesId')" class="text-red-500">
+                {{ getFieldError('speciesId') }}
+              </small>
+            </div>
+
+            <!-- Plot -->
+            <div class="col-span-full md:col-span-1">
+              <label for="plotId" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                <i class="pi pi-th-large mr-2"></i>Parcela *
+              </label>
+              <p-select
+                id="plotId"
+                formControlName="plotId"
+                [options]="plots"
+                placeholder="Selecione uma parcela"
+                [filter]="true"
+                filterPlaceholder="Buscar parcela..."
+                [showClear]="true"
+                [loading]="loadingData.plots"
+                class="w-full"
+                [class.ng-invalid]="isFieldInvalid('plotId')"
+                [class.ng-dirty]="isFieldInvalid('plotId')"
+              />
+              <small *ngIf="isFieldInvalid('plotId')" class="text-red-500">
+                {{ getFieldError('plotId') }}
+              </small>
+            </div>
+
+            <!-- Observer -->
+            <div class="col-span-full md:col-span-1">
+              <label for="observerId" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                <i class="pi pi-user mr-2"></i>Observador *
+              </label>
+              <p-select
+                id="observerId"
+                formControlName="observerId"
+                [options]="users"
+                placeholder="Selecione um observador"
+                [filter]="true"
+                filterPlaceholder="Buscar observador..."
+                [showClear]="true"
+                [loading]="loadingData.users"
+                class="w-full"
+                [class.ng-invalid]="isFieldInvalid('observerId')"
+                [class.ng-dirty]="isFieldInvalid('observerId')"
+              />
+              <small *ngIf="isFieldInvalid('observerId')" class="text-red-500">
+                {{ getFieldError('observerId') }}
+              </small>
+            </div>
+
+            <!-- Latitude -->
+            <div class="col-span-full md:col-span-1">
+              <label for="latitude" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                <i class="pi pi-globe mr-2"></i>Latitude *
+              </label>
+              <p-inputNumber
+                id="latitude"
+                formControlName="latitude"
+                [minFractionDigits]="6"
+                [maxFractionDigits]="8"
+                [min]="-90"
+                [max]="90"
+                placeholder="-23.550520"
+                class="w-full"
+                [class.ng-invalid]="isFieldInvalid('latitude')"
+                [class.ng-dirty]="isFieldInvalid('latitude')"
+              />
+              <small *ngIf="isFieldInvalid('latitude')" class="text-red-500">
+                {{ getFieldError('latitude') }}
+              </small>
+              <small class="text-surface-500 dark:text-surface-400">
+                Valor entre -90 e 90
+              </small>
+            </div>
+
+            <!-- Longitude -->
+            <div class="col-span-full md:col-span-1">
+              <label for="longitude" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                <i class="pi pi-globe mr-2"></i>Longitude *
+              </label>
+              <p-inputNumber
+                id="longitude"
+                formControlName="longitude"
+                [minFractionDigits]="6"
+                [maxFractionDigits]="8"
+                [min]="-180"
+                [max]="180"
+                placeholder="-46.633308"
+                class="w-full"
+                [class.ng-invalid]="isFieldInvalid('longitude')"
+                [class.ng-dirty]="isFieldInvalid('longitude')"
+              />
+              <small *ngIf="isFieldInvalid('longitude')" class="text-red-500">
+                {{ getFieldError('longitude') }}
+              </small>
+              <small class="text-surface-500 dark:text-surface-400">
+                Valor entre -180 e 180
+              </small>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-surface-200 dark:border-surface-700">
+            <button
+              pButton
+              type="button"
+              label="Cancelar"
+              icon="pi pi-times"
+              class="p-button-outlined p-button-secondary"
+              (click)="onCancel()"
+              [disabled]="loading"
+            ></button>
+            <button
+              pButton
+              type="submit"
+              [label]="isEditMode ? 'Atualizar' : 'Cadastrar'"
+              icon="pi pi-check"
+              class="p-button-success"
+              [loading]="loading"
+              [disabled]="form.invalid || loading"
+            ></button>
+          </div>
+        </form>
+      </ng-template>
+    </p-card>
+  </div>
+</div>

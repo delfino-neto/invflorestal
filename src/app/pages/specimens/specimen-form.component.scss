@@ -1,0 +1,25 @@
+.specimen-form-container {
+  padding: 2rem;
+  min-height: calc(100vh - 200px);
+
+  ::ng-deep {
+    .p-card {
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .p-select,
+    .p-inputnumber {
+      width: 100%;
+    }
+
+    .p-select.ng-invalid.ng-dirty,
+    .p-inputnumber.ng-invalid.ng-dirty {
+      border-color: #ef4444;
+    }
+  }
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+}

@@ -6,6 +6,7 @@ import { DASHBOARD_ROUTES } from './app/pages/dashboard/dashboard.routes';
 import { USER_MANAGEMENT_ROUTES } from './app/pages/user-management/user-management.routes';
 import { SPECIES_ROUTES } from './app/pages/species/species.routes';
 import { COLLECTION_AREA_ROUTES } from './app/pages/collection-areas/collection-area.routes';
+import { SPECIMEN_ROUTES } from './app/pages/specimens/specimen.routes';
 import { authGuard } from '@/core';
 
 export const routes: Routes = [
@@ -19,7 +20,8 @@ export const routes: Routes = [
             { path: 'dashboard', children: DASHBOARD_ROUTES },
             { path: 'users', children: USER_MANAGEMENT_ROUTES },
             { path: 'species', children: SPECIES_ROUTES },
-            { path: 'collection-areas', children: COLLECTION_AREA_ROUTES }
+            { path: 'collection-areas', children: COLLECTION_AREA_ROUTES },
+            { path: 'specimens', children: SPECIMEN_ROUTES }
         ]
     },
     { path: '**', redirectTo: 'error' } // Wildcard route for a 404 page

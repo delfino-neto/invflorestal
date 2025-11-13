@@ -1,0 +1,218 @@
+<div class="specimen-detail-container">
+  <p-toast />
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="max-w-6xl mx-auto">
+    <p-skeleton height="4rem" class="mb-4"></p-skeleton>
+    <p-skeleton height="400px"></p-skeleton>
+  </div>
+
+  <!-- Content -->
+  <div *ngIf="!loading && specimen" class="max-w-6xl mx-auto">
+    <!-- Header -->
+    <div class="header-section mb-6">
+      <div class="flex items-center gap-3 mb-4">
+        <button
+          pButton
+          icon="pi pi-arrow-left"
+          class="p-button-text p-button-secondary"
+          (click)="navigateBack()"
+          pTooltip="Voltar para listagem"
+        ></button>
+        <div class="flex-1">
+          <div class="flex items-center gap-3 mb-2">
+            <h1 class="text-4xl font-bold text-surface-900 dark:text-surface-0">
+              {{ specimen.speciesScientificName }}
+            </h1>
+            <p-tag
+              value="ID: {{ specimen.id }}"
+              severity="secondary"
+            ></p-tag>
+          </div>
+          <p class="text-xl text-surface-600 dark:text-surface-400 italic">
+            {{ specimen.speciesCommonName || 'Nome comum não disponível' }}
+          </p>
+        </div>
+        <button
+          pButton
+          icon="pi pi-pencil"
+          label="Editar"
+          class="p-button-warning"
+          (click)="navigateToEdit()"
+        ></button>
+      </div>
+    </div>
+
+    <!-- Main Info Card -->
+    <p-card class="mb-6">
+      <ng-template pTemplate="header">
+        <div class="p-4 bg-gradient-to-br from-primary-50 to-primary-100 dark:from-primary-900 dark:to-primary-800">
+          <h2 class="text-2xl font-bold text-surface-900 dark:text-surface-0 flex items-center gap-2">
+            <i class="pi pi-info-circle"></i>
+            Informações do Espécime
+          </h2>
+        </div>
+      </ng-template>
+
+      <ng-template pTemplate="content">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Plot Info -->
+          <div class="info-item">
+            <div class="flex items-center gap-2 mb-2">
+              <i class="pi pi-th-large text-primary text-xl"></i>
+              <span class="font-semibold text-surface-700 dark:text-surface-300">Parcela</span>
+            </div>
+            <p-chip
+              [label]="specimen.plotCode || 'Parcela #' + specimen.plotId"
+              icon="pi pi-map-marker"
+              styleClass="text-lg"
+            ></p-chip>
+          </div>
+
+          <!-- Observer Info -->
+          <div class="info-item">
+            <div class="flex items-center gap-2 mb-2">
+              <i class="pi pi-user text-primary text-xl"></i>
+              <span class="font-semibold text-surface-700 dark:text-surface-300">Observador</span>
+            </div>
+            <div class="flex items-center gap-3">
+              <p-avatar
+                [label]="getInitials(specimen.observerFullName)"
+                shape="circle"
+                size="large"
+                [style]="{ 'background-color': '#059669', 'color': '#ffffff' }"
+              ></p-avatar>
+              <div>
+                <p class="text-lg font-semibold text-surface-900 dark:text-surface-0">
+                  {{ specimen.observerFullName }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Location -->
+          <div class="info-item col-span-full">
+            <div class="flex items-center justify-between mb-2">
+              <div class="flex items-center gap-2">
+                <i class="pi pi-globe text-primary text-xl"></i>
+                <span class="font-semibold text-surface-700 dark:text-surface-300">Localização GPS</span>
+              </div>
+              <button
+                pButton
+                icon="pi pi-copy"
+                label="Copiar"
+                class="p-button-sm p-button-outlined"
+                (click)="copyCoordinates()"
+              ></button>
+            </div>
+            <div class="bg-surface-100 dark:bg-surface-700 p-4 rounded-lg font-mono text-lg">
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <span class="text-surface-500 dark:text-surface-400 text-sm">Latitude:</span>
+                  <p class="text-surface-900 dark:text-surface-0 font-bold">{{ specimen.latitude.toFixed(8) }}°</p>
+                </div>
+                <div>
+                  <span class="text-surface-500 dark:text-surface-400 text-sm">Longitude:</span>
+                  <p class="text-surface-900 dark:text-surface-0 font-bold">{{ specimen.longitude.toFixed(8) }}°</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p-divider class="col-span-full" />
+
+          <!-- Timestamps -->
+          <div class="info-item">
+            <div class="flex items-center gap-2 mb-2">
+              <i class="pi pi-calendar-plus text-primary text-xl"></i>
+              <span class="font-semibold text-surface-700 dark:text-surface-300">Cadastrado em</span>
+            </div>
+            <p class="text-surface-900 dark:text-surface-0">
+              {{ formatDate(specimen.createdAt) }}
+            </p>
+          </div>
+
+          <div class="info-item" *ngIf="specimen.updatedAt">
+            <div class="flex items-center gap-2 mb-2">
+              <i class="pi pi-calendar text-primary text-xl"></i>
+              <span class="font-semibold text-surface-700 dark:text-surface-300">Última atualização</span>
+            </div>
+            <p class="text-surface-900 dark:text-surface-0">
+              {{ formatDate(specimen.updatedAt) }}
+            </p>
+          </div>
+        </div>
+      </ng-template>
+    </p-card>
+
+    <!-- Tabs for additional info -->
+    <p-tabs value="0">
+      <!-- History Tab -->
+      <p-tabpanel header="Histórico de Medições">
+        <ng-template pTemplate="header">
+          <i class="pi pi-clock mr-2"></i>
+          <span>Histórico de Medições</span>
+        </ng-template>
+        
+        <div *ngIf="history.length === 0" class="empty-history text-center py-12">
+          <i class="pi pi-chart-line text-6xl text-surface-300 dark:text-surface-700 mb-4"></i>
+          <h3 class="text-xl font-semibold text-surface-700 dark:text-surface-300 mb-2">
+            Nenhuma medição registrada
+          </h3>
+          <p class="text-surface-500 dark:text-surface-400 mb-6">
+            As medições e observações do espécime ao longo do tempo aparecerão aqui
+          </p>
+          <button
+            pButton
+            icon="pi pi-plus"
+            label="Adicionar Primeira Medição"
+            class="p-button-outlined"
+          ></button>
+        </div>
+
+        <!-- Timeline will be populated with real data from SpeciesInfo API -->
+        <p-timeline *ngIf="history.length > 0" [value]="history" align="alternate">
+          <ng-template pTemplate="content" let-event>
+            <!-- History items will be rendered here -->
+          </ng-template>
+        </p-timeline>
+      </p-tabpanel>
+
+      <!-- Map Tab (Future) -->
+      <p-tabpanel header="Localização no Mapa">
+        <ng-template pTemplate="header">
+          <i class="pi pi-map mr-2"></i>
+          <span>Localização no Mapa</span>
+        </ng-template>
+        
+        <div class="text-center py-12">
+          <i class="pi pi-map text-6xl text-surface-300 dark:text-surface-700 mb-4"></i>
+          <h3 class="text-xl font-semibold text-surface-700 dark:text-surface-300 mb-2">
+            Visualização no Mapa
+          </h3>
+          <p class="text-surface-500 dark:text-surface-400">
+            Em breve: mapa interativo mostrando a localização exata do espécime
+          </p>
+        </div>
+      </p-tabpanel>
+
+      <!-- Photos Tab (Future) -->
+      <p-tabpanel header="Fotos">
+        <ng-template pTemplate="header">
+          <i class="pi pi-images mr-2"></i>
+          <span>Fotos</span>
+        </ng-template>
+        
+        <div class="text-center py-12">
+          <i class="pi pi-images text-6xl text-surface-300 dark:text-surface-700 mb-4"></i>
+          <h3 class="text-xl font-semibold text-surface-700 dark:text-surface-300 mb-2">
+            Galeria de Fotos
+          </h3>
+          <p class="text-surface-500 dark:text-surface-400">
+            Em breve: galeria de fotos do espécime
+          </p>
+        </div>
+      </p-tabpanel>
+    </p-tabs>
+  </div>
+</div>

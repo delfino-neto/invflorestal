@@ -9,6 +9,7 @@ export interface SpecimenObject {
     longitude: number;
     observerId: number;
     observerFullName?: string;
+    imageUrls?: string[];
     createdAt?: Date;
     updatedAt?: Date;
 }
