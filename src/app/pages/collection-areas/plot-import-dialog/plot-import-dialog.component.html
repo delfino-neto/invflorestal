@@ -29,9 +29,11 @@
       <ng-template pTemplate="body" let-rowNode let-rowData="rowData">
         <tr [ttRow]="rowNode" [ttSelectableRow]="rowNode">
           <td style="width: 5%">
-            <p-treeTableCheckbox 
-              [value]="rowNode" 
-              [disabled]="!isNodeSelectable(rowNode)"></p-treeTableCheckbox>
+            <div [style.padding-left.rem]="rowNode.level * 1.5">
+              <p-treeTableCheckbox 
+                [value]="rowNode" 
+                [disabled]="!isNodeSelectable(rowNode)"></p-treeTableCheckbox>
+            </div>
           </td>
           <td style="width: 40%">
             <p-treeTableToggler [rowNode]="rowNode"></p-treeTableToggler>
