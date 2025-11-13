@@ -217,4 +217,31 @@ export class SpecimenListComponent implements OnInit, OnDestroy {
       .substring(0, 2)
       .toUpperCase();
   }
+
+  getUserAvatarColor(name?: string): string {
+    if (!name) return '#6b7280';
+    
+    const colors = [
+      '#ef4444', // red-500
+      '#f97316', // orange-500
+      '#eab308', // yellow-500
+      '#22c55e', // green-500
+      '#10b981', // emerald-500
+      '#06b6d4', // cyan-500
+      '#3b82f6', // blue-500
+      '#6366f1', // indigo-500
+      '#8b5cf6', // violet-500
+      '#a855f7', // purple-500
+      '#ec4899', // pink-500
+      '#f43f5e', // rose-500
+    ];
+    
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    
+    const index = Math.abs(hash) % colors.length;
+    return colors[index];
+  }
 }

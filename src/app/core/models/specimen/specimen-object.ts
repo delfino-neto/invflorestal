@@ -2,6 +2,8 @@ export interface SpecimenObject {
     id?: number;
     plotId: number;
     plotCode?: string;
+    areaId?: number;
+    areaName?: string;
     speciesId: number;
     speciesScientificName?: string;
     speciesCommonName?: string;

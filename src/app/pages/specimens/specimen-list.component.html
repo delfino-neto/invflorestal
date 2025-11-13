@@ -36,32 +36,6 @@
           class="w-full"
         />
       </p-iconfield>
-
-      <div class="flex items-center gap-2">
-        <span class="text-sm text-surface-600 dark:text-surface-400">
-          Visualização:
-        </span>
-        <div class="flex gap-1 p-1 bg-surface-50 dark:bg-surface-800 rounded-lg">
-          <button
-            pButton
-            icon="pi pi-th-large"
-            [class.p-button-outlined]="layout !== 'grid'"
-            class="p-button-sm"
-            (click)="layout = 'grid'"
-            pTooltip="Visualização em Grade"
-            tooltipPosition="bottom"
-          ></button>
-          <button
-            pButton
-            icon="pi pi-list"
-            [class.p-button-outlined]="layout !== 'list'"
-            class="p-button-sm"
-            (click)="layout = 'list'"
-            pTooltip="Visualização em Lista"
-            tooltipPosition="bottom"
-          ></button>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -134,56 +108,59 @@
 
               <!-- Detalhes do Espécime (2/5 = 40%) -->
               <div class="specimen-details-section">
-                <!-- Header com Parcela -->
-                <div class="details-header">
-                  <div class="flex items-center gap-2">
-                    <i class="pi pi-map-marker"></i>
-                    <p-tag
-                      [value]="specimen.plotCode || 'Parcela #' + specimen.plotId"
-                      icon="pi pi-th-large"
-                      severity="success"
-                    />
+                <!-- Espécie -->
+                <div class="species-info">
+                  <i class="pi pi-leaf"></i>
+                  <div class="flex-1">
+                    <h3 class="species-name">{{ specimen.speciesScientificName }}</h3>
+                    <p class="common-name">{{ specimen.speciesCommonName || 'Nome comum não disponível' }}</p>
                   </div>
                 </div>
 
-                <!-- Espécie -->
-                <div class="species-info">
-                  <div class="flex items-start gap-2">
-                    <i class="pi pi-leaf"></i>
-                    <div class="flex-1">
-                      <h3 class="species-name">
-                        {{ specimen.speciesScientificName }}
-                      </h3>
-                      <p class="common-name">
-                        {{ specimen.speciesCommonName || 'Nome comum não disponível' }}
-                      </p>
+                <!-- Informações Compactas em Grid 2x2 -->
+                <div class="compact-info-grid">
+                  <!-- Área -->
+                  <div class="info-item">
+                    <i class="pi pi-map"></i>
+                    <div class="info-content">
+                      <span class="info-label">Área</span>
+                      <span class="info-value">{{ specimen.areaName || 'N/A' }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Parcela -->
+                  <div class="info-item">
+                    <i class="pi pi-th-large"></i>
+                    <div class="info-content">
+                      <span class="info-label">Parcela</span>
+                      <span class="info-value">{{ specimen.plotCode || '#' + specimen.plotId }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Coordenadas -->
+                  <div class="info-item">
+                    <i class="pi pi-map-marker"></i>
+                    <div class="info-content">
+                      <span class="info-label">Coordenadas</span>
+                      <span class="info-value">{{ formatCoordinates(specimen.latitude, specimen.longitude) }}</span>
                     </div>
                   </div>
                 </div>
 
-                <p-divider />
-
-                <!-- Informações Compactas -->
-                <div class="compact-info">
-                  <!-- Localização -->
-                  <div class="info-item">
-                    <i class="pi pi-globe"></i>
-                    <span class="info-value">
-                      {{ formatCoordinates(specimen.latitude, specimen.longitude) }}
-                    </span>
-                  </div>
-
-                  <!-- Observador -->
-                  <div class="info-item">
-                    <i class="pi pi-user"></i>
-                    <span class="info-value">{{ specimen.observerFullName }}</span>
-                  </div>
-
-                  <!-- Data -->
-                  <div class="info-item">
-                    <i class="pi pi-calendar"></i>
-                    <span class="info-value">{{ formatDate(specimen.createdAt) }}</span>
-                  </div>
+                <div class="user-info">
+                    <p-avatar 
+                        [label]="getInitials(specimen.observerFullName)" 
+                        shape="square"
+                        styleClass="metadata-avatar"
+                        [style]="{ 'background-color': getUserAvatarColor(specimen.observerFullName) }"
+                    ></p-avatar>
+                    <div class="user-details">
+                        <span class="user-name">{{ specimen.observerFullName || 'N/A' }}</span>
+                        <span class="date-info">
+                        <i class="pi pi-calendar-plus"></i>
+                        {{ specimen.updatedAt ? formatDate(specimen.updatedAt) : formatDate(specimen.createdAt) }}
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Ações -->
@@ -192,136 +169,25 @@
                     pButton
                     icon="pi pi-eye"
                     label="Ver"
-                    class="p-button-text p-button-sm flex-1"
+                    class="p-button-outlined p-button-sm flex-1"
                     (click)="navigateToView(specimen.id!)"
                   ></button>
                   <button
                     pButton
                     icon="pi pi-pencil"
-                    class="p-button-text p-button-warning p-button-sm"
+                    class="p-button-outlined p-button-warning p-button-sm"
                     (click)="navigateToEdit(specimen.id!)"
                     pTooltip="Editar"
                   ></button>
                   <button
                     pButton
                     icon="pi pi-trash"
-                    class="p-button-text p-button-danger p-button-sm"
+                    class="p-button-outlined p-button-danger p-button-sm"
                     (click)="confirmDelete(specimen)"
                     pTooltip="Excluir"
                   ></button>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </ng-template>
-
-    <!-- List View Template -->
-    <ng-template let-specimens #list>
-      <div class="flex flex-col gap-4">
-        <div *ngFor="let specimen of specimens" class="specimen-list-item p-4 bg-surface-0 dark:bg-surface-800 rounded-lg border border-surface-200 dark:border-surface-700 hover:shadow-md transition-all">
-          <div class="flex flex-col md:flex-row gap-4 items-start">
-            <!-- Left: Icon and ID -->
-            <div class="flex items-center gap-3">
-              <div class="specimen-icon-wrapper bg-primary-50 dark:bg-primary-900 p-3 rounded-lg">
-                <i class="pi pi-sitemap text-3xl text-primary"></i>
-              </div>
-              <div>
-                <p-tag
-                  value="ID: {{ specimen.id }}"
-                  severity="secondary"
-                ></p-tag>
-              </div>
-            </div>
-
-            <!-- Center: Main Info -->
-            <div class="flex-1">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Species -->
-                <div>
-                  <div class="flex items-center gap-2 mb-1">
-                    <i class="pi pi-leaf text-green-600"></i>
-                    <span class="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase">Espécie</span>
-                  </div>
-                  <h3 class="text-lg font-bold text-surface-900 dark:text-surface-0">
-                    {{ specimen.speciesScientificName }}
-                  </h3>
-                  <p class="text-sm text-surface-600 dark:text-surface-400 italic">
-                    {{ specimen.speciesCommonName || 'Nome comum não disponível' }}
-                  </p>
-                </div>
-
-                <!-- Plot and Location -->
-                <div>
-                  <div class="flex items-center gap-2 mb-1">
-                    <i class="pi pi-map-marker text-primary"></i>
-                    <span class="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase">Parcela & Localização</span>
-                  </div>
-                  <p class="text-sm font-semibold text-surface-900 dark:text-surface-0 mb-1">
-                    {{ specimen.plotCode || 'Parcela #' + specimen.plotId }}
-                  </p>
-                  <p class="text-xs text-surface-600 dark:text-surface-400 font-mono">
-                    {{ formatCoordinates(specimen.latitude, specimen.longitude) }}
-                  </p>
-                </div>
-
-                <!-- Observer -->
-                <div>
-                  <div class="flex items-center gap-2 mb-1">
-                    <i class="pi pi-user text-primary"></i>
-                    <span class="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase">Observador</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <p-avatar
-                      [label]="getInitials(specimen.observerFullName)"
-                      shape="circle"
-                      size="normal"
-                      [style]="{ 'background-color': '#059669', 'color': '#ffffff' }"
-                    ></p-avatar>
-                    <span class="text-sm font-semibold text-surface-900 dark:text-surface-0">
-                      {{ specimen.observerFullName }}
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Date -->
-                <div>
-                  <div class="flex items-center gap-2 mb-1">
-                    <i class="pi pi-calendar text-primary"></i>
-                    <span class="text-xs font-semibold text-surface-500 dark:text-surface-400 uppercase">Registro</span>
-                  </div>
-                  <p class="text-sm text-surface-900 dark:text-surface-0">
-                    {{ formatDate(specimen.createdAt) }}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <!-- Right: Actions -->
-            <div class="flex md:flex-col gap-2">
-              <button
-                pButton
-                icon="pi pi-eye"
-                label="Ver"
-                class="p-button-outlined p-button-sm"
-                (click)="navigateToView(specimen.id!)"
-                pTooltip="Ver detalhes e histórico"
-              ></button>
-              <button
-                pButton
-                icon="pi pi-pencil"
-                class="p-button-outlined p-button-warning p-button-sm"
-                (click)="navigateToEdit(specimen.id!)"
-                pTooltip="Editar"
-              ></button>
-              <button
-                pButton
-                icon="pi pi-trash"
-                class="p-button-outlined p-button-danger p-button-sm"
-                (click)="confirmDelete(specimen)"
-                pTooltip="Excluir"
-              ></button>
             </div>
           </div>
         </div>
