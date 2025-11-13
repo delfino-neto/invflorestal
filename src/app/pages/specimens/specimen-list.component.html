@@ -89,7 +89,7 @@
                   [containerClass]="'galleria-container'">
                   <ng-template pTemplate="item" let-item>
                     <div class="galleria-image-container">
-                      <img [src]="item" [alt]="specimen.speciesScientificName" class="galleria-image" />
+                      <img [src]="'/api'+item" [alt]="specimen.speciesScientificName" class="galleria-image" />
                     </div>
                   </ng-template>
                 </p-galleria>
