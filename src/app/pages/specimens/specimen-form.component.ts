@@ -1,27 +1,3 @@
-/**
- * Specimen Form Component
- * 
- * Formulário em 3 etapas para criação de espécimes:
- * 
- * Etapa 1: Upload de Fotos
- * - Upload opcional de múltiplas fotos do espécime
- * - Adição de descrição para cada foto
- * 
- * Etapa 2: Dados do Objeto (SpecimenObject)
- * - Informações de localização (latitude/longitude)
- * - Seleção de espécie, parcela e observador
- * 
- * Etapa 3: Informações da Espécie (SpeciesInfo)
- * - Medições: altura, DAP (diâmetro à altura do peito), idade
- * - Condição do espécime
- * - Data de observação
- * 
- * Fluxo de criação:
- * 1. Cria o SpecimenObject
- * 2. Faz upload das fotos (se houver)
- * 3. Salva as informações de medição (se preenchidas)
- */
-
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
@@ -129,7 +105,6 @@ export class SpecimenFormComponent implements OnInit {
   }
 
   initializeForms(): void {
-    // Form for SpecimenObject (Step 2)
     this.objectForm = this.fb.group({
       plotId: [null, Validators.required],
       speciesId: [null, Validators.required],
@@ -138,7 +113,6 @@ export class SpecimenFormComponent implements OnInit {
       observerId: [null, Validators.required]
     });
 
-    // Form for SpeciesInfo (Step 3)
     this.speciesInfoForm = this.fb.group({
       observationDate: [new Date()],
       heightM: [null],
@@ -147,8 +121,6 @@ export class SpecimenFormComponent implements OnInit {
       condition: [null]
     });
   }
-
-  // Photo handling methods
   onPhotosSelect(event: any): void {
     const files = event.currentFiles || event.files;
     for (const file of files) {
@@ -175,7 +147,6 @@ export class SpecimenFormComponent implements OnInit {
     this.selectedPhotos.splice(index, 1);
   }
 
-  // Step navigation
   onObjectFormNext(activateCallback: any): void {
     if (this.objectForm.valid) {
       activateCallback(3);
@@ -190,7 +161,6 @@ export class SpecimenFormComponent implements OnInit {
   }
 
   loadDropdownData(): void {
-    // Load species
     this.loadingData.species = true;
     this.speciesService.getSpeciesTaxonomies(0, 1000).subscribe({
       next: (response) => {
@@ -210,7 +180,6 @@ export class SpecimenFormComponent implements OnInit {
       }
     });
 
-    // Load plots
     this.loadingData.plots = true;
     this.plotService.search(0, 1000).subscribe({
       next: (response) => {
@@ -230,7 +199,6 @@ export class SpecimenFormComponent implements OnInit {
       }
     });
 
-    // Load users
     this.loadingData.users = true;
     this.userService.search(0, 1000).subscribe({
       next: (response) => {
@@ -273,8 +241,7 @@ export class SpecimenFormComponent implements OnInit {
         });
         this.loading = false;
       },
-      error: (error) => {
-        console.error('Erro ao carregar espécime:', error);
+      error: () => {
         this.messageService.add({
           severity: 'error',
           summary: 'Erro',
@@ -298,15 +265,12 @@ export class SpecimenFormComponent implements OnInit {
     }
 
     this.loading = true;
-
-    // Step 1: Create SpecimenObject
     const objectRequest: SpecimenObjectRequest = this.objectForm.value;
 
     this.specimenService.create(objectRequest).subscribe({
       next: (createdObject) => {
         this.createdObjectId = createdObject.id;
         
-        // Step 2: Upload photos if any
         const photoUploads = this.selectedPhotos.map(photo =>
           this.mediaService.uploadImage(
             createdObject.id!,
@@ -320,8 +284,7 @@ export class SpecimenFormComponent implements OnInit {
             next: () => {
               this.createSpeciesInfo();
             },
-            error: (error) => {
-              console.error('Erro ao fazer upload das fotos:', error);
+            error: () => {
               this.messageService.add({
                 severity: 'warn',
                 summary: 'Aviso',
@@ -347,7 +310,6 @@ export class SpecimenFormComponent implements OnInit {
   }
 
   createSpeciesInfo(): void {
-    // Step 3: Create SpeciesInfo if there's any data
     const infoData = this.speciesInfoForm.value;
     const hasInfoData = infoData.heightM || infoData.dbmCm || infoData.ageYears || infoData.condition;
 
@@ -365,8 +327,7 @@ export class SpecimenFormComponent implements OnInit {
         next: () => {
           this.finishCreation();
         },
-        error: (error) => {
-          console.error('Erro ao criar informações da espécie:', error);
+        error: () => {
           this.messageService.add({
             severity: 'warn',
             summary: 'Aviso',
