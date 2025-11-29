@@ -31,4 +31,8 @@ export class SpecimenObjectService {
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  findByCollectionAreaId(areaId: number): Observable<SpecimenObject[]> {
+    return this.http.get<SpecimenObject[]>(`${this.apiUrl}/by-area/${areaId}`);
+  }
 }

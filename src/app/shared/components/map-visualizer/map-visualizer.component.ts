@@ -27,8 +27,8 @@ import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import { Feature } from 'ol';
-import { Polygon } from 'ol/geom';
-import { Fill, Stroke, Style, Text } from 'ol/style';
+import { Polygon, Point } from 'ol/geom';
+import { Fill, Stroke, Style, Text, Circle, Icon } from 'ol/style';
 
 interface GeometryItem {
   geometry: string;
@@ -36,6 +36,19 @@ interface GeometryItem {
   fillColor?: string;
   strokeColor?: string;
   strokeWidth?: number;
+}
+
+export interface MapMarker {
+  id?: string | number;
+  latitude: number;
+  longitude: number;
+  type?: string;
+  color?: string;
+  icon?: string;
+  label?: string;
+  data?: any;
+  onClick?: (marker: MapMarker) => void;
+  onHover?: (marker: MapMarker) => void;
 }
 
 @Component({
@@ -58,6 +71,9 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
   // Geometrias para visualizar
   @Input() geometries: GeometryItem[] = [];
   
+  // Marcadores para visualizar (pontos no mapa)
+  @Input() markers: MapMarker[] = [];
+  
   // Index da geometria destacada
   @Input() highlightedIndex?: number;
 
@@ -65,6 +81,8 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
   map?: Map;
   vectorSource!: VectorSource;
   vectorLayer!: VectorLayer<VectorSource>;
+  markersSource!: VectorSource;
+  markersLayer!: VectorLayer<VectorSource>;
   private hasInitialFit = false; // Flag para controlar o fit inicial
   
   // Controle de visibilidade de labels
@@ -101,6 +119,10 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
       this.updateGeometries();
     }
     
+    if (changes['markers'] && !changes['markers'].firstChange) {
+      this.updateMarkers();
+    }
+    
     if (changes['highlightedIndex']) {
       const newIndex = changes['highlightedIndex'].currentValue;
       if (newIndex !== this.previousHighlightedIndex) {
@@ -118,12 +140,20 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
   initializeMap(): void {
     if (!this.mapContainer) return;
 
-    // Criar source e layer para vetores
+    // Criar source e layer para vetores (geometrias/polígonos)
     this.vectorSource = new VectorSource();
     
     this.vectorLayer = new VectorLayer({
       source: this.vectorSource,
       renderBuffer: 4096
+    });
+    
+    // Criar source e layer para marcadores (pontos)
+    this.markersSource = new VectorSource();
+    
+    this.markersLayer = new VectorLayer({
+      source: this.markersSource,
+      zIndex: 100 // Marcadores ficam acima das geometrias
     });
 
     // Criar mapa
@@ -133,7 +163,8 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
         new TileLayer({
           source: new OSM()
         }),
-        this.vectorLayer
+        this.vectorLayer,
+        this.markersLayer
       ],
       view: new View({
         center: fromLonLat([this.centerLon, this.centerLat]),
@@ -141,10 +172,41 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
       }),
       controls: [] // Sem controles por padrão
     });
+    
+    // Adicionar evento de clique no mapa para marcadores
+    this.map.on('click', (event) => {
+      this.map!.forEachFeatureAtPixel(event.pixel, (feature) => {
+        const markerData = feature.get('markerData');
+        if (markerData && markerData.onClick) {
+          markerData.onClick(markerData);
+        }
+      });
+    });
+    
+    // Adicionar evento de hover nos marcadores
+    this.map.on('pointermove', (event) => {
+      const pixel = this.map!.getEventPixel(event.originalEvent);
+      const hit = this.map!.hasFeatureAtPixel(pixel);
+      this.map!.getTargetElement().style.cursor = hit ? 'pointer' : '';
+      
+      if (hit) {
+        this.map!.forEachFeatureAtPixel(pixel, (feature) => {
+          const markerData = feature.get('markerData');
+          if (markerData && markerData.onHover) {
+            markerData.onHover(markerData);
+          }
+        });
+      }
+    });
 
     // Carregar geometrias se fornecidas
     if (this.geometries && this.geometries.length > 0) {
       this.updateGeometries();
+    }
+    
+    // Carregar marcadores se fornecidos
+    if (this.markers && this.markers.length > 0) {
+      this.updateMarkers();
     }
   }
 
@@ -361,6 +423,69 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
       maxZoom: 18, // Permite zoom maior para plots pequenos
       minResolution: undefined // Remove limite de zoom out
     });
+  }
+  
+  private updateMarkers(): void {
+    if (!this.markersSource || !this.map) {
+      return;
+    }
+
+    // Limpar marcadores anteriores
+    this.markersSource.clear();
+
+    if (!this.markers || this.markers.length === 0) {
+      return;
+    }
+
+    try {
+      this.markers.forEach((marker) => {
+        const point = new Point(fromLonLat([marker.longitude, marker.latitude]));
+        const feature = new Feature({ geometry: point });
+        
+        // Armazenar os dados do marcador na feature para callbacks
+        feature.set('markerData', marker);
+        
+        // Aplicar estilo ao marcador
+        this.applyMarkerStyle(feature, marker);
+        
+        this.markersSource.addFeature(feature);
+      });
+    } catch (error) {
+      console.error('Erro ao carregar marcadores:', error);
+    }
+  }
+  
+  private applyMarkerStyle(feature: Feature, marker: MapMarker): void {
+    const color = marker.color || '#ff0000';
+    const label = marker.label || '';
+    
+    // Estilo do marcador (círculo)
+    const style = new Style({
+      image: new Circle({
+        radius: 8,
+        fill: new Fill({
+          color: color
+        }),
+        stroke: new Stroke({
+          color: '#ffffff',
+          width: 2
+        })
+      }),
+      text: label ? new Text({
+        text: label,
+        offsetY: -18,
+        font: '12px sans-serif',
+        fill: new Fill({
+          color: '#000000'
+        }),
+        stroke: new Stroke({
+          color: '#ffffff',
+          width: 3
+        })
+      }) : undefined
+    });
+    
+    feature.setStyle(style);
   }
 
   updateMapSize(): void {
