@@ -27,7 +27,10 @@ export const appConfig: ApplicationConfig = {
                 strong: "Forte",
                 weak: "Fraca",
                 medium: "Média",
-                passwordPrompt: "Insira sua senha"
+                passwordPrompt: "Insira sua senha",
+                selectionMessage: "{0} itens selecionados",
+                emptyMessage: "Nenhum dado disponível",
+                emptyFilterMessage: "Nenhum resultado encontrado",
             }
         },)
     ]

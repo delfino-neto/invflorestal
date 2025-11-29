@@ -21,6 +21,7 @@ import { CardModule } from 'primeng/card';
 import { CheckboxModule } from 'primeng/checkbox';
 import { AvatarModule } from 'primeng/avatar';
 import { MenuModule } from 'primeng/menu';
+import { PasswordModule } from 'primeng/password';
 import { MenuItem } from 'primeng/api';
 
 import { User, Role, UserRequest, UserUpdateRequest } from "@/core/models/user/user";
@@ -49,7 +50,8 @@ import { UserService } from "@/core/services/user.service";
         CardModule,
         CheckboxModule,
         AvatarModule,
-        MenuModule
+        MenuModule,
+        PasswordModule
     ],
     providers: [MessageService, ConfirmationService]
 })
@@ -91,7 +93,6 @@ export class UserManagementComponent implements OnInit {
             firstName: ['', Validators.required],
             lastName: ['', Validators.required],
             email: ['', [Validators.required, Validators.email]],
-            dateOfBirth: [null],
             password: ['', [Validators.required, Validators.minLength(6)]],
             enabled: [true],
             accountLocked: [false],
@@ -174,7 +175,6 @@ export class UserManagementComponent implements OnInit {
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
-            dateOfBirth: user.dateOfBirth ? new Date(user.dateOfBirth) : null,
             password: '',
             enabled: user.enabled,
             accountLocked: user.accountLocked,
@@ -203,7 +203,6 @@ export class UserManagementComponent implements OnInit {
                 firstName: formValue.firstName,
                 lastName: formValue.lastName,
                 email: formValue.email,
-                dateOfBirth: formValue.dateOfBirth,
                 enabled: formValue.enabled,
                 accountLocked: formValue.accountLocked,
                 roleIds: formValue.roleIds
@@ -238,7 +237,6 @@ export class UserManagementComponent implements OnInit {
                 firstName: formValue.firstName,
                 lastName: formValue.lastName,
                 email: formValue.email,
-                dateOfBirth: formValue.dateOfBirth,
                 password: formValue.password,
                 enabled: formValue.enabled,
                 accountLocked: formValue.accountLocked,
