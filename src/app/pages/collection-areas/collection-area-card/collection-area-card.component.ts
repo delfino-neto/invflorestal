@@ -55,7 +55,7 @@ export class CollectionAreaCardComponent implements OnInit, AfterViewInit, OnDes
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef<HTMLDivElement>;
 
   private map?: Map;
-  speciesCount = 0; // TODO: Implementar contagem real de espécies
+  speciesCount = 0;
 
   constructor(
     private collectionAreaService: CollectionAreaService,
@@ -64,8 +64,8 @@ export class CollectionAreaCardComponent implements OnInit, AfterViewInit, OnDes
   ) {}
 
   ngOnInit(): void {
-    // TODO: Buscar contagem de espécies da área
-    this.speciesCount = Math.floor(Math.random() * 50); // Mock temporário
+    // Usar a contagem de espécimes da API
+    this.speciesCount = this.area.specimensCount || 0;
   }
 
   ngAfterViewInit(): void {

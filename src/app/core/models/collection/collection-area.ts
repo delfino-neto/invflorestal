@@ -7,6 +7,8 @@ export interface CollectionArea {
     notes?: string;
     createdAt?: Date;
     updatedAt?: Date;
+    speciesCount?: number;
+    specimensCount?: number;
 }
 
 export interface CollectionAreaRequest {
