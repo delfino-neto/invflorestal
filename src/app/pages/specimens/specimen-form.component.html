@@ -24,64 +24,108 @@
         <p-step-panel [value]="1" header="Fotos">
           <ng-template pTemplate="content" let-activateCallback="activateCallback" let-index="index">
             <div class="flex flex-col h-full">
-              <div class="border-2 border-surface-200 dark:border-surface-700 border-dashed rounded-lg bg-surface-50 dark:bg-surface-800 p-8">
-                <div class="text-center mb-6">
-                  <i [style]="{'font-size': '3rem'}" class="material-symbols-outlined text-primary">photo_camera</i>
-                  <h3 class="text-2xl font-semibold text-surface-900 dark:text-surface-0 mb-2">
-                    Adicione fotos do espécime
-                  </h3>
-                  <p class="text-surface-600 dark:text-surface-400">
-                    Você pode adicionar fotos agora ou pular esta etapa
-                  </p>
+
+              <!-- Files List -->
+              <div *ngIf="selectedPhotos.length > 0" class="files-list-section">
+                <div class="files-list-header">
+                  <h4>{{ selectedPhotos.length }} {{ selectedPhotos.length === 1 ? 'arquivo' : 'arquivos' }} selecionado{{ selectedPhotos.length === 1 ? '' : 's' }}</h4>
+                  <button 
+                    type="button"
+                    class="clear-all-btn"
+                    (click)="clearAllPhotos(); fileUpload.clear()">
+                    <i class="pi pi-trash"></i>
+                    Limpar todos
+                  </button>
                 </div>
-  
-                <p-fileupload
-                  name="photos[]"
-                  [multiple]="true"
-                  accept="image/*"
-                  [maxFileSize]="10000000"
-                  (onSelect)="onPhotosSelect($event)"
-                  (onRemove)="onPhotoRemove($event)"
-                  [showUploadButton]="false"
-                  [showCancelButton]="false"
-                  chooseLabel="Selecionar Fotos"
-                  chooseIcon="pi pi-images"
-                  class="w-full"
-                >
-                  <ng-template pTemplate="content">
-                    <div *ngIf="selectedPhotos.length > 0" class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                      <div *ngFor="let photo of selectedPhotos; let i = index" class="relative group">
-                        <img [src]="photo.preview" class="w-full h-40 object-cover rounded-lg shadow-md" />
-                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
-                          <button
-                            pButton
-                            type="button"
-                            icon="pi pi-trash"
-                            class="p-button-danger p-button-rounded"
-                            (click)="removePhoto(i)"
-                          ></button>
-                        </div>
-                        <div class="mt-2">
-                          <input
-                            type="text"
-                            pInputText
-                            [(ngModel)]="photo.description"
-                            placeholder="Descrição (opcional)"
-                            class="w-full text-sm"
-                          />
-                        </div>
+
+                <div class="files-grid">
+                  <div *ngFor="let photo of selectedPhotos; let i = index" 
+                       class="file-card">
+                    
+                    <!-- Image Preview -->
+                    <div class="file-preview" (click)="openPhotoPreview(i)">
+                      <img [src]="photo.preview" [alt]="photo.file.name" />
+                      <div class="preview-overlay">
+                        <i class="pi pi-eye"></i>
                       </div>
                     </div>
-                    <div *ngIf="selectedPhotos.length === 0" class="text-center py-8 text-surface-500">
-                      Nenhuma foto selecionada
+
+                    <!-- File Info -->
+                    <div class="file-details">
+                      <div class="file-header">
+                        <div class="file-name" [title]="photo.file.name">
+                          {{ photo.file.name }}
+                        </div>
+                        <button 
+                          class="action-btn delete"
+                          (click)="removePhoto(i); fileUpload.remove($event, i)"
+                          type="button">
+                          <i class="pi pi-times"></i>
+                        </button>
+                      </div>
+
+                      <div class="file-meta">
+                        <span class="file-size">{{ formatFileSize(photo.file.size) }}</span>
+                        <span class="separator">•</span>
+                        <span class="file-type">{{ photo.file.type.split('/')[1].toUpperCase() }}</span>
+                      </div>
+
+                      <!-- Description Input -->
+                      <div class="description-input">
+                        <textarea
+                          [(ngModel)]="selectedPhotos[i].description"
+                          [ngModelOptions]="{standalone: true}"
+                          placeholder="Adicionar descrição (opcional)..."
+                          [maxlength]="200"
+                          rows="2"
+                        ></textarea>
+                        <span class="char-count">{{ selectedPhotos[i].description?.length || 0 }}/200</span>
+                      </div>
                     </div>
-                  </ng-template>
-                </p-fileupload>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Upload Area -->
+              <div class="upload-card">
+                <div class="upload-dropzone" 
+                     [class.has-files]="selectedPhotos.length > 0"
+                     (dragover)="$event.preventDefault()" 
+                     (drop)="$event.preventDefault()">
+                  <div class="dropzone-content">
+                    <div class="dropzone-icon">
+                      <i class="pi pi-cloud-upload" [style]="{'font-size': '24pt'}"></i>
+                    </div>
+                    <h3 class="dropzone-title">Arraste e solte suas imagens aqui</h3>
+                    <p class="dropzone-text">ou</p>
+                  </div>
+                  
+                  <p-fileupload
+                    #fileUpload
+                    name="photos[]"
+                    [multiple]="true"
+                    accept="image/*"
+                    [maxFileSize]="20000000"
+                    (onSelect)="onPhotosSelect($event)"
+                    (onClear)="onFileUploadClear()"
+                    [showUploadButton]="false"
+                    [showCancelButton]="false"
+                    chooseLabel="Selecionar Arquivos"
+                    chooseIcon="pi pi-folder-open"
+                    class="modern-file-upload"
+                  >
+                    <ng-template pTemplate="content">
+                      <div></div>
+                    </ng-template>
+                  </p-fileupload>
+                  
+                  <p class="dropzone-hint">PNG, JPG, WEBP até 20MB</p>
+                </div>
               </div>
   
               <div class="flex justify-between pt-6">
                 <button pButton type="button" label="Cancelar" icon="pi pi-times" class="p-button-outlined p-button-secondary" (click)="onCancel()"></button>
-                <button pButton type="button" label="Próximo" icon="pi pi-arrow-right" iconPos="right" (click)="activateCallback(2)" class="p-button-primary"></button>
+                <button pButton type="button" label="Próximo" icon="pi pi-arrow-right" iconPos="right" (click)="activateCallback(2)" [disabled]="selectedPhotos.length === 0" class="p-button-primary"></button>
               </div>
             </div>
           </ng-template>
@@ -136,9 +180,6 @@
                           formControlName="plotId"
                           [options]="plots"
                           placeholder="Selecione uma parcela"
-                          [filter]="true"
-                          filterPlaceholder="Buscar parcela..."
-                          [showClear]="true"
                           [loading]="loadingData.plots"
                           class="w-full"
                           [class.ng-invalid]="isFieldInvalid('plotId', objectForm)"
@@ -365,3 +406,122 @@
     </p-stepper>
   </div>
 </div>
+
+<!-- Photo Preview Dialog -->
+<p-dialog
+  [(visible)]="previewVisible"
+  [modal]="true"
+  [draggable]="false"
+  [resizable]="false"
+  [style]="{width: '90vw', maxWidth: '1000px'}"
+  styleClass="photo-preview-dialog"
+  (onHide)="closePhotoPreview()">
+  <ng-template pTemplate="header">
+    <div class="flex items-center gap-3">
+      <i class="pi pi-image text-xl"></i>
+      <span class="font-semibold">Preview da Imagem</span>
+      <span class="text-sm text-surface-500">({{ previewImageIndex + 1 }} de {{ selectedPhotos.length }})</span>
+    </div>
+  </ng-template>
+  
+  <div class="preview-content" *ngIf="selectedPhotos[previewImageIndex]">
+    <img 
+      [src]="selectedPhotos[previewImageIndex].preview" 
+      [alt]="selectedPhotos[previewImageIndex].file.name"
+      class="w-full h-auto rounded-lg"
+    />
+    <div class="preview-info">
+      <p class="font-medium">{{ selectedPhotos[previewImageIndex].file.name }}</p>
+      <p class="text-sm text-surface-500">
+        {{ formatFileSize(selectedPhotos[previewImageIndex].file.size) }} • 
+        {{ selectedPhotos[previewImageIndex].file.type.split('/')[1].toUpperCase() }}
+      </p>
+    </div>
+  </div>
+
+  <ng-template pTemplate="footer">
+    <div class="flex justify-between w-full">
+      <button 
+        pButton 
+        type="button" 
+        icon="pi pi-chevron-left" 
+        label="Anterior"
+        class="p-button-outlined"
+        (click)="previousPreviewImage()"
+        [disabled]="selectedPhotos.length <= 1">
+      </button>
+      <button 
+        pButton 
+        type="button" 
+        icon="pi pi-chevron-right" 
+        iconPos="right"
+        label="Próxima"
+        class="p-button-outlined"
+        (click)="nextPreviewImage()"
+        [disabled]="selectedPhotos.length <= 1">
+      </button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<!-- Photo Preview Modal -->
+<!-- <p-dialog
+  [(visible)]="previewVisible"
+  [modal]="true"
+  [closable]="true"
+  [dismissableMask]="true"
+  [style]="{width: '90vw', maxWidth: '1200px'}"
+  styleClass="photo-preview-dialog"
+>
+  <ng-template pTemplate="header">
+    <div class="flex items-center justify-between w-full">
+      <h3 class="text-xl font-semibold">
+        Visualização de Foto ({{ previewImageIndex + 1 }}/{{ selectedPhotos.length }})
+      </h3>
+    </div>
+  </ng-template>
+
+  <div class="flex flex-col items-center" *ngIf="selectedPhotos[previewImageIndex]">
+    <div class="relative w-full max-h-[70vh] flex items-center justify-center bg-surface-100 dark:bg-surface-900 rounded-lg overflow-hidden">
+      <img 
+        [src]="selectedPhotos[previewImageIndex].preview" 
+        [alt]="selectedPhotos[previewImageIndex].file.name"
+        class="max-w-full max-h-[70vh] object-contain"
+      />
+      
+      <button
+        *ngIf="selectedPhotos.length > 1"
+        pButton
+        type="button"
+        icon="pi pi-chevron-left"
+        class="p-button-rounded p-button-text absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
+        (click)="previousPreviewImage()"
+      ></button>
+      <button
+        *ngIf="selectedPhotos.length > 1"
+        pButton
+        type="button"
+        icon="pi pi-chevron-right"
+        class="p-button-rounded p-button-text absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 text-white hover:bg-black/70"
+        (click)="nextPreviewImage()"
+      ></button>
+    </div>
+
+    <div class="w-full mt-4 p-4 bg-surface-50 dark:bg-surface-800 rounded-lg">
+      <p class="text-sm font-medium text-surface-900 dark:text-surface-0 mb-2">
+        <i class="pi pi-file mr-2"></i>
+        {{ selectedPhotos[previewImageIndex].file.name }}
+      </p>
+      <p class="text-xs text-surface-600 dark:text-surface-400 mb-3">
+        <i class="pi pi-info-circle mr-2"></i>
+        Tamanho: {{ formatFileSize(selectedPhotos[previewImageIndex].file.size) }}
+      </p>
+      <div *ngIf="selectedPhotos[previewImageIndex].description" class="mt-2">
+        <p class="text-sm text-surface-700 dark:text-surface-300">
+          <i class="pi pi-comment mr-2"></i>
+          <strong>Descrição:</strong> {{ selectedPhotos[previewImageIndex].description }}
+        </p>
+      </div>
+    </div>
+  </div>
+</p-dialog> -->

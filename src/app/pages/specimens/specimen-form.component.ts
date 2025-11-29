@@ -16,6 +16,8 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { StepperModule } from 'primeng/stepper';
 import { FileUploadModule } from 'primeng/fileupload';
 import { DatePickerModule } from 'primeng/datepicker';
+import { DialogModule } from 'primeng/dialog';
+import { TooltipModule } from 'primeng/tooltip';
 
 // Services & Models
 import { SpecimenObjectService } from '@/core/services/specimen-object.service';
@@ -49,7 +51,9 @@ interface PhotoFile {
     ProgressSpinnerModule,
     StepperModule,
     FileUploadModule,
-    DatePickerModule
+    DatePickerModule,
+    DialogModule,
+    TooltipModule
   ],
   providers: [MessageService],
   templateUrl: './specimen-form.component.html',
@@ -62,10 +66,12 @@ export class SpecimenFormComponent implements OnInit {
   isEditMode = false;
   specimenId?: number;
   createdObjectId?: number;
-  activeStep = 0;
 
   // Photos
   selectedPhotos: PhotoFile[] = [];
+  previewVisible = false;
+  previewImageIndex = 0;
+  fileUploadComponent: any;
 
   // Dropdown options
   species: any[] = [];
@@ -121,14 +127,37 @@ export class SpecimenFormComponent implements OnInit {
       condition: [null]
     });
   }
+
   onPhotosSelect(event: any): void {
     const files = event.currentFiles || event.files;
+    
+    if (!files || files.length === 0) return;
+
+    // Verificar duplicatas por nome e tamanho
     for (const file of files) {
+      if (!file.type.startsWith('image/')) {
+        this.messageService.add({
+          severity: 'warn',
+          summary: 'Aviso',
+          detail: `Arquivo ${file.name} não é uma imagem válida`
+        });
+        continue;
+      }
+
+      // Verificar se já existe no array
+      const alreadyExists = this.selectedPhotos.some(
+        photo => photo.file.name === file.name && photo.file.size === file.size
+      );
+
+      if (alreadyExists) {
+        continue;
+      }
+
       const reader = new FileReader();
       reader.onload = (e: any) => {
         this.selectedPhotos.push({
           file: file,
-          preview: e.target.result,
+          preview: e.target?.result,
           description: ''
         });
       };
@@ -136,15 +165,43 @@ export class SpecimenFormComponent implements OnInit {
     }
   }
 
-  onPhotoRemove(event: any): void {
-    const index = this.selectedPhotos.findIndex(p => p.file === event.file);
-    if (index !== -1) {
-      this.selectedPhotos.splice(index, 1);
-    }
-  }
-
   removePhoto(index: number): void {
     this.selectedPhotos.splice(index, 1);
+  }
+
+  clearAllPhotos(): void {
+    this.selectedPhotos = [];
+  }
+
+  openPhotoPreview(index: number): void {
+    this.previewImageIndex = index;
+    this.previewVisible = true;
+  }
+
+  closePhotoPreview(): void {
+    this.previewVisible = false;
+  }
+
+  onFileUploadClear(): void {
+    this.selectedPhotos = [];
+  }
+
+  nextPreviewImage(): void {
+    this.previewImageIndex = (this.previewImageIndex + 1) % this.selectedPhotos.length;
+  }
+
+  previousPreviewImage(): void {
+    this.previewImageIndex = this.previewImageIndex === 0 
+      ? this.selectedPhotos.length - 1 
+      : this.previewImageIndex - 1;
+  }
+
+  formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   }
 
   onObjectFormNext(activateCallback: any): void {
