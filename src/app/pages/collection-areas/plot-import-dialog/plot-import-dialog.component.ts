@@ -56,6 +56,12 @@ export class PlotImportDialogComponent implements OnInit {
           this.plotService.searchByArea(area.id!, 0, 1000)
         );
 
+        if(plotRequests.length === 0) {
+          this.treeData = [];
+          this.loading = false;
+          return;
+        }
+
         forkJoin(plotRequests).subscribe({
           next: (plotPages) => {
             this.treeData = areas.map((area, index) => {

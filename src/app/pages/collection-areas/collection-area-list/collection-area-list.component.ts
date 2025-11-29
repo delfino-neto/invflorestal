@@ -54,7 +54,7 @@ export class CollectionAreaListComponent implements OnInit, OnDestroy {
   
   // Paginação
   currentPage = 0;
-  pageSize = 9; // 3x3 grid
+  pageSize = 8;
   totalRecords = 0;
   
   private destroy$ = new Subject<void>();
