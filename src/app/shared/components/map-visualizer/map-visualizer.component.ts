@@ -97,6 +97,9 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
   
   // Índice anterior destacado (para detectar mudanças)
   private previousHighlightedIndex?: number;
+  
+  // Feature de marcador com hover
+  private hoveredMarkerFeature?: Feature;
 
   constructor() {}
 
@@ -186,17 +189,42 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
     // Adicionar evento de hover nos marcadores
     this.map.on('pointermove', (event) => {
       const pixel = this.map!.getEventPixel(event.originalEvent);
-      const hit = this.map!.hasFeatureAtPixel(pixel);
-      this.map!.getTargetElement().style.cursor = hit ? 'pointer' : '';
+      let foundMarker = false;
       
-      if (hit) {
-        this.map!.forEachFeatureAtPixel(pixel, (feature) => {
-          const markerData = feature.get('markerData');
-          if (markerData && markerData.onHover) {
-            markerData.onHover(markerData);
+      this.map!.forEachFeatureAtPixel(pixel, (feature) => {
+        const markerData = feature.get('markerData');
+        if (markerData) {
+          foundMarker = true;
+          
+          // Se mudou de marcador, atualizar hover
+          if (this.hoveredMarkerFeature !== feature) {
+            // Remover hover do anterior
+            if (this.hoveredMarkerFeature) {
+              const prevData = this.hoveredMarkerFeature.get('markerData');
+              this.applyMarkerStyle(this.hoveredMarkerFeature, prevData, false);
+            }
+            
+            // Aplicar hover no novo
+            this.hoveredMarkerFeature = feature as Feature;
+            this.applyMarkerStyle(feature as Feature, markerData, true);
+            
+            // Chamar callback de hover
+            if (markerData.onHover) {
+              markerData.onHover(markerData);
+            }
           }
-        });
+        }
+      });
+      
+      // Se não encontrou marcador, remover hover
+      if (!foundMarker && this.hoveredMarkerFeature) {
+        const prevData = this.hoveredMarkerFeature.get('markerData');
+        this.applyMarkerStyle(this.hoveredMarkerFeature, prevData, false);
+        this.hoveredMarkerFeature = undefined;
       }
+      
+      // Atualizar cursor
+      this.map!.getTargetElement().style.cursor = foundMarker ? 'pointer' : '';
     });
 
     // Carregar geometrias se fornecidas
@@ -445,8 +473,8 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
         // Armazenar os dados do marcador na feature para callbacks
         feature.set('markerData', marker);
         
-        // Aplicar estilo ao marcador
-        this.applyMarkerStyle(feature, marker);
+        // Aplicar estilo ao marcador (sem hover inicialmente)
+        this.applyMarkerStyle(feature, marker, false);
         
         this.markersSource.addFeature(feature);
       });
@@ -455,33 +483,41 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
     }
   }
   
-  private applyMarkerStyle(feature: Feature, marker: MapMarker): void {
+  private applyMarkerStyle(feature: Feature, marker: MapMarker, isHovered: boolean = false): void {
     const color = marker.color || '#ff0000';
     const label = marker.label || '';
     
-    // Estilo do marcador (círculo)
+    // Estilo do marcador - maior e mais destacado
+    const radius = isHovered ? 10 : 7;
+    const strokeWidth = isHovered ? 3 : 2.5;
+    
     const style = new Style({
       image: new Circle({
-        radius: 8,
+        radius: radius,
         fill: new Fill({
           color: color
         }),
         stroke: new Stroke({
           color: '#ffffff',
-          width: 2
+          width: strokeWidth
         })
       }),
-      text: label ? new Text({
+      // Mostrar label apenas no hover
+      text: (isHovered && label) ? new Text({
         text: label,
-        offsetY: -18,
-        font: '12px sans-serif',
+        offsetY: -20,
+        font: 'bold 13px sans-serif',
         fill: new Fill({
-          color: '#000000'
+          color: '#1f2937'
         }),
         stroke: new Stroke({
           color: '#ffffff',
-          width: 3
-        })
+          width: 4
+        }),
+        backgroundFill: new Fill({
+          color: 'rgba(255, 255, 255, 0.9)'
+        }),
+        padding: [3, 6, 2, 6]
       }) : undefined
     });
     

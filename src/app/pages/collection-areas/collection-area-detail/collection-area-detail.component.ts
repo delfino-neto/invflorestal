@@ -20,13 +20,15 @@ import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 // Services & Models
 import { CollectionAreaService } from '@/core/services/collection-area.service';
 import { PlotService } from '@/core/services/plot.service';
+import { SpecimenObjectService } from '@/core/services/specimen-object.service';
 import { CollectionArea } from '@/core/models/collection/collection-area';
 import { Plot, PlotRequest } from '@/core/models/collection/plot';
+import { SpecimenObject } from '@/core/models/specimen/specimen-object';
 
 // Shared Components
 import { PlotDialogComponent } from '../plot-dialog/plot-dialog.component';
 import { PlotImportDialogComponent } from '../plot-import-dialog/plot-import-dialog.component';
-import { MapVisualizerComponent } from '@/shared/components/map-visualizer';
+import { MapVisualizerComponent, MapMarker } from '@/shared/components/map-visualizer';
 
 @Component({
   selector: 'app-collection-area-detail',
@@ -53,10 +55,13 @@ import { MapVisualizerComponent } from '@/shared/components/map-visualizer';
 export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
   area?: CollectionArea;
   plots: Plot[] = [];
+  specimens: SpecimenObject[] = [];
+  specimenMarkers: MapMarker[] = [];
   selectedPlot?: Plot;
   
   loading = true;
   loadingPlots = false;
+  loadingSpecimens = false;
   
   // Dialog states
   showPlotDialog = false;
@@ -79,6 +84,7 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
     private router: Router,
     private collectionAreaService: CollectionAreaService,
     private plotService: PlotService,
+    private specimenObjectService: SpecimenObjectService,
     private messageService: MessageService,
     private confirmationService: ConfirmationService,
     private dialogService: DialogService
@@ -89,6 +95,7 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
       this.areaId = +params['id'];
       this.loadArea();
       this.loadPlots();
+      this.loadSpecimens();
     });
   }
 
@@ -144,6 +151,56 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
           this.loadingPlots = false;
         }
       });
+  }
+
+  loadSpecimens(): void {
+    this.loadingSpecimens = true;
+    this.specimenObjectService
+      .findByCollectionAreaId(this.areaId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (specimens) => {
+          this.specimens = specimens;
+          this.updateSpecimenMarkers();
+          this.loadingSpecimens = false;
+        },
+        error: (error) => {
+          console.error('Erro ao carregar espécimes:', error);
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Erro',
+            detail: 'Erro ao carregar espécimes'
+          });
+          this.loadingSpecimens = false;
+        }
+      });
+  }
+
+  updateSpecimenMarkers(): void {
+    // Criar marcadores a partir dos espécimes
+    this.specimenMarkers = this.specimens.map(specimen => ({
+      id: specimen.id,
+      latitude: Number(specimen.latitude),
+      longitude: Number(specimen.longitude),
+      type: 'specimen',
+      color: '#10b981', // Verde esmeralda
+      label: specimen.speciesCommonName || specimen.speciesScientificName?.split(' ').slice(0, 2).join(' ') || '',
+      data: specimen,
+      onClick: (marker: MapMarker) => {
+        this.onSpecimenClick(marker.data);
+      }
+    }));
+  }
+
+  onSpecimenClick(specimen: SpecimenObject): void {
+    // Por enquanto apenas mostra no console, pode abrir um dialog ou navegar para detalhe
+    console.log('Clicou no espécime:', specimen);
+    this.messageService.add({
+      severity: 'info',
+      summary: specimen.speciesScientificName || 'Espécime',
+      detail: `Plot: ${specimen.plotCode || 'N/A'}`,
+      life: 3000
+    });
   }
 
   openNewPlotDialog(): void {
@@ -295,6 +352,15 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
 
   getTotalArea(): number {
     return this.plots.reduce((sum, plot) => sum + Number(plot.areaM2 || 0), 0);
+  }
+
+  getTotalSpecimens(): number {
+    return this.specimens.length;
+  }
+
+  getUniqueSpeciesCount(): number {
+    const uniqueSpecies = new Set(this.specimens.map(s => s.speciesId));
+    return uniqueSpecies.size;
   }
 
   // Retorna os outros plots (exceto o selecionado) para usar como helper

@@ -66,8 +66,8 @@
       </div>
       <div class="card-content">
         <span class="card-label">Espécimes</span>
-        <span class="card-value">-</span>
-        <span class="card-hint">Em breve</span>
+        <span class="card-value" *ngIf="!loadingSpecimens">{{ getTotalSpecimens() }}</span>
+        <p-skeleton *ngIf="loadingSpecimens" width="3rem" height="2rem"></p-skeleton>
       </div>
     </div>
 
@@ -78,8 +78,8 @@
       </div>
       <div class="card-content">
         <span class="card-label">Espécies</span>
-        <span class="card-value">-</span>
-        <span class="card-hint">Em breve</span>
+        <span class="card-value" *ngIf="!loadingSpecimens">{{ getUniqueSpeciesCount() }}</span>
+        <p-skeleton *ngIf="loadingSpecimens" width="3rem" height="2rem"></p-skeleton>
       </div>
     </div>
 
@@ -244,6 +244,7 @@
           <div *ngIf="!loading && area">
             <app-map-visualizer
               [geometries]="getMapGeometries()"
+              [markers]="specimenMarkers"
               [highlightedIndex]="highlightedGeometryIndex"
               height="600px"
             ></app-map-visualizer>
