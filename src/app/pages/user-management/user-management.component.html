@@ -1,37 +1,559 @@
-<div class="text-2xl font-bold mb-8">
-    Gestão de Usuários
+<div class="p-6">
+    <!-- Header -->
+    <div class="bg-white dark:bg-surface-900 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 p-6 mb-6">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-2 text-surface-600 dark:text-surface-400 text-sm mb-1">
+                    <span>Total de Usuários: <strong class="text-surface-900 dark:text-surface-0">{{ totalRecords }}</strong></span>
+                </div>
+            </div>
+            
+            <p-button 
+                label="Adicionar novo usuário" 
+                icon="pi pi-plus" 
+                (onClick)="openNew()"
+            ></p-button>
+        </div>
+    </div>
+
+    <!-- Tabela -->
+    <div class="bg-white dark:bg-surface-900 rounded-lg shadow-sm border border-surface-200 dark:border-surface-700 overflow-hidden">
+        <p-table 
+            [value]="users" 
+            [lazy]="true"
+            [paginator]="true"
+            [rows]="pageSize"
+            [totalRecords]="totalRecords"
+            [loading]="loading"
+            [rowsPerPageOptions]="[10, 25, 50]"
+            (onLazyLoad)="onPageChange($event)"
+            styleClass="user-management-table"
+        >
+            <ng-template pTemplate="header">
+                <tr>
+                    <th style="width: 40px">
+                        <p-checkbox binary="true"></p-checkbox>
+                    </th>
+                    <th style="width: 300px">USUÁRIO</th>
+                    <th style="width: 150px">FUNÇÃO</th>
+                    <th style="width: 120px">STATUS</th>
+                    <th style="width: 150px">ÚLTIMA ATUALIZAÇÃO</th>
+                    <th style="width: 150px">ÚLTIMO LOGIN</th>
+                    <th style="width: 80px"></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-user>
+                <tr>
+                    <td>
+                        <p-checkbox binary="true"></p-checkbox>
+                    </td>
+                    <td>
+                        <div class="flex items-center gap-3">
+                            <p-avatar 
+                                [label]="getInitials(user.name)" 
+                                shape="circle"
+                                [style]="{ 'background-color': getUserAvatarColor(user.name), 'color': '#ffffff' }"
+                            ></p-avatar>
+                            <div class="flex flex-col">
+                                <span class="font-semibold text-surface-900 dark:text-surface-0">{{ user.name }}</span>
+                                <span class="text-sm text-surface-500 dark:text-surface-400">{{ user.email }}</span>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="flex gap-1 flex-wrap">
+                            <p-tag 
+                                *ngFor="let role of user.roles" 
+                                [value]="role" 
+                                [severity]="getRoleSeverity(role)"
+                                [icon]="role === 'ADMIN' ? 'pi pi-shield' : 'pi pi-eye'"
+                            ></p-tag>
+                        </div>
+                    </td>
+                    <td>
+                        <span 
+                            class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium"
+                            [ngClass]="{
+                                'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400': user.enabled && !user.accountLocked,
+                                'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400': !user.enabled,
+                                'bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400': user.accountLocked
+                            }"
+                        >
+                            <span 
+                                class="w-2 h-2 rounded-full"
+                                [ngClass]="{
+                                    'bg-green-600': user.enabled && !user.accountLocked,
+                                    'bg-red-600': !user.enabled,
+                                    'bg-orange-600': user.accountLocked
+                                }"
+                            ></span>
+                            {{ user.accountLocked ? 'Bloqueado' : (user.enabled ? 'Ativo' : 'Inativo') }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="text-sm text-surface-600 dark:text-surface-400">
+                            {{ user.updatedAt ? formatDate(user.updatedAt) : (user.createdAt ? formatDate(user.createdAt) : '-') }}
+                        </span>
+                    </td>
+                    <td>
+                        <span class="text-sm text-surface-600 dark:text-surface-400">
+                            {{ user.lastLogin ? formatDate(user.lastLogin) : 'Nunca' }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="flex items-center justify-end gap-1">
+                            <p-button 
+                                icon="pi pi-ellipsis-v" 
+                                [text]="true"
+                                [rounded]="true"
+                                severity="secondary"
+                                (onClick)="getMenuItems(user); menu.toggle($event)"
+                            ></p-button>
+                            <p-menu [appendTo]="'body'" #menu [model]="currentMenu" [popup]="true"></p-menu>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="emptymessage">
+                <tr>
+                    <td colspan="7" class="text-center p-8">
+                        <div class="flex flex-col items-center gap-3">
+                            <i class="pi pi-inbox text-5xl text-surface-300 dark:text-surface-600"></i>
+                            <p class="text-surface-600 dark:text-surface-400 font-medium">Nenhum usuário encontrado</p>
+                        </div>
+                    </td>
+                </tr>
+            </ng-template>
+        </p-table>
+    </div>
 </div>
-<p-table 
-    size="large" 
-    [value]="users" 
-    [paginator]="true"
-    [rows]="5"
-    [rowsPerPageOptions]="[5, 10, 20]"
-    >
-    <ng-template #header>
-        <tr>
-            <th [style]="{'background': 'var(--p-primary-50)', 'color': 'var(--p-primary-900)'}" width="50%">Email</th>
-            <th [style]="{'background': 'var(--p-primary-50)', 'color': 'var(--p-primary-900)'}" width="20%">Nome</th>
-            <th [style]="{'background': 'var(--p-primary-50)', 'color': 'var(--p-primary-900)'}" width="20%">Permissões</th>
-            <th [style]="{'background': 'var(--p-primary-50)', 'color': 'var(--p-primary-900)'}" width="10%"></th>
-        </tr>
+
+<!-- Dialog de Criar/Editar Usuário -->
+<p-dialog 
+    [(visible)]="userDialog" 
+    [header]="isEditMode ? 'Editar Usuário' : 'Novo Usuário'"
+    [modal]="true"
+    [style]="{width: '700px'}"
+    [breakpoints]="{'960px': '75vw', '640px': '95vw'}"
+    [draggable]="false"
+    styleClass="user-dialog"
+>
+    <form [formGroup]="userForm">
+        <div class="space-y-6">
+            <!-- Informações Pessoais -->
+            <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg border border-surface-200 dark:border-surface-700">
+                <h3 class="text-lg font-semibold mb-4 text-surface-900 dark:text-surface-0 flex items-center gap-2">
+                    <i class="pi pi-user"></i>
+                    Informações Pessoais
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Nome -->
+                    <div class="field">
+                        <label for="firstName" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                            <i class="pi pi-user mr-1"></i>Nome *
+                        </label>
+                        <input 
+                            pInputText 
+                            id="firstName" 
+                            formControlName="firstName"
+                            placeholder="Digite o nome"
+                            class="w-full"
+                            [class.ng-invalid]="userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched"
+                            [class.ng-dirty]="userForm.get('firstName')?.touched"
+                        />
+                        <small 
+                            *ngIf="userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched" 
+                            class="text-red-500 mt-1 block"
+                        >
+                            <i class="pi pi-exclamation-circle mr-1"></i>Nome é obrigatório
+                        </small>
+                    </div>
+
+                    <!-- Sobrenome -->
+                    <div class="field">
+                        <label for="lastName" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                            <i class="pi pi-user mr-1"></i>Sobrenome *
+                        </label>
+                        <input 
+                            pInputText 
+                            id="lastName" 
+                            formControlName="lastName"
+                            placeholder="Digite o sobrenome"
+                            class="w-full"
+                            [class.ng-invalid]="userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched"
+                            [class.ng-dirty]="userForm.get('lastName')?.touched"
+                        />
+                        <small 
+                            *ngIf="userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched" 
+                            class="text-red-500 mt-1 block"
+                        >
+                            <i class="pi pi-exclamation-circle mr-1"></i>Sobrenome é obrigatório
+                        </small>
+                    </div>
+
+                    <!-- Data de Nascimento -->
+                    <div class="field col-span-full">
+                        <label for="dateOfBirth" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                            <i class="pi pi-calendar mr-1"></i>Data de Nascimento
+                        </label>
+                        <p-datepicker 
+                            id="dateOfBirth" 
+                            formControlName="dateOfBirth"
+                            dateFormat="dd/mm/yy"
+                            [showIcon]="true"
+                            placeholder="Selecione a data"
+                            class="w-full"
+                        ></p-datepicker>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credenciais -->
+            <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg border border-surface-200 dark:border-surface-700">
+                <h3 class="text-lg font-semibold mb-4 text-surface-900 dark:text-surface-0 flex items-center gap-2">
+                    <i class="pi pi-key"></i>
+                    Credenciais
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Email -->
+                    <div class="field">
+                        <label for="email" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                            <i class="pi pi-envelope mr-1"></i>Email *
+                        </label>
+                        <input 
+                            pInputText 
+                            id="email" 
+                            type="email"
+                            formControlName="email"
+                            placeholder="usuario@email.com"
+                            class="w-full"
+                            [class.ng-invalid]="userForm.get('email')?.invalid && userForm.get('email')?.touched"
+                            [class.ng-dirty]="userForm.get('email')?.touched"
+                        />
+                        <small 
+                            *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" 
+                            class="text-red-500 mt-1 block"
+                        >
+                            <i class="pi pi-exclamation-circle mr-1"></i>Email válido é obrigatório
+                        </small>
+                    </div>
+
+                    <!-- Senha -->
+                    <div class="field">
+                        <label for="password" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                            <i class="pi pi-lock mr-1"></i>Senha {{ isEditMode ? '(deixe em branco para não alterar)' : '*' }}
+                        </label>
+                        <input 
+                            pInputText 
+                            id="password" 
+                            type="password"
+                            formControlName="password"
+                            placeholder="Digite a senha (mínimo 6 caracteres)"
+                            class="w-full"
+                            [class.ng-invalid]="userForm.get('password')?.invalid && userForm.get('password')?.touched"
+                            [class.ng-dirty]="userForm.get('password')?.touched"
+                        />
+                        <small 
+                            *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched" 
+                            class="text-red-500 mt-1 block"
+                        >
+                            <i class="pi pi-exclamation-circle mr-1"></i>Senha deve ter no mínimo 6 caracteres
+                        </small>
+                        <small 
+                            *ngIf="!isEditMode && !userForm.get('password')?.touched"
+                            class="text-surface-500 dark:text-surface-400 mt-1 block"
+                        >
+                            <i class="pi pi-info-circle mr-1"></i>A senha deve conter pelo menos 6 caracteres
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permissões e Status -->
+            <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg border border-surface-200 dark:border-surface-700">
+                <h3 class="text-lg font-semibold mb-4 text-surface-900 dark:text-surface-0 flex items-center gap-2">
+                    <i class="pi pi-shield"></i>
+                    Permissões e Acesso
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Permissões -->
+                    <div class="field">
+                        <label for="roleIds" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                            <i class="pi pi-users mr-1"></i>Permissões *
+                        </label>
+                        <p-multiselect
+                            id="roleIds"
+                            formControlName="roleIds"
+                            [options]="roles"
+                            optionLabel="name"
+                            optionValue="id"
+                            placeholder="Selecione as permissões"
+                            display="chip"
+                            class="w-full"
+                            [class.ng-invalid]="userForm.get('roleIds')?.invalid && userForm.get('roleIds')?.touched"
+                            [class.ng-dirty]="userForm.get('roleIds')?.touched"
+                        >
+                            <ng-template let-role pTemplate="item">
+                                <div class="flex items-center gap-2">
+                                    <i class="pi" [ngClass]="role.name === 'ADMIN' ? 'pi-shield' : 'pi-user'"></i>
+                                    <span>{{ role.name }}</span>
+                                </div>
+                            </ng-template>
+                        </p-multiselect>
+                        <small 
+                            *ngIf="userForm.get('roleIds')?.invalid && userForm.get('roleIds')?.touched" 
+                            class="text-red-500 mt-1 block"
+                        >
+                            <i class="pi pi-exclamation-circle mr-1"></i>Pelo menos uma permissão é obrigatória
+                        </small>
+                        <small 
+                            *ngIf="!userForm.get('roleIds')?.touched"
+                            class="text-surface-500 dark:text-surface-400 mt-1 block"
+                        >
+                            <i class="pi pi-info-circle mr-1"></i>Selecione as funções que o usuário pode desempenhar
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="flex gap-2 justify-end pt-4 border-t border-surface-200 dark:border-surface-700">
+            <p-button 
+                label="Cancelar" 
+                icon="pi pi-times" 
+                (onClick)="hideDialog()"
+                severity="secondary"
+                [outlined]="true"
+            ></p-button>
+            <p-button 
+                [label]="isEditMode ? 'Atualizar' : 'Criar'" 
+                [icon]="isEditMode ? 'pi pi-check' : 'pi pi-plus'" 
+                (onClick)="saveUser()"
+                [disabled]="userForm.invalid"
+            ></p-button>
+        </div>
     </ng-template>
-    <ng-template #body let-user>
-        <tr>
-            <td>{{ user.email }}</td>
-            <td>{{ user.name }}</td>
-            <td>{{ user.roles }}</td>
-            <td>
-                <p-button tooltipPosition="top" pTooltip="Editar" [outlined]="true" [text]="true" severity="primary" icon="pi pi-pencil" />
-                <p-button tooltipPosition="top" pTooltip="Deletar" [outlined]="true" [text]="true" severity="danger" icon="pi pi-trash" />
-            </td>
-        </tr>
+</p-dialog>
+
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
+
+<!-- Dialog de Criar/Editar Usuário -->
+<p-dialog 
+    [(visible)]="userDialog" 
+    [header]="isEditMode ? 'Editar Usuário' : 'Novo Usuário'"
+    [modal]="true"
+    [style]="{width: '700px'}"
+    [breakpoints]="{'960px': '75vw', '640px': '95vw'}"
+    [draggable]="false"
+    styleClass="user-dialog"
+>
+    <form [formGroup]="userForm">
+        <div class="space-y-6">
+            <!-- Informações Pessoais -->
+            <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg border border-surface-200 dark:border-surface-700">
+                <h3 class="text-lg font-semibold mb-4 text-surface-900 dark:text-surface-0 flex items-center gap-2">
+                    <i class="pi pi-user"></i>
+                    Informações Pessoais
+                </h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Nome -->
+                    <div class="field">
+                        <label for="firstName" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                            <i class="pi pi-user mr-1"></i>Nome *
+                        </label>
+                        <input 
+                            pInputText 
+                            id="firstName" 
+                            formControlName="firstName"
+                            placeholder="Digite o nome"
+                            class="w-full"
+                            [class.ng-invalid]="userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched"
+                            [class.ng-dirty]="userForm.get('firstName')?.touched"
+                        />
+                        <small 
+                            *ngIf="userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched" 
+                            class="text-red-500 mt-1 block"
+                        >
+                            <i class="pi pi-exclamation-circle mr-1"></i>Nome é obrigatório
+                        </small>
+                    </div>
+
+                    <!-- Sobrenome -->
+                    <div class="field">
+                        <label for="lastName" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                            <i class="pi pi-user mr-1"></i>Sobrenome *
+                        </label>
+                        <input 
+                            pInputText 
+                            id="lastName" 
+                            formControlName="lastName"
+                            placeholder="Digite o sobrenome"
+                            class="w-full"
+                            [class.ng-invalid]="userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched"
+                            [class.ng-dirty]="userForm.get('lastName')?.touched"
+                        />
+                        <small 
+                            *ngIf="userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched" 
+                            class="text-red-500 mt-1 block"
+                        >
+                            <i class="pi pi-exclamation-circle mr-1"></i>Sobrenome é obrigatório
+                        </small>
+                    </div>
+
+                    <!-- Data de Nascimento -->
+                    <div class="field col-span-full">
+                        <label for="dateOfBirth" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                            <i class="pi pi-calendar mr-1"></i>Data de Nascimento
+                        </label>
+                        <p-datepicker 
+                            id="dateOfBirth" 
+                            formControlName="dateOfBirth"
+                            dateFormat="dd/mm/yy"
+                            [showIcon]="true"
+                            placeholder="Selecione a data"
+                            class="w-full"
+                        ></p-datepicker>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Credenciais -->
+            <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg border border-surface-200 dark:border-surface-700">
+                <h3 class="text-lg font-semibold mb-4 text-surface-900 dark:text-surface-0 flex items-center gap-2">
+                    <i class="pi pi-key"></i>
+                    Credenciais
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Email -->
+                    <div class="field">
+                        <label for="email" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                            <i class="pi pi-envelope mr-1"></i>Email *
+                        </label>
+                        <input 
+                            pInputText 
+                            id="email" 
+                            type="email"
+                            formControlName="email"
+                            placeholder="usuario@email.com"
+                            class="w-full"
+                            [class.ng-invalid]="userForm.get('email')?.invalid && userForm.get('email')?.touched"
+                            [class.ng-dirty]="userForm.get('email')?.touched"
+                        />
+                        <small 
+                            *ngIf="userForm.get('email')?.invalid && userForm.get('email')?.touched" 
+                            class="text-red-500 mt-1 block"
+                        >
+                            <i class="pi pi-exclamation-circle mr-1"></i>Email válido é obrigatório
+                        </small>
+                    </div>
+
+                    <!-- Senha -->
+                    <div class="field">
+                        <label for="password" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                            <i class="pi pi-lock mr-1"></i>Senha {{ isEditMode ? '(deixe em branco para não alterar)' : '*' }}
+                        </label>
+                        <input 
+                            pInputText 
+                            id="password" 
+                            type="password"
+                            formControlName="password"
+                            placeholder="Digite a senha (mínimo 6 caracteres)"
+                            class="w-full"
+                            [class.ng-invalid]="userForm.get('password')?.invalid && userForm.get('password')?.touched"
+                            [class.ng-dirty]="userForm.get('password')?.touched"
+                        />
+                        <small 
+                            *ngIf="userForm.get('password')?.invalid && userForm.get('password')?.touched" 
+                            class="text-red-500 mt-1 block"
+                        >
+                            <i class="pi pi-exclamation-circle mr-1"></i>Senha deve ter no mínimo 6 caracteres
+                        </small>
+                        <small 
+                            *ngIf="!isEditMode && !userForm.get('password')?.touched"
+                            class="text-surface-500 dark:text-surface-400 mt-1 block"
+                        >
+                            <i class="pi pi-info-circle mr-1"></i>A senha deve conter pelo menos 6 caracteres
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permissões e Status -->
+            <div class="bg-surface-50 dark:bg-surface-800 p-4 rounded-lg border border-surface-200 dark:border-surface-700">
+                <h3 class="text-lg font-semibold mb-4 text-surface-900 dark:text-surface-0 flex items-center gap-2">
+                    <i class="pi pi-shield"></i>
+                    Permissões e Acesso
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Permissões -->
+                    <div class="field">
+                        <label for="roleIds" class="block text-sm font-semibold text-surface-700 dark:text-surface-300 mb-2">
+                            <i class="pi pi-users mr-1"></i>Permissões *
+                        </label>
+                        <p-multiselect
+                            id="roleIds"
+                            formControlName="roleIds"
+                            [options]="roles"
+                            optionLabel="name"
+                            optionValue="id"
+                            placeholder="Selecione as permissões"
+                            display="chip"
+                            class="w-full"
+                            [class.ng-invalid]="userForm.get('roleIds')?.invalid && userForm.get('roleIds')?.touched"
+                            [class.ng-dirty]="userForm.get('roleIds')?.touched"
+                        >
+                            <ng-template let-role pTemplate="item">
+                                <div class="flex items-center gap-2">
+                                    <i class="pi" [ngClass]="role.name === 'ADMIN' ? 'pi-shield' : 'pi-user'"></i>
+                                    <span>{{ role.name }}</span>
+                                </div>
+                            </ng-template>
+                        </p-multiselect>
+                        <small 
+                            *ngIf="userForm.get('roleIds')?.invalid && userForm.get('roleIds')?.touched" 
+                            class="text-red-500 mt-1 block"
+                        >
+                            <i class="pi pi-exclamation-circle mr-1"></i>Pelo menos uma permissão é obrigatória
+                        </small>
+                        <small 
+                            *ngIf="!userForm.get('roleIds')?.touched"
+                            class="text-surface-500 dark:text-surface-400 mt-1 block"
+                        >
+                            <i class="pi pi-info-circle mr-1"></i>Selecione as funções que o usuário pode desempenhar
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <ng-template pTemplate="footer">
+        <div class="flex gap-2 justify-end pt-4 border-t border-surface-200 dark:border-surface-700">
+            <p-button 
+                label="Cancelar" 
+                icon="pi pi-times" 
+                (onClick)="hideDialog()"
+                severity="secondary"
+                [outlined]="true"
+            ></p-button>
+            <p-button 
+                [label]="isEditMode ? 'Atualizar' : 'Criar'" 
+                [icon]="isEditMode ? 'pi pi-check' : 'pi pi-plus'" 
+                (onClick)="saveUser()"
+                [disabled]="userForm.invalid"
+            ></p-button>
+        </div>
     </ng-template>
-    @if(users.length <= 0){
-        <ng-template #footer>
-            <td colspan="4" class="text-center p-4 text-gray-500">
-                Nenhum usuário encontrado
-            </td>
-        </ng-template>
-    }
-</p-table>
+</p-dialog>
+
+<p-toast></p-toast>
+<p-confirmDialog></p-confirmDialog>
