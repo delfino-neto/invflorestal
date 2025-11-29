@@ -18,16 +18,20 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { DatePickerModule } from 'primeng/datepicker';
 import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
+import { DividerModule } from 'primeng/divider';
 
 // Services & Models
 import { SpecimenObjectService } from '@/core/services/specimen-object.service';
 import { SpeciesTaxonomyService } from '@/core/services/species-taxonomy.service';
 import { PlotService } from '@/core/services/plot.service';
+import { CollectionAreaService } from '@/core/services/collection-area.service';
 import { UserService } from '@/core/services/user.service';
 import { MediaService } from '@/core/services/media.service';
 import { SpeciesInfoService } from '@/core/services/species-info.service';
+import { AuthService } from '@/core/services/auth.service';
 import { SpecimenObject, SpecimenObjectRequest } from '@/core/models/specimen/specimen-object';
 import { SpeciesInfoRequest } from '@/core/models/specimen/species-info';
+import { MapVisualizerComponent, MapMarker } from '@/shared/components/map-visualizer';
 
 interface PhotoFile {
   file: File;
@@ -53,14 +57,16 @@ interface PhotoFile {
     FileUploadModule,
     DatePickerModule,
     DialogModule,
-    TooltipModule
+    TooltipModule,
+    MapVisualizerComponent,
+    DividerModule
   ],
   providers: [MessageService],
   templateUrl: './specimen-form.component.html',
   styleUrls: ['./specimen-form.component.scss']
 })
 export class SpecimenFormComponent implements OnInit {
-  objectForm!: FormGroup;
+  locationForm!: FormGroup;
   speciesInfoForm!: FormGroup;
   loading = false;
   isEditMode = false;
@@ -72,10 +78,17 @@ export class SpecimenFormComponent implements OnInit {
   previewVisible = false;
   previewImageIndex = 0;
   fileUploadComponent: any;
+  
+  // Map properties
+  selectedPlotGeometry?: string;
+  currentMarker: MapMarker[] = [];
+  mapGeometries: Array<{ geometry: string; label?: string; fillColor?: string; strokeColor?: string }> = [];
 
   // Dropdown options
   species: any[] = [];
   plots: any[] = [];
+  filteredPlots: any[] = [];
+  collectionAreas: any[] = [];
   users: any[] = [];
   conditionOptions = [
     { label: 'Excelente', value: 1 },
@@ -88,6 +101,7 @@ export class SpecimenFormComponent implements OnInit {
   loadingData = {
     species: false,
     plots: false,
+    areas: false,
     users: false
   };
 
@@ -96,9 +110,11 @@ export class SpecimenFormComponent implements OnInit {
     private specimenService: SpecimenObjectService,
     private speciesService: SpeciesTaxonomyService,
     private plotService: PlotService,
+    private collectionAreaService: CollectionAreaService,
     private userService: UserService,
     private mediaService: MediaService,
     private speciesInfoService: SpeciesInfoService,
+    private authService: AuthService,
     private router: Router,
     private route: ActivatedRoute,
     private messageService: MessageService
@@ -111,21 +127,49 @@ export class SpecimenFormComponent implements OnInit {
   }
 
   initializeForms(): void {
-    this.objectForm = this.fb.group({
+    this.locationForm = this.fb.group({
+      areaId: [null, Validators.required],
       plotId: [null, Validators.required],
-      speciesId: [null, Validators.required],
       latitude: [null, [Validators.required, Validators.min(-90), Validators.max(90)]],
-      longitude: [null, [Validators.required, Validators.min(-180), Validators.max(180)]],
-      observerId: [null, Validators.required]
+      longitude: [null, [Validators.required, Validators.min(-180), Validators.max(180)]]
     });
 
     this.speciesInfoForm = this.fb.group({
+      speciesId: [null, Validators.required],
+      observerId: [null, Validators.required],
       observationDate: [new Date()],
       heightM: [null],
       dbmCm: [null],
       ageYears: [null],
       condition: [null]
     });
+    
+    // Observar mudanças no areaId para filtrar plots
+    this.locationForm.get('areaId')?.valueChanges.subscribe(areaId => {
+      if (areaId) {
+        this.filterPlotsByArea(areaId);
+        // Limpar plotId quando mudar de área
+        this.locationForm.patchValue({ plotId: null }, { emitEvent: false });
+      } else {
+        this.filteredPlots = [];
+        this.mapGeometries = [];
+        this.selectedPlotGeometry = undefined;
+      }
+    });
+    
+    // Observar mudanças no plotId para carregar geometria
+    this.locationForm.get('plotId')?.valueChanges.subscribe(plotId => {
+      if (plotId) {
+        this.loadPlotGeometry(plotId);
+      } else {
+        this.mapGeometries = [];
+        this.selectedPlotGeometry = undefined;
+      }
+    });
+    
+    // Observar mudanças nas coordenadas para atualizar marcador
+    this.locationForm.get('latitude')?.valueChanges.subscribe(() => this.updateMarker());
+    this.locationForm.get('longitude')?.valueChanges.subscribe(() => this.updateMarker());
   }
 
   onPhotosSelect(event: any): void {
@@ -204,11 +248,11 @@ export class SpecimenFormComponent implements OnInit {
     return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
   }
 
-  onObjectFormNext(activateCallback: any): void {
-    if (this.objectForm.valid) {
+  onLocationFormNext(activateCallback: any): void {
+    if (this.locationForm.valid) {
       activateCallback(3);
     } else {
-      this.objectForm.markAllAsTouched();
+      this.locationForm.markAllAsTouched();
       this.messageService.add({
         severity: 'warn',
         summary: 'Atenção',
@@ -218,6 +262,8 @@ export class SpecimenFormComponent implements OnInit {
   }
 
   loadDropdownData(): void {
+    this.loadCollectionAreas();
+    
     this.loadingData.species = true;
     this.speciesService.getSpeciesTaxonomies(0, 1000).subscribe({
       next: (response) => {
@@ -264,6 +310,8 @@ export class SpecimenFormComponent implements OnInit {
           value: u.id
         }));
         this.loadingData.users = false;
+        // Auto-preencher observador após carregar usuários
+        this.loadCurrentUserAsObserver();
       },
       error: () => {
         this.loadingData.users = false;
@@ -272,6 +320,55 @@ export class SpecimenFormComponent implements OnInit {
           summary: 'Erro',
           detail: 'Não foi possível carregar os usuários.'
         });
+      }
+    });
+  }
+  
+  loadCollectionAreas(): void {
+    this.loadingData.areas = true;
+    this.collectionAreaService.search(0, 1000).subscribe({
+      next: (response) => {
+        this.collectionAreas = response.content.map(a => ({
+          label: a.name,
+          value: a.id
+        }));
+        this.loadingData.areas = false;
+      },
+      error: () => {
+        this.loadingData.areas = false;
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Não foi possível carregar as áreas de coleta.'
+        });
+      }
+    });
+  }
+  
+  filterPlotsByArea(areaId: number): void {
+    this.filteredPlots = this.plots.filter(p => {
+      // Extrair areaId do label que tem formato "PLOT-X - Área Y"
+      const match = p.label.match(/(\d+)$/);
+      return match && parseInt(match[1]) === areaId;
+    });
+  }
+  
+  loadCurrentUserAsObserver(): void {
+    this.authService.me().subscribe({
+      next: (user) => {
+        if (user?.name && this.users.length > 0) {
+          // Buscar o usuário na lista pelo nome
+          const currentUserInList = this.users.find(u => u.label === user.name);
+          
+          if (currentUserInList) {
+            this.speciesInfoForm.patchValue({
+              observerId: currentUserInList.value
+            });
+          }
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao carregar usuário atual:', error);
       }
     });
   }
@@ -284,16 +381,72 @@ export class SpecimenFormComponent implements OnInit {
       this.loadSpecimen(this.specimenId);
     }
   }
+  
+  loadPlotGeometry(plotId: number): void {
+    this.plotService.findById(plotId).subscribe({
+      next: (plot) => {
+        if (plot.geometry) {
+          this.selectedPlotGeometry = plot.geometry;
+          this.mapGeometries = [{
+            geometry: plot.geometry,
+            label: plot.plotCode,
+            fillColor: 'rgba(34, 197, 94, 0.2)',
+            strokeColor: 'rgb(34, 197, 94)'
+          }];
+        }
+      },
+      error: (error) => {
+        console.error('Erro ao carregar geometria do plot:', error);
+      }
+    });
+  }
+  
+  updateMarker(): void {
+    const lat = this.locationForm.get('latitude')?.value;
+    const lon = this.locationForm.get('longitude')?.value;
+    
+    if (lat && lon && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+      this.currentMarker = [{
+        latitude: Number(lat),
+        longitude: Number(lon),
+        color: '#f97316', // Laranja vibrante para destacar do fundo verde
+        label: '📍 Espécime'
+      }];
+    } else {
+      this.currentMarker = [];
+    }
+  }
+  
+  onMapClick(event: { latitude: number; longitude: number }): void {
+    // Atualizar os campos de latitude e longitude quando o usuário clicar no mapa
+    this.locationForm.patchValue({
+      latitude: Number(event.latitude.toFixed(8)),
+      longitude: Number(event.longitude.toFixed(8))
+    });
+    
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Coordenadas atualizadas',
+      detail: `Lat: ${event.latitude.toFixed(6)}, Lon: ${event.longitude.toFixed(6)}`,
+      life: 2000
+    });
+  }
 
   loadSpecimen(id: number): void {
     this.loading = true;
     this.specimenService.findById(id).subscribe({
       next: (specimen) => {
-        this.objectForm.patchValue({
+        // Preencher locationForm
+        this.locationForm.patchValue({
+          areaId: specimen.areaId,
           plotId: specimen.plotId,
-          speciesId: specimen.speciesId,
           latitude: specimen.latitude,
-          longitude: specimen.longitude,
+          longitude: specimen.longitude
+        });
+        
+        // Preencher speciesInfoForm
+        this.speciesInfoForm.patchValue({
+          speciesId: specimen.speciesId,
           observerId: specimen.observerId
         });
         this.loading = false;
@@ -311,18 +464,27 @@ export class SpecimenFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.objectForm.invalid) {
-      this.objectForm.markAllAsTouched();
+    if (this.locationForm.invalid || this.speciesInfoForm.invalid) {
+      this.locationForm.markAllAsTouched();
+      this.speciesInfoForm.markAllAsTouched();
       this.messageService.add({
         severity: 'warn',
         summary: 'Atenção',
-        detail: 'Preencha todos os campos obrigatórios do objeto.'
+        detail: 'Preencha todos os campos obrigatórios.'
       });
       return;
     }
 
     this.loading = true;
-    const objectRequest: SpecimenObjectRequest = this.objectForm.value;
+    
+    // Combinar dados dos dois forms
+    const objectRequest: SpecimenObjectRequest = {
+      plotId: this.locationForm.value.plotId,
+      speciesId: this.speciesInfoForm.value.speciesId,
+      latitude: this.locationForm.value.latitude,
+      longitude: this.locationForm.value.longitude,
+      observerId: this.speciesInfoForm.value.observerId
+    };
 
     this.specimenService.create(objectRequest).subscribe({
       next: (createdObject) => {

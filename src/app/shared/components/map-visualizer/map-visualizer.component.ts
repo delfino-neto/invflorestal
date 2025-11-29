@@ -7,7 +7,9 @@ import {
   SimpleChanges,
   ElementRef, 
   ViewChild,
-  Input
+  Input,
+  Output,
+  EventEmitter
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -74,8 +76,14 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
   // Marcadores para visualizar (pontos no mapa)
   @Input() markers: MapMarker[] = [];
   
+  // Habilitar clique no mapa para selecionar coordenadas
+  @Input() enableMapClick: boolean = false;
+  
   // Index da geometria destacada
   @Input() highlightedIndex?: number;
+  
+  // Evento emitido quando o mapa é clicado (retorna lat/lon)
+  @Output() mapClick = new EventEmitter<{ latitude: number; longitude: number }>();
 
   // Estado interno
   map?: Map;
@@ -178,12 +186,22 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
     
     // Adicionar evento de clique no mapa para marcadores
     this.map.on('click', (event) => {
+      let clickedMarker = false;
+      
       this.map!.forEachFeatureAtPixel(event.pixel, (feature) => {
         const markerData = feature.get('markerData');
         if (markerData && markerData.onClick) {
           markerData.onClick(markerData);
+          clickedMarker = true;
         }
       });
+      
+      // Se não clicou em um marcador e o clique no mapa está habilitado, emitir coordenadas
+      if (!clickedMarker && this.enableMapClick) {
+        const coordinates = this.map!.getCoordinateFromPixel(event.pixel);
+        const [lon, lat] = toLonLat(coordinates);
+        this.mapClick.emit({ latitude: lat, longitude: lon });
+      }
     });
     
     // Adicionar evento de hover nos marcadores
@@ -223,8 +241,12 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
         this.hoveredMarkerFeature = undefined;
       }
       
-      // Atualizar cursor
-      this.map!.getTargetElement().style.cursor = foundMarker ? 'pointer' : '';
+      // Atualizar cursor - crosshair se enableMapClick está ativo e não está sobre marcador
+      if (this.enableMapClick && !foundMarker) {
+        this.map!.getTargetElement().style.cursor = 'crosshair';
+      } else {
+        this.map!.getTargetElement().style.cursor = foundMarker ? 'pointer' : '';
+      }
     });
 
     // Carregar geometrias se fornecidas
