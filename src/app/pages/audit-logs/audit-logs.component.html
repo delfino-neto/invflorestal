@@ -1,0 +1,279 @@
+<div class="card">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-2xl font-semibold text-surface-900 dark:text-surface-0 m-0">Audit logs</h1>
+        </div>
+        <div class="flex gap-2">
+            <p-select
+                [(ngModel)]="selectedAction"
+                [options]="actions"
+                optionLabel="label"
+                optionValue="value"
+                placeholder="Action"
+                (onChange)="onActionFilter()"
+                styleClass="w-32"
+            ></p-select>
+            <button class="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg flex items-center gap-2">
+                <i class="pi pi-download text-xs"></i>
+                Export logs
+            </button>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="border border-surface-200 dark:border-surface-700 rounded-lg overflow-hidden">
+        <table class="w-full text-sm">
+            <thead class="bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
+                <tr>
+                    <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">User</th>
+                    <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Action</th>
+                    <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Date & Time</th>
+                    <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Subject</th>
+                    <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Browser</th>
+                    <th class="text-right py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Actions</th>
+                </tr>
+            </thead>
+            <tbody *ngIf="!loading">
+                <tr *ngFor="let log of auditLogs" 
+                    class="border-b border-surface-200 dark:border-surface-700 hover:bg-surface-50 dark:hover:bg-surface-800/50 transition-colors">
+                    <td class="py-3 px-4">
+                        <div class="flex items-center gap-2">
+                            <div *ngIf="log.userName" class="flex items-center gap-2">
+                                <p-avatar 
+                                    [label]="getInitials(log.userName)" 
+                                    shape="square"
+                                    styleClass="metadata-avatar"
+                                    [style]="{ 'background-color': getUserAvatarColor(log.userName) }"
+                                ></p-avatar>
+                                <!-- <div class="w-8 h-8 rounded-full bg-surface-200 dark:bg-surface-700 flex items-center justify-center text-xs font-medium text-surface-700 dark:text-surface-300">
+                                    {{ getInitials(log.userName) }}
+                                </div> -->
+                                <div>
+                                    <div class="font-medium text-surface-900 dark:text-surface-0">{{ log.userName }}</div>
+                                    <div class="text-xs text-surface-500">{{ log.userEmail }}</div>
+                                </div>
+                            </div>
+                            <div *ngIf="!log.userName" class="text-surface-400 flex items-center gap-2">
+                                <i class="pi pi-desktop text-xs"></i>
+                                Sistema
+                            </div>
+                        </div>
+                    </td>
+                    <td class="py-3 px-4">
+                        <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded text-xs font-medium"
+                            [ngClass]="{
+                                'bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-400': log.action === 'CREATE',
+                                'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-400': log.action === 'UPDATE',
+                                'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400': log.action === 'DELETE',
+                                'bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-400': log.action === 'LOGIN',
+                                'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400': log.action === 'STATUS_CHANGE' || log.action === 'LOCK_CHANGE'
+                            }">
+                            <span class="w-1.5 h-1.5 rounded-full"
+                                [ngClass]="{
+                                    'bg-green-600': log.action === 'CREATE',
+                                    'bg-blue-600': log.action === 'UPDATE',
+                                    'bg-red-600': log.action === 'DELETE',
+                                    'bg-purple-600': log.action === 'LOGIN',
+                                    'bg-orange-600': log.action === 'STATUS_CHANGE' || log.action === 'LOCK_CHANGE'
+                                }"></span>
+                            {{ getActionLabel(log.action) }}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-surface-700 dark:text-surface-300">
+                        {{ formatDate(log.timestamp) }}
+                    </td>
+                    <td class="py-3 px-4 text-surface-900 dark:text-surface-0">
+                        "{{ log.description }}"
+                    </td>
+                    <td class="py-3 px-4 text-surface-600 dark:text-surface-400">
+                        {{ getBrowserFromUserAgent(log.userAgent) }}
+                    </td>
+                    <td class="py-3 px-4 text-right">
+                        <div class="flex items-center justify-end gap-1">
+                            <button 
+                                pButton
+                                [outlined]="true"
+                                severity="info"
+                                [text]="true"
+                                (click)="showDetails(log)"
+                                class="p-2"
+                                title="Ver detalhes">
+                                <i class="pi pi-eye"></i>
+                            </button>
+                            <button 
+                                pButton
+                                [outlined]="true"
+                                severity="danger"
+                                [text]="true"
+                                class="p-2"
+                                title="Excluir">
+                                <i class="pi pi-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Loading State -->
+        <div *ngIf="loading" class="flex items-center justify-center py-12">
+            <i class="pi pi-spinner pi-spin text-2xl text-surface-400"></i>
+        </div>
+
+        <!-- Empty State -->
+        <div *ngIf="!loading && auditLogs.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
+            <i class="pi pi-inbox text-4xl text-surface-300 dark:text-surface-600 mb-3"></i>
+            <p class="text-surface-600 dark:text-surface-400 font-medium">Nenhum log encontrado</p>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-between px-4 py-3 border-t border-surface-200 dark:border-surface-700 bg-surface-50 dark:bg-surface-800">
+            <div class="text-sm text-surface-600 dark:text-surface-400">
+                Mostrando {{ currentPage * pageSize + 1 }} a {{ Math.min((currentPage + 1) * pageSize, totalRecords) }} de {{ totalRecords }} registros
+            </div>
+            <div class="flex items-center gap-2">
+                <button 
+                    pButton
+                    [disabled]="currentPage === 0"
+                    (click)="previousPage()"
+                    class="px-3 py-1.5 text-sm border border-surface-300 dark:border-surface-600 rounded hover:bg-surface-100 dark:hover:bg-surface-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    Anterior
+                </button>
+                <button 
+                    pButton
+                    [disabled]="(currentPage + 1) * pageSize >= totalRecords"
+                    (click)="nextPage()"
+                    class="px-3 py-1.5 text-sm border border-surface-300 dark:border-surface-600 rounded hover:bg-surface-100 dark:hover:bg-surface-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
+                    Próximo
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Dialog de Detalhes -->
+<p-dialog
+    [(visible)]="detailDialog"
+    [modal]="true"
+    [style]="{width: '700px'}"
+    [breakpoints]="{'960px': '90vw'}"
+    [draggable]="false"
+    styleClass="audit-detail-dialog"
+>
+    <ng-template pTemplate="header">
+        <div class="w-full">
+            <div class="flex items-center justify-between mb-1">
+                <h2 class="text-lg font-semibold text-surface-900 dark:text-surface-0 m-0">
+                    Registro de Auditoria
+                </h2>
+                <p-tag 
+                    [value]="getActionLabel(selectedLog?.action!)" 
+                    [severity]="getActionSeverity(selectedLog?.action!)"
+                    styleClass="text-xs"
+                ></p-tag>
+            </div>
+            <p class="text-sm text-surface-500 dark:text-surface-400 m-0">
+                {{ selectedLog?.description }}
+            </p>
+        </div>
+    </ng-template>
+
+    <div *ngIf="selectedLog" class="space-y-4 pt-4">
+        <!-- Informações Principais -->
+        <div class="grid grid-cols-2 gap-4 pb-4 border-b border-surface-200 dark:border-surface-700">
+            <div>
+                <label class="text-xs font-medium text-surface-500 dark:text-surface-400 block mb-1">
+                    Data e Hora
+                </label>
+                <p class="text-sm text-surface-900 dark:text-surface-0 m-0 flex items-center gap-2">
+                    <i class="pi pi-clock text-xs"></i>
+                    {{ formatDate(selectedLog.timestamp) }}
+                </p>
+            </div>
+            <div>
+                <label class="text-xs font-medium text-surface-500 dark:text-surface-400 block mb-1">
+                    Entidade
+                </label>
+                <p class="text-sm text-surface-900 dark:text-surface-0 m-0 flex items-center gap-2">
+                    <i class="pi" [ngClass]="getEntityIcon(selectedLog.entityName)" class="text-xs"></i>
+                    {{ selectedLog.entityName }} <span class="font-mono text-xs text-surface-500">#{{ selectedLog.entityId }}</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- Usuário -->
+        <div class="pb-4 border-b border-surface-200 dark:border-surface-700">
+            <label class="text-xs font-medium text-surface-500 dark:text-surface-400 block mb-2">
+                Usuário
+            </label>
+            <div *ngIf="selectedLog.userName" class="flex items-center gap-2">
+                <div class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300 text-xs font-medium">
+                    {{ getInitials(selectedLog.userName) }}
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-surface-900 dark:text-surface-0 m-0">
+                        {{ selectedLog.userName }}
+                    </p>
+                    <p class="text-xs text-surface-500 dark:text-surface-400 m-0">
+                        {{ selectedLog.userEmail }}
+                    </p>
+                </div>
+            </div>
+            <p *ngIf="!selectedLog.userName" class="text-sm text-surface-400 m-0 flex items-center gap-2">
+                <i class="pi pi-desktop text-xs"></i>
+                Sistema
+            </p>
+        </div>
+
+        <!-- Origem -->
+        <div class="pb-4 border-b border-surface-200 dark:border-surface-700">
+            <label class="text-xs font-medium text-surface-500 dark:text-surface-400 block mb-2">
+                Origem da Requisição
+            </label>
+            <div class="space-y-2">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-surface-500 w-20">IP:</span>
+                    <span class="text-sm font-mono text-surface-900 dark:text-surface-0">
+                        {{ selectedLog.ipAddress || 'N/A' }}
+                    </span>
+                </div>
+                <div *ngIf="selectedLog.userAgent" class="flex items-start gap-2">
+                    <span class="text-xs text-surface-500 w-20 mt-0.5">Navegador:</span>
+                    <span class="text-xs text-surface-700 dark:text-surface-300 break-all flex-1">
+                        {{ selectedLog.userAgent }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dados JSON -->
+        <div *ngIf="selectedLog.newValue">
+            <label class="text-xs font-medium text-surface-500 dark:text-surface-400 block mb-2">
+                Dados
+            </label>
+            <div class="bg-surface-50 dark:bg-surface-900 rounded border border-surface-200 dark:border-surface-700 p-3 overflow-auto max-h-80">
+                <pre class="text-xs font-mono text-surface-900 dark:text-surface-0 m-0 leading-relaxed">{{ formatJson(selectedLog.newValue) }}</pre>
+            </div>
+        </div>
+
+        <div *ngIf="selectedLog.oldValue">
+            <label class="text-xs font-medium text-surface-500 dark:text-surface-400 block mb-2">
+                Valor Anterior
+            </label>
+            <div class="bg-surface-50 dark:bg-surface-900 rounded border border-surface-200 dark:border-surface-700 p-3 overflow-auto max-h-80">
+                <pre class="text-xs font-mono text-surface-900 dark:text-surface-0 m-0 leading-relaxed">{{ formatJson(selectedLog.oldValue) }}</pre>
+            </div>
+        </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+        <p-button 
+            label="Fechar" 
+            icon="pi pi-times" 
+            (onClick)="detailDialog = false"
+            severity="secondary"
+            [text]="true"
+        ></p-button>
+    </ng-template>
+</p-dialog>

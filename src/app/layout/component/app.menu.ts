@@ -76,6 +76,7 @@ export class AppMenu {
                     ]
                 },
                 { label: 'Gestão de Usuários', icon: 'pi pi-fw pi-users', routerLink: ['/users'] },
+                { label: 'Logs de Auditoria', icon: 'pi pi-fw pi-history', routerLink: ['/audit-logs'] },
             ]);
         }
     }
