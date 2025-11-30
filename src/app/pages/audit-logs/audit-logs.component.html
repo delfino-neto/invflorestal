@@ -11,6 +11,7 @@
                 icon="pi pi-trash" 
                 [label]="'Excluir (' + selectedLogs.length + ')'"
                 severity="danger" 
+                [outlined]="true"
                 (click)="deleteSelectedLogs()">
             </button>
             <p-select
@@ -18,12 +19,18 @@
                 [options]="actions"
                 optionLabel="label"
                 optionValue="value"
-                placeholder="Action"
+                placeholder="Ação"
                 (onChange)="onActionFilter()"
-                styleClass="w-32"
+                styleClass="w-50"
             ></p-select>
-            <button pButton icon="pi pi-download" label="Export logs" severity="primary" [outlined]="true">
-            </button>
+            <p-splitbutton 
+                label="Exportar Logs" 
+                icon="pi pi-download" 
+                [model]="exportMenuItems"
+                (onClick)="exportLogs('csv')"
+                severity="secondary"
+                [outlined]="true">
+            </p-splitbutton>
         </div>
     </div>
 

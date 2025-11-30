@@ -14,6 +14,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
+import { SplitButtonModule } from 'primeng/splitbutton';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
 import { AuditLogService } from '@/core/services/audit-log.service';
@@ -37,7 +38,8 @@ import { AvatarModule } from 'primeng/avatar';
         DialogModule,
         AvatarModule,
         ConfirmDialogModule,
-        ToastModule
+        ToastModule,
+        SplitButtonModule
     ],
     providers: [ConfirmationService, MessageService],
     templateUrl: './audit-logs.component.html',
@@ -74,6 +76,29 @@ export class AuditLogsComponent implements OnInit {
         { label: 'Alterar Status', value: AuditAction.STATUS_CHANGE },
         { label: 'Alterar Bloqueio', value: AuditAction.LOCK_CHANGE },
         { label: 'Alterar Senha', value: AuditAction.PASSWORD_CHANGE }
+    ];
+
+    exportMenuItems = [
+        {
+            label: 'CSV',
+            icon: 'pi pi-file',
+            command: () => this.exportLogs('csv')
+        },
+        {
+            label: 'Excel',
+            icon: 'pi pi-file-excel',
+            command: () => this.exportLogs('excel')
+        },
+        {
+            label: 'JSON',
+            icon: 'pi pi-code',
+            command: () => this.exportLogs('json')
+        },
+        {
+            label: 'TXT',
+            icon: 'pi pi-file-edit',
+            command: () => this.exportLogs('txt')
+        }
     ];
 
     constructor(
@@ -259,6 +284,117 @@ export class AuditLogsComponent implements OnInit {
 
     get Math() {
         return Math;
+    }
+
+    exportLogs(format: 'csv' | 'excel' | 'json' | 'txt') {
+        const dataToExport = this.selectedLogs.length > 0 ? this.selectedLogs : this.auditLogs;
+        
+        if (dataToExport.length === 0) {
+            this.messageService.add({
+                severity: 'warn',
+                summary: 'Atenção',
+                detail: 'Nenhum log disponível para exportar',
+                life: 3000
+            });
+            return;
+        }
+
+        switch (format) {
+            case 'csv':
+                this.exportAsCSV(dataToExport);
+                break;
+            case 'excel':
+                this.exportAsExcel(dataToExport);
+                break;
+            case 'json':
+                this.exportAsJSON(dataToExport);
+                break;
+            case 'txt':
+                this.exportAsTXT(dataToExport);
+                break;
+        }
+
+        this.messageService.add({
+            severity: 'success',
+            summary: 'Sucesso',
+            detail: `${dataToExport.length} log(s) exportado(s) em formato ${format.toUpperCase()}`,
+            life: 3000
+        });
+    }
+
+    private exportAsCSV(data: AuditLog[]) {
+        const headers = ['ID', 'Ação', 'Entidade', 'ID Entidade', 'Usuário', 'Email', 'Descrição', 'IP', 'Navegador', 'Data/Hora'];
+        const csvContent = [
+            headers.join(','),
+            ...data.map(log => [
+                log.id,
+                log.action,
+                log.entityName,
+                log.entityId,
+                `"${log.userName || '-'}"`,
+                `"${log.userEmail || '-'}"`,
+                `"${log.description || '-'}"`,
+                log.ipAddress || '-',
+                `"${log.userAgent || '-'}"`,
+                this.formatDate(log.timestamp)
+            ].join(','))
+        ].join('\n');
+
+        this.downloadFile(csvContent, 'audit-logs.csv', 'text/csv');
+    }
+
+    private exportAsExcel(data: AuditLog[]) {
+        // Simula formato Excel com TSV (Tab Separated Values)
+        const headers = ['ID', 'Ação', 'Entidade', 'ID Entidade', 'Usuário', 'Email', 'Descrição', 'IP', 'Navegador', 'Data/Hora'];
+        const tsvContent = [
+            headers.join('\t'),
+            ...data.map(log => [
+                log.id,
+                log.action,
+                log.entityName,
+                log.entityId,
+                log.userName || '-',
+                log.userEmail || '-',
+                log.description || '-',
+                log.ipAddress || '-',
+                log.userAgent || '-',
+                this.formatDate(log.timestamp)
+            ].join('\t'))
+        ].join('\n');
+
+        this.downloadFile(tsvContent, 'audit-logs.xls', 'application/vnd.ms-excel');
+    }
+
+    private exportAsJSON(data: AuditLog[]) {
+        const jsonContent = JSON.stringify(data, null, 2);
+        this.downloadFile(jsonContent, 'audit-logs.json', 'application/json');
+    }
+
+    private exportAsTXT(data: AuditLog[]) {
+        const txtContent = data.map(log => 
+            `===============================================\n` +
+            `ID: ${log.id}\n` +
+            `Ação: ${this.getActionLabel(log.action)}\n` +
+            `Entidade: ${log.entityName} #${log.entityId}\n` +
+            `Usuário: ${log.userName || 'Sistema'} (${log.userEmail || '-'})\n` +
+            `Descrição: ${log.description || '-'}\n` +
+            `IP: ${log.ipAddress || '-'}\n` +
+            `Navegador: ${this.getBrowserFromUserAgent(log.userAgent)}\n` +
+            `Data/Hora: ${this.formatDate(log.timestamp)}\n` +
+            `===============================================\n`
+        ).join('\n');
+
+        this.downloadFile(txtContent, 'audit-logs.txt', 'text/plain');
+    }
+
+    private downloadFile(content: string, filename: string, mimeType: string) {
+        const blob = new Blob([content], { type: mimeType });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        window.URL.revokeObjectURL(url);
     }
 
     deleteLog(log: AuditLog) {
