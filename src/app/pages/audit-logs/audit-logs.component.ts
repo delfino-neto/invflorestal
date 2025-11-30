@@ -214,7 +214,7 @@ export class AuditLogsComponent implements OnInit {
             'Plot': 'pi-th-large',
             'Species': 'pi-leaf'
         };
-        return icons[entityName] || 'pi-circle';
+        return icons[entityName] || 'pi-file';
     }
 
     getInitials(name: string): string {

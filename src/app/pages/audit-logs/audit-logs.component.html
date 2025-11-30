@@ -193,14 +193,14 @@
     <ng-template pTemplate="header">
         <div class="w-full">
             <div class="flex items-center justify-between mb-1">
-                <h2 class="text-lg font-semibold text-surface-900 dark:text-surface-0 m-0">
+                <div class="text-lg flex gap-4 font-semibold text-surface-900 dark:text-surface-0 m-0">
                     Registro de Auditoria
-                </h2>
-                <p-tag 
-                    [value]="getActionLabel(selectedLog?.action!)" 
-                    [severity]="getActionSeverity(selectedLog?.action!)"
-                    styleClass="text-xs"
-                ></p-tag>
+                    <p-tag 
+                        [value]="getActionLabel(selectedLog?.action!)" 
+                        [severity]="getActionSeverity(selectedLog?.action!)"
+                        styleClass="text-xs"
+                    ></p-tag>
+                </div>
             </div>
             <p class="text-sm text-surface-500 dark:text-surface-400 m-0">
                 {{ selectedLog?.description }}
@@ -224,9 +224,9 @@
                 <label class="text-xs font-medium text-surface-500 dark:text-surface-400 block mb-1">
                     Entidade
                 </label>
-                <p class="text-sm text-surface-900 dark:text-surface-0 m-0 flex items-center gap-2">
-                    <i class="pi" [ngClass]="getEntityIcon(selectedLog.entityName)" class="text-xs"></i>
-                    {{ selectedLog.entityName }} <span class="font-mono text-xs text-surface-500">#{{ selectedLog.entityId }}</span>
+                <p class="text-sm text-surface-900 dark:text-surface-0 m-0 flex items-center gap-2 flex gap-2 align-items-center">
+                    <i class="pi {{ getEntityIcon(selectedLog.entityName) }}" [style]="{'font-size': '10pt'}"></i>
+                    {{ selectedLog.entityName }} <span class="text-xs text-surface-500">#{{ selectedLog.entityId }}</span>
                 </p>
             </div>
         </div>
@@ -236,17 +236,20 @@
             <label class="text-xs font-medium text-surface-500 dark:text-surface-400 block mb-2">
                 Usuário
             </label>
-            <div *ngIf="selectedLog.userName" class="flex items-center gap-2">
-                <div class="flex items-center justify-center w-8 h-8 rounded-full bg-surface-200 dark:bg-surface-700 text-surface-700 dark:text-surface-300 text-xs font-medium">
-                    {{ getInitials(selectedLog.userName) }}
-                </div>
-                <div>
-                    <p class="text-sm font-medium text-surface-900 dark:text-surface-0 m-0">
+            <div *ngIf="selectedLog.userName" class="flex gap-2">
+                <p-avatar 
+                    [label]="getInitials(selectedLog.userName)" 
+                    shape="square"
+                    styleClass="metadata-avatar"
+                    [style]="{ 'background-color': getUserAvatarColor(selectedLog.userName) }"
+                ></p-avatar>
+                <div class="flex flex-col">
+                    <div class="text-sm font-medium text-surface-900 dark:text-surface-0">
                         {{ selectedLog.userName }}
-                    </p>
-                    <p class="text-xs text-surface-500 dark:text-surface-400 m-0">
+                    </div>
+                    <div class="text-xs text-surface-500 dark:text-surface-400 m-0">
                         {{ selectedLog.userEmail }}
-                    </p>
+                    </div>
                 </div>
             </div>
             <p *ngIf="!selectedLog.userName" class="text-sm text-surface-400 m-0 flex items-center gap-2">
