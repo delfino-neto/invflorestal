@@ -52,6 +52,9 @@
               <!-- Nome -->
               <div class="form-field">
                 <label for="name" class="form-label required">
+                  <i class="pi pi-info-circle info-icon" 
+                     pTooltip="Escolha um nome descritivo para identificar esta área" 
+                     tooltipPosition="top"></i>
                   Nome da Área
                 </label>
                 <input
@@ -66,26 +69,189 @@
                 <small class="form-error" *ngIf="isFieldInvalid('name')">
                   {{ getFieldError('name') }}
                 </small>
-                <small class="form-hint">
-                  Escolha um nome descritivo para identificar esta área
-                </small>
+              </div>
+
+              <!-- Bioma -->
+              <div class="form-field">
+                <label for="biome" class="form-label">
+                  <i class="pi pi-info-circle info-icon" 
+                     pTooltip="Bioma brasileiro onde a área está localizada" 
+                     tooltipPosition="top"></i>
+                  Bioma
+                </label>
+                <p-autoComplete
+                  id="biome"
+                  formControlName="biome"
+                  [suggestions]="filteredBiomes"
+                  (completeMethod)="filterBiomes($event)"
+                  placeholder="Ex: Mata Atlântica"
+                  [dropdown]="true"
+                  styleClass="w-full"
+                />
+              </div>
+
+              <!-- Tipo de Vegetação -->
+              <div class="form-field">
+                <label for="vegetationType" class="form-label">
+                  <i class="pi pi-info-circle info-icon" 
+                     pTooltip="Tipo de formação vegetal predominante" 
+                     tooltipPosition="top"></i>
+                  Tipo de Vegetação
+                </label>
+                <p-autoComplete
+                  id="vegetationType"
+                  formControlName="vegetationType"
+                  [suggestions]="filteredVegetationTypes"
+                  (completeMethod)="filterVegetationTypes($event)"
+                  placeholder="Ex: Floresta Ombrófila Densa"
+                  [dropdown]="true"
+                  styleClass="w-full"
+                />
+              </div>
+
+              <!-- Clima -->
+              <div class="form-field">
+                <label for="climateZone" class="form-label">
+                  <i class="pi pi-info-circle info-icon" 
+                     pTooltip="Classificação climática da região" 
+                     tooltipPosition="top"></i>
+                  Zona Climática
+                </label>
+                <p-autoComplete
+                  id="climateZone"
+                  formControlName="climateZone"
+                  [suggestions]="filteredClimates"
+                  (completeMethod)="filterClimates($event)"
+                  placeholder="Ex: Tropical úmido"
+                  [dropdown]="true"
+                  styleClass="w-full"
+                />
+              </div>
+
+              <!-- Tipo de Solo -->
+              <div class="form-field">
+                <label for="soilType" class="form-label">
+                  <i class="pi pi-info-circle info-icon" 
+                     pTooltip="Tipo de solo predominante na área" 
+                     tooltipPosition="top"></i>
+                  Tipo de Solo
+                </label>
+                <p-autoComplete
+                  id="soilType"
+                  formControlName="soilType"
+                  [suggestions]="filteredSoilTypes"
+                  (completeMethod)="filterSoilTypes($event)"
+                  placeholder="Ex: Latossolo"
+                  [dropdown]="true"
+                  styleClass="w-full"
+                />
+              </div>
+
+              <!-- Status de Conservação -->
+              <div class="form-field">
+                <label for="conservationStatus" class="form-label">
+                  <i class="pi pi-info-circle info-icon" 
+                     pTooltip="Estado de conservação da vegetação" 
+                     tooltipPosition="top"></i>
+                  Status de Conservação
+                </label>
+                <p-autoComplete
+                  id="conservationStatus"
+                  formControlName="conservationStatus"
+                  [suggestions]="filteredConservationStatus"
+                  (completeMethod)="filterConservationStatus($event)"
+                  placeholder="Ex: Preservada"
+                  [dropdown]="true"
+                  styleClass="w-full"
+                />
+              </div>
+
+              <!-- Altitude -->
+              <div class="form-field">
+                <label for="altitudeM" class="form-label">
+                  <i class="pi pi-info-circle info-icon" 
+                     pTooltip="Altitude média da área em metros" 
+                     tooltipPosition="top"></i>
+                  Altitude (metros)
+                </label>
+                <p-inputNumber
+                  id="altitudeM"
+                  formControlName="altitudeM"
+                  placeholder="Ex: 850"
+                  [min]="0"
+                  [max]="10000"
+                  suffix=" m"
+                  styleClass="w-full"
+                />
+              </div>
+
+              <!-- Área Protegida -->
+              <div class="form-field">
+                <div class="flex items-center gap-2">
+                  <p-checkbox
+                    inputId="protectedArea"
+                    formControlName="protectedArea"
+                    [binary]="true"
+                  />
+                  <label for="protectedArea" class="form-label mb-0 cursor-pointer">
+                    <i class="pi pi-info-circle info-icon" 
+                       pTooltip="Marque se é uma Unidade de Conservação ou Terra Indígena" 
+                       tooltipPosition="top"></i>
+                    Área Protegida
+                  </label>
+                </div>
+              </div>
+
+              <!-- Nome da Área Protegida -->
+              <div class="form-field" *ngIf="form.get('protectedArea')?.value">
+                <label for="protectedAreaName" class="form-label">
+                  <i class="pi pi-info-circle info-icon" 
+                     pTooltip="Nome da UC, TI ou outra categoria de área protegida" 
+                     tooltipPosition="top"></i>
+                  Nome da Área Protegida
+                </label>
+                <input
+                  pInputText
+                  id="protectedAreaName"
+                  formControlName="protectedAreaName"
+                  placeholder="Ex: Parque Nacional da Serra do Mar"
+                  class="w-full"
+                />
+              </div>
+
+              <!-- Proprietário/Responsável -->
+              <div class="form-field">
+                <label for="landOwner" class="form-label">
+                  <i class="pi pi-info-circle info-icon" 
+                     pTooltip="Proprietário da terra ou responsável pela gestão" 
+                     tooltipPosition="top"></i>
+                  Proprietário/Responsável
+                </label>
+                <input
+                  pInputText
+                  id="landOwner"
+                  formControlName="landOwner"
+                  placeholder="Ex: Instituto Ambiental XYZ"
+                  class="w-full"
+                />
               </div>
 
               <!-- Notas -->
               <div class="form-field">
                 <label for="notes" class="form-label">
+                  <i class="pi pi-info-circle info-icon" 
+                     pTooltip="Informações adicionais sobre acesso, características especiais, etc." 
+                     tooltipPosition="top"></i>
                   Observações
                 </label>
                 <textarea
                   id="notes"
+                  pTextarea
                   formControlName="notes"
                   placeholder="Adicione informações relevantes sobre esta área..."
                   rows="5"
                   class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                 ></textarea>
-                <small class="form-hint">
-                  Informações sobre vegetação, acesso, características especiais, etc.
-                </small>
               </div>
 
               <!-- Status do Polígono -->

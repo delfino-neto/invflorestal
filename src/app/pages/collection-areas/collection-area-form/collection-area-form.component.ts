@@ -12,6 +12,9 @@ import { ButtonModule } from 'primeng/button';
 import { ToastModule } from 'primeng/toast';
 import { DividerModule } from 'primeng/divider';
 import { TagModule } from 'primeng/tag';
+import { AutoCompleteModule } from 'primeng/autocomplete';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { CheckboxModule } from 'primeng/checkbox';
 
 // Services & Models
 import { CollectionAreaService } from '@/core/services/collection-area.service';
@@ -20,6 +23,8 @@ import { AuthService } from '@/core/services/auth.service';
 
 // Shared Components
 import { GeometryMapComponent } from '@/shared/components/geometry-map';
+import { TooltipModule } from 'primeng/tooltip';
+import { TextareaModule } from 'primeng/textarea';
 
 @Component({
   selector: 'app-collection-area-form',
@@ -33,6 +38,11 @@ import { GeometryMapComponent } from '@/shared/components/geometry-map';
     ToastModule,
     DividerModule,
     TagModule,
+    AutoCompleteModule,
+    InputNumberModule,
+    CheckboxModule,
+    TooltipModule,
+    TextareaModule,
     GeometryMapComponent
   ],
   providers: [MessageService],
@@ -70,6 +80,61 @@ export class CollectionAreaFormComponent implements OnInit {
     'Arraste os pontos para ajustar a forma'
   ];
 
+  // Opções de autocomplete
+  biomeOptions = [
+    'Amazônia',
+    'Mata Atlântica',
+    'Cerrado',
+    'Caatinga',
+    'Pampa',
+    'Pantanal'
+  ];
+  filteredBiomes: string[] = [];
+
+  climateOptions = [
+    'Tropical úmido',
+    'Tropical semiárido',
+    'Subtropical úmido',
+    'Temperado',
+    'Equatorial'
+  ];
+  filteredClimates: string[] = [];
+
+  soilTypeOptions = [
+    'Latossolo',
+    'Argissolo',
+    'Neossolo',
+    'Cambissolo',
+    'Nitossolo',
+    'Plintossolo',
+    'Gleissolo'
+  ];
+  filteredSoilTypes: string[] = [];
+
+  conservationStatusOptions = [
+    'Preservada',
+    'Conservada',
+    'Degradada',
+    'Em recuperação',
+    'Regeneração natural'
+  ];
+  filteredConservationStatus: string[] = [];
+
+  vegetationTypeOptions = [
+    'Floresta Ombrófila Densa',
+    'Floresta Ombrófila Mista',
+    'Floresta Estacional Semidecidual',
+    'Floresta Estacional Decidual',
+    'Cerrado stricto sensu',
+    'Cerradão',
+    'Campo Cerrado',
+    'Caatinga arbórea',
+    'Caatinga arbustiva',
+    'Restinga',
+    'Manguezal'
+  ];
+  filteredVegetationTypes: string[] = [];
+
   constructor(
     private fb: FormBuilder,
     private router: Router,
@@ -99,7 +164,16 @@ export class CollectionAreaFormComponent implements OnInit {
     this.form = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       notes: [''],
-      geometry: ['', Validators.required]
+      geometry: ['', Validators.required],
+      biome: [''],
+      climateZone: [''],
+      soilType: [''],
+      conservationStatus: [''],
+      vegetationType: [''],
+      altitudeM: [null],
+      protectedArea: [false],
+      protectedAreaName: [''],
+      landOwner: ['']
     });
   }
 
@@ -131,7 +205,16 @@ export class CollectionAreaFormComponent implements OnInit {
         this.form.patchValue({
           name: area.name,
           notes: area.notes,
-          geometry: area.geometry
+          geometry: area.geometry,
+          biome: area.biome,
+          climateZone: area.climateZone,
+          soilType: area.soilType,
+          conservationStatus: area.conservationStatus,
+          vegetationType: area.vegetationType,
+          altitudeM: area.altitudeM,
+          protectedArea: area.protectedArea,
+          protectedAreaName: area.protectedAreaName,
+          landOwner: area.landOwner
         });
         this.hasDrawnPolygon = !!area.geometry;
       },
@@ -163,7 +246,16 @@ export class CollectionAreaFormComponent implements OnInit {
     const request: CollectionAreaRequest = {
       name: this.form.value.name,
       notes: this.form.value.notes,
-      geometry: this.form.value.geometry
+      geometry: this.form.value.geometry,
+      biome: this.form.value.biome,
+      climateZone: this.form.value.climateZone,
+      soilType: this.form.value.soilType,
+      conservationStatus: this.form.value.conservationStatus,
+      vegetationType: this.form.value.vegetationType,
+      altitudeM: this.form.value.altitudeM,
+      protectedArea: this.form.value.protectedArea,
+      protectedAreaName: this.form.value.protectedAreaName,
+      landOwner: this.form.value.landOwner
     };
 
     const operation = this.isEditMode && this.areaId
@@ -216,5 +308,41 @@ export class CollectionAreaFormComponent implements OnInit {
       if (field.errors['minlength']) return `Mínimo de ${field.errors['minlength'].requiredLength} caracteres`;
     }
     return '';
+  }
+
+  // Métodos de filtro para autocomplete
+  filterBiomes(event: any): void {
+    const query = event.query.toLowerCase();
+    this.filteredBiomes = this.biomeOptions.filter(biome => 
+      biome.toLowerCase().includes(query)
+    );
+  }
+
+  filterClimates(event: any): void {
+    const query = event.query.toLowerCase();
+    this.filteredClimates = this.climateOptions.filter(climate => 
+      climate.toLowerCase().includes(query)
+    );
+  }
+
+  filterSoilTypes(event: any): void {
+    const query = event.query.toLowerCase();
+    this.filteredSoilTypes = this.soilTypeOptions.filter(soil => 
+      soil.toLowerCase().includes(query)
+    );
+  }
+
+  filterConservationStatus(event: any): void {
+    const query = event.query.toLowerCase();
+    this.filteredConservationStatus = this.conservationStatusOptions.filter(status => 
+      status.toLowerCase().includes(query)
+    );
+  }
+
+  filterVegetationTypes(event: any): void {
+    const query = event.query.toLowerCase();
+    this.filteredVegetationTypes = this.vegetationTypeOptions.filter(vegetation => 
+      vegetation.toLowerCase().includes(query)
+    );
   }
 }
