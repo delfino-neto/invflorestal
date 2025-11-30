@@ -39,6 +39,8 @@ export class DataImportService {
     formData.append('file', file);
     formData.append('mapping', new Blob([JSON.stringify(mapping)], { type: 'application/json' }));
 
-    return this.http.post<ImportResult>(`${this.apiUrl}/specimens`, formData);
+    return this.http.post<ImportResult>(`${this.apiUrl}/specimens`, formData, {
+        withCredentials: true
+    });
   }
 }

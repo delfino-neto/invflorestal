@@ -56,21 +56,40 @@
                 <form [formGroup]="importForm" class="flex gap-4">
 
                     <div class="flex flex-col flex-1">
-                        <div class="field">
-                            <label for="plot" class="block font-semibold mb-2">
-                            <i class="pi pi-map-marker mr-2"></i>Plot <span class="text-red-500">*</span>
-                            </label>
-                            <p-select
-                            id="plot"
-                            formControlName="plotId"
-                            [options]="plots"
-                            optionLabel="name"
-                            optionValue="id"
-                            placeholder="Selecione o plot"
-                            styleClass="w-full"
-                            [disabled]="uploading">
-                            </p-select>
-                            <small class="block mt-1 text-color-secondary">Plot onde os espécimes serão cadastrados</small>
+
+                        <div class="flex gap-4">
+                            <div class="field flex-1">
+                                <label for="collectionArea" class="block font-semibold mb-2">
+                                    <i class="pi pi-map mr-2"></i>Área de Coleta <span class="text-red-500">*</span>
+                                </label>
+                                <p-select
+                                    id="collectionArea"
+                                    formControlName="collectionAreaId"
+                                    [options]="collectionAreas"
+                                    optionLabel="name"
+                                    optionValue="id"
+                                    placeholder="Selecione a área de coleta"
+                                    (onChange)="onCollectionAreaChange()"
+                                    [disabled]="uploading">
+                                </p-select>
+                                <small class="block mt-1 text-color-secondary">Selecione primeiro a área de coleta</small>
+                            </div>
+    
+                            <div class="field flex-1">
+                                <label for="plot" class="block font-semibold mb-2">
+                                    <i class="pi pi-map-marker mr-2"></i>Plot <span class="text-red-500">*</span>
+                                </label>
+                                <p-select
+                                    id="plot"
+                                    formControlName="plotId"
+                                    [options]="filteredPlots"
+                                    optionLabel="plotCode"
+                                    optionValue="id"
+                                    placeholder="Selecione o plot"
+                                    [disabled]="uploading || !importForm.get('collectionAreaId')?.value">
+                                </p-select>
+                                <small class="block mt-1 text-color-secondary">Plot onde os espécimes serão cadastrados</small>
+                            </div>
                         </div>
         
                         <div class="flex gap-4">

@@ -22,6 +22,8 @@ import * as XLSX from 'xlsx';
 // Services & Models
 import { PlotService } from '@/core/services/plot.service';
 import { Plot } from '@/core/models/collection/plot';
+import { CollectionAreaService } from '@/core/services/collection-area.service';
+import { CollectionArea } from '@/core/models/collection/collection-area';
 import { DataImportService, ImportMapping, ImportResult } from '@/core/services/data-import.service';
 
 interface ColumnMapping {
@@ -59,7 +61,9 @@ export class DataImportComponent implements OnInit {
   selectedFile: File | null = null;
   uploading = false;
   importResult: ImportResult | null = null;
+  collectionAreas: CollectionArea[] = [];
   plots: Plot[] = [];
+  filteredPlots: Plot[] = [];
   filePreview: any[] = [];
   previewColumns: string[] = [];
   
@@ -81,9 +85,11 @@ export class DataImportComponent implements OnInit {
     private fb: FormBuilder,
     private dataImportService: DataImportService,
     private plotService: PlotService,
+    private collectionAreaService: CollectionAreaService,
     private messageService: MessageService
   ) {
     this.importForm = this.fb.group({
+      collectionAreaId: [null, Validators.required],
       plotId: [null, Validators.required],
       sheetName: [''],
       startRow: [1, [Validators.required, Validators.min(0)]],
@@ -92,7 +98,23 @@ export class DataImportComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.loadCollectionAreas();
     this.loadPlots();
+  }
+
+  loadCollectionAreas(): void {
+    this.collectionAreaService.search(0, 1000).subscribe({
+      next: (response) => {
+        this.collectionAreas = response.content;
+      },
+      error: (error) => {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Erro',
+          detail: 'Erro ao carregar áreas de coleta'
+        });
+      }
+    });
   }
 
   loadPlots(): void {
@@ -208,6 +230,17 @@ export class DataImportComponent implements OnInit {
 
   removeColumnMapping(index: number): void {
     this.columnMappings.splice(index, 1);
+  }
+
+  onCollectionAreaChange(): void {
+    const collectionAreaId = this.importForm.get('collectionAreaId')?.value;
+    this.importForm.patchValue({ plotId: null });
+    
+    if (collectionAreaId) {
+      this.filteredPlots = this.plots.filter(plot => plot.areaId === collectionAreaId);
+    } else {
+      this.filteredPlots = [];
+    }
   }
 
   canImport(): boolean {
