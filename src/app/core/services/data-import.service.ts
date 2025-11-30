@@ -30,14 +30,14 @@ export interface ImportResult {
   providedIn: 'root'
 })
 export class DataImportService {
-  private readonly apiUrl = `${API_CONFIG.baseUrl}/data-import`;
+  private readonly apiUrl = `${API_CONFIG.baseUrl}/import`;
 
   constructor(private http: HttpClient) {}
 
   importSpecimens(file: File, mapping: ImportMapping): Observable<ImportResult> {
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('mapping', new Blob([JSON.stringify(mapping)], { type: 'application/json' }));
+    formData.append('mapping', JSON.stringify(mapping));
 
     return this.http.post<ImportResult>(`${this.apiUrl}/specimens`, formData, {
         withCredentials: true

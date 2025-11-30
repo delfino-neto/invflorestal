@@ -477,13 +477,21 @@ export class SpecimenFormComponent implements OnInit {
 
     this.loading = true;
     
-    // Combinar dados dos dois forms
+    const infoData = this.speciesInfoForm.value;
+    
+    // Combinar dados dos dois forms incluindo SpeciesInfo
     const objectRequest: SpecimenObjectRequest = {
       plotId: this.locationForm.value.plotId,
       speciesId: this.speciesInfoForm.value.speciesId,
       latitude: this.locationForm.value.latitude,
       longitude: this.locationForm.value.longitude,
-      observerId: this.speciesInfoForm.value.observerId
+      observerId: this.speciesInfoForm.value.observerId,
+      // SpeciesInfo fields
+      observationDate: infoData.observationDate,
+      heightM: infoData.heightM,
+      dbmCm: infoData.dbmCm,
+      ageYears: infoData.ageYears,
+      condition: infoData.condition
     };
 
     this.specimenService.create(objectRequest).subscribe({
@@ -501,7 +509,7 @@ export class SpecimenFormComponent implements OnInit {
         if (photoUploads.length > 0) {
           forkJoin(photoUploads).subscribe({
             next: () => {
-              this.createSpeciesInfo();
+              this.finishCreation();
             },
             error: () => {
               this.messageService.add({
@@ -509,11 +517,11 @@ export class SpecimenFormComponent implements OnInit {
                 summary: 'Aviso',
                 detail: 'Espécime criado, mas houve erro ao fazer upload de algumas fotos.'
               });
-              this.createSpeciesInfo();
+              this.finishCreation();
             }
           });
         } else {
-          this.createSpeciesInfo();
+          this.finishCreation();
         }
       },
       error: (error) => {

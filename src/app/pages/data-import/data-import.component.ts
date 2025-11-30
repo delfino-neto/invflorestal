@@ -70,7 +70,12 @@ export class DataImportComponent implements OnInit {
   availableFields = [
     { label: 'Nome Científico', value: 'scientificName' },
     { label: 'Latitude', value: 'latitude' },
-    { label: 'Longitude', value: 'longitude' }
+    { label: 'Longitude', value: 'longitude' },
+    { label: 'Altura (m)', value: 'heightM' },
+    { label: 'DBM (cm)', value: 'dbmCm' },
+    { label: 'Idade (anos)', value: 'ageYears' },
+    { label: 'Condição', value: 'condition' },
+    { label: 'Data de Observação', value: 'observationDate' }
   ];
 
   columnMappings: ColumnMapping[] = [
