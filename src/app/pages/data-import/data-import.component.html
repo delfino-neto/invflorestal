@@ -6,31 +6,51 @@
         <!-- Form Section -->
         <div class="form-section card mb-4">
             <!-- File Upload -->
-                <div class="field">
+            <div class="field">
                 <label class="block font-semibold mb-2">
                     <i class="pi pi-file mr-2"></i>Arquivo
                 </label>
-                <p-fileUpload 
-                    mode="basic" 
-                    name="file"
-                    [auto]="false"
-                    accept=".csv,.xlsx,.xls"
-                    [maxFileSize]="10000000"
-                    chooseLabel="Selecionar Arquivo"
-                    (onSelect)="onFileSelect($event)"
-                    (onClear)="onFileRemove()"
-                    [disabled]="uploading"
-                    styleClass="w-full">
-                </p-fileUpload>
                 
-                <div *ngIf="selectedFile" class="mt-2">
-                    <p-chip [label]="selectedFile.name" icon="pi pi-file" [removable]="true" (onRemove)="onFileRemove()"></p-chip>
+                <div class="upload-container" [class.has-file]="selectedFile">
+                    <div *ngIf="!selectedFile" class="upload-area">
+                        <i class="pi pi-cloud-upload upload-icon"></i>
+                        <p class="upload-text mb-2">Arraste um arquivo ou clique para selecionar</p>
+                        <p-fileUpload 
+                            mode="basic" 
+                            name="file"
+                            [auto]="false"
+                            accept=".csv,.xlsx,.xls"
+                            [maxFileSize]="10000000"
+                            chooseLabel="Escolher Arquivo"
+                            (onSelect)="onFileSelect($event)"
+                            [disabled]="uploading"
+                            styleClass="upload-button">
+                        </p-fileUpload>
+                        <small class="text-color-secondary mt-2">CSV, XLSX ou XLS (máx. 10MB)</small>
+                    </div>
+                    
+                    <div *ngIf="selectedFile" class="file-selected">
+                        <div class="file-info">
+                            <i class="pi pi-file-excel file-icon"></i>
+                            <div class="file-details">
+                                <span class="file-name">{{ selectedFile.name }}</span>
+                                <span class="file-size">{{ (selectedFile.size / 1024).toFixed(2) }} KB</span>
+                            </div>
+                        </div>
+                        <p-button 
+                            icon="pi pi-times" 
+                            [text]="true"
+                            [rounded]="true"
+                            severity="danger"
+                            size="small"
+                            (onClick)="onFileRemove()"
+                            [disabled]="uploading">
+                        </p-button>
+                    </div>
                 </div>
-                
-                <small class="block mt-1 text-color-secondary">CSV, XLSX ou XLS (máx. 10MB)</small>
-                </div>
+            </div>
 
-                <p-divider></p-divider>
+            <p-divider></p-divider>
 
                 <!-- Configuration Form -->
                 <form [formGroup]="importForm" class="flex gap-4">
