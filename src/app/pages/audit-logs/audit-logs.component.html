@@ -2,7 +2,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-2xl font-semibold text-surface-900 dark:text-surface-0 m-0">Audit logs</h1>
+            <div class="text-2xl font-semibold text-surface-900 dark:text-surface-0 m-0">Logs de Auditoria</div>
         </div>
         <div class="flex gap-2">
             <p-select
@@ -14,9 +14,7 @@
                 (onChange)="onActionFilter()"
                 styleClass="w-32"
             ></p-select>
-            <button class="px-4 py-2 text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 rounded-lg flex items-center gap-2">
-                <i class="pi pi-download text-xs"></i>
-                Export logs
+            <button pButton icon="pi pi-download" label="Export logs" severity="primary" [outlined]="true">
             </button>
         </div>
     </div>
@@ -26,12 +24,13 @@
         <table class="w-full text-sm">
             <thead class="bg-surface-50 dark:bg-surface-800 border-b border-surface-200 dark:border-surface-700">
                 <tr>
-                    <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">User</th>
-                    <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Action</th>
-                    <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Date & Time</th>
-                    <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Subject</th>
+                    <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Usuário</th>
+                    <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Ação</th>
+                    <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Data & Hora</th>
+                    <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Assunto</th>
+                    <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">IP Address</th>
                     <th class="text-left py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Browser</th>
-                    <th class="text-right py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Actions</th>
+                    <th class="text-right py-3 px-4 font-medium text-surface-600 dark:text-surface-400">Ações</th>
                 </tr>
             </thead>
             <tbody *ngIf="!loading">
@@ -85,6 +84,9 @@
                     </td>
                     <td class="py-3 px-4 text-surface-900 dark:text-surface-0">
                         "{{ log.description }}"
+                    </td>
+                    <td class="py-3 px-4 text-surface-600 dark:text-surface-400">
+                        {{ log.ipAddress }}
                     </td>
                     <td class="py-3 px-4 text-surface-600 dark:text-surface-400">
                         {{ getBrowserFromUserAgent(log.userAgent) }}
