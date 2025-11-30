@@ -14,7 +14,7 @@
                 <div class="upload-container" [class.has-file]="selectedFile">
                     <div *ngIf="!selectedFile" class="upload-area">
                         <i class="pi pi-cloud-upload upload-icon"></i>
-                        <p class="upload-text mb-2">Arraste um arquivo ou clique para selecionar</p>
+                        <p class="upload-text mb-4">Arraste um arquivo ou clique para selecionar</p>
                         <p-fileUpload 
                             mode="basic" 
                             name="file"
@@ -24,14 +24,14 @@
                             chooseLabel="Escolher Arquivo"
                             (onSelect)="onFileSelect($event)"
                             [disabled]="uploading"
-                            styleClass="upload-button">
+                            class="mt-4">
                         </p-fileUpload>
-                        <small class="text-color-secondary mt-2">CSV, XLSX ou XLS (máx. 10MB)</small>
+                        <small class="text-color-secondary mt-4">CSV, XLSX ou XLS (máx. 10MB)</small>
                     </div>
                     
                     <div *ngIf="selectedFile" class="file-selected">
                         <div class="file-info">
-                            <i class="pi pi-file-excel file-icon"></i>
+                            <i class="pi pi-file-excel text-green-600" [style]="{'font-size': '20pt'}"></i>
                             <div class="file-details">
                                 <span class="file-name">{{ selectedFile.name }}</span>
                                 <span class="file-size">{{ (selectedFile.size / 1024).toFixed(2) }} KB</span>

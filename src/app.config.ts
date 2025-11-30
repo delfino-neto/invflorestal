@@ -31,6 +31,7 @@ export const appConfig: ApplicationConfig = {
                 selectionMessage: "{0} itens selecionados",
                 emptyMessage: "Nenhum dado disponível",
                 emptyFilterMessage: "Nenhum resultado encontrado",
+                noFileChosenMessage: "Nenhum arquivo escolhido"
             }
         },)
     ]
