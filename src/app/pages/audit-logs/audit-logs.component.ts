@@ -12,6 +12,9 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { InputTextModule } from 'primeng/inputtext';
 import { DialogModule } from 'primeng/dialog';
+import { ConfirmDialogModule } from 'primeng/confirmdialog';
+import { ToastModule } from 'primeng/toast';
+import { ConfirmationService, MessageService } from 'primeng/api';
 
 import { AuditLogService } from '@/core/services/audit-log.service';
 import { AuditLog, AuditAction } from '@/core/models/audit/audit-log';
@@ -32,8 +35,11 @@ import { AvatarModule } from 'primeng/avatar';
         InputIconModule,
         InputTextModule,
         DialogModule,
-        AvatarModule
+        AvatarModule,
+        ConfirmDialogModule,
+        ToastModule
     ],
+    providers: [ConfirmationService, MessageService],
     templateUrl: './audit-logs.component.html',
     styleUrls: ['./audit-logs.component.scss']
 })
@@ -54,6 +60,9 @@ export class AuditLogsComponent implements OnInit {
     detailDialog = false;
     selectedLog?: AuditLog;
     
+    // Selection
+    selectedLogs: AuditLog[] = [];
+    
     // Actions dropdown
     actions = [
         { label: 'Todas as Ações', value: null },
@@ -67,7 +76,11 @@ export class AuditLogsComponent implements OnInit {
         { label: 'Alterar Senha', value: AuditAction.PASSWORD_CHANGE }
     ];
 
-    constructor(private auditLogService: AuditLogService) {}
+    constructor(
+        private auditLogService: AuditLogService,
+        private confirmationService: ConfirmationService,
+        private messageService: MessageService
+    ) {}
 
     ngOnInit() {
         this.loadAuditLogs();
@@ -246,5 +259,82 @@ export class AuditLogsComponent implements OnInit {
 
     get Math() {
         return Math;
+    }
+
+    deleteLog(log: AuditLog) {
+        this.confirmationService.confirm({
+            message: 'Tem certeza que deseja excluir este log?',
+            header: 'Confirmar Exclusão',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sim',
+            rejectLabel: 'Não',
+            accept: () => {
+                this.auditLogService.deleteAuditLog(log.id).subscribe({
+                    next: () => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: 'Log excluído com sucesso',
+                            life: 3000
+                        });
+                        this.loadAuditLogs();
+                    },
+                    error: (error) => {
+                        console.error('Error deleting audit log:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao excluir log',
+                            life: 3000
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    deleteSelectedLogs() {
+        if (this.selectedLogs.length === 0) {
+            this.confirmationService.confirm({
+                message: 'Selecione pelo menos um log para excluir',
+                header: 'Atenção',
+                icon: 'pi pi-info-circle',
+                rejectVisible: false,
+                acceptLabel: 'OK'
+            });
+            return;
+        }
+
+        this.confirmationService.confirm({
+            message: `Tem certeza que deseja excluir ${this.selectedLogs.length} log(s)?`,
+            header: 'Confirmar Exclusão',
+            icon: 'pi pi-exclamation-triangle',
+            acceptLabel: 'Sim',
+            rejectLabel: 'Não',
+            accept: () => {
+                const ids = this.selectedLogs.map(log => log.id);
+                this.auditLogService.deleteAuditLogs(ids).subscribe({
+                    next: () => {
+                        this.messageService.add({
+                            severity: 'success',
+                            summary: 'Sucesso',
+                            detail: `${this.selectedLogs.length} log(s) excluído(s) com sucesso`,
+                            life: 3000
+                        });
+                        this.selectedLogs = [];
+                        this.loadAuditLogs();
+                    },
+                    error: (error) => {
+                        console.error('Error deleting audit logs:', error);
+                        this.messageService.add({
+                            severity: 'error',
+                            summary: 'Erro',
+                            detail: 'Erro ao excluir logs',
+                            life: 3000
+                        });
+                    }
+                });
+            }
+        });
     }
 }

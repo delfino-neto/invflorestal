@@ -53,4 +53,12 @@ export class AuditLogService {
         
         return this.http.get<AuditLogPage>(`${this.apiUrl}/date-range`, { params });
     }
+
+    deleteAuditLog(id: number): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/${id}`);
+    }
+
+    deleteAuditLogs(ids: number[]): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/batch`, { body: ids });
+    }
 }
