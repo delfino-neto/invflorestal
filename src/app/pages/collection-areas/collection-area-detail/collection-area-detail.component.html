@@ -32,11 +32,114 @@
 
   <!-- Loading State -->
   <div *ngIf="loading" class="info-cards-grid">
-    <p-skeleton height="90px" *ngFor="let i of [1,2,3,4,5,6]"></p-skeleton>
+    <p-skeleton height="90px" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12]"></p-skeleton>
   </div>
 
-  <!-- Info Cards -->
-  <div *ngIf="!loading && area" class="info-cards-grid">
+  <!-- Informações da Área de Coleta -->
+  <div *ngIf="!loading && area" class="area-info-section">
+    <h2 class="section-title">
+      <i class="pi pi-info-circle"></i>
+      Informações da Área
+    </h2>
+    <div class="area-info-cards">
+      <!-- Bioma -->
+      <div class="info-card" *ngIf="area.biome">
+        <div class="card-icon bg-cyan-100 dark:bg-cyan-900">
+          <i class="material-symbols-outlined text-cyan-600 dark:text-cyan-300">forest</i>
+        </div>
+        <div class="card-content">
+          <span class="card-label">Bioma</span>
+          <span class="card-value">{{ area.biome }}</span>
+        </div>
+      </div>
+
+      <!-- Tipo de Vegetação -->
+      <div class="info-card" *ngIf="area.vegetationType">
+        <div class="card-icon bg-lime-100 dark:bg-lime-900">
+          <i class="material-symbols-outlined text-lime-600 dark:text-lime-300">nature</i>
+        </div>
+        <div class="card-content">
+          <span class="card-label">Vegetação</span>
+          <span class="card-value">{{ area.vegetationType }}</span>
+        </div>
+      </div>
+
+      <!-- Zona Climática -->
+      <div class="info-card" *ngIf="area.climateZone">
+        <div class="card-icon bg-sky-100 dark:bg-sky-900">
+          <i class="pi pi-sun text-sky-600 dark:text-sky-300"></i>
+        </div>
+        <div class="card-content">
+          <span class="card-label">Clima</span>
+          <span class="card-value">{{ area.climateZone }}</span>
+        </div>
+      </div>
+
+      <!-- Tipo de Solo -->
+      <div class="info-card" *ngIf="area.soilType">
+        <div class="card-icon bg-amber-100 dark:bg-amber-900">
+          <i class="material-symbols-outlined text-amber-600 dark:text-amber-300">landscape</i>
+        </div>
+        <div class="card-content">
+          <span class="card-label">Solo</span>
+          <span class="card-value">{{ area.soilType }}</span>
+        </div>
+      </div>
+
+      <!-- Status de Conservação -->
+      <div class="info-card" *ngIf="area.conservationStatus">
+        <div class="card-icon bg-emerald-100 dark:bg-emerald-900">
+          <i class="pi pi-shield text-emerald-600 dark:text-emerald-300"></i>
+        </div>
+        <div class="card-content">
+          <span class="card-label">Conservação</span>
+          <span class="card-value">{{ area.conservationStatus }}</span>
+        </div>
+      </div>
+
+      <!-- Altitude -->
+      <div class="info-card" *ngIf="area.altitudeM != null">
+        <div class="card-icon bg-indigo-100 dark:bg-indigo-900">
+          <i class="material-symbols-outlined text-indigo-600 dark:text-indigo-300">terrain</i>
+        </div>
+        <div class="card-content">
+          <span class="card-label">Altitude</span>
+          <span class="card-value">{{ area.altitudeM }} m</span>
+        </div>
+      </div>
+
+      <!-- Área Protegida -->
+      <div class="info-card" *ngIf="area.protectedArea != null">
+        <div class="card-icon" [class]="area.protectedArea ? 'bg-green-100 dark:bg-green-900' : 'bg-gray-100 dark:bg-gray-900'">
+          <i class="pi" [class]="area.protectedArea ? 'pi-check-circle text-green-600 dark:text-green-300' : 'pi-times-circle text-gray-600 dark:text-gray-300'"></i>
+        </div>
+        <div class="card-content">
+          <span class="card-label">Área Protegida</span>
+          <span class="card-value">{{ area.protectedArea ? 'Sim' : 'Não' }}</span>
+          <span class="card-hint" *ngIf="area.protectedArea && area.protectedAreaName">{{ area.protectedAreaName }}</span>
+        </div>
+      </div>
+
+      <!-- Proprietário -->
+      <div class="info-card" *ngIf="area.landOwner">
+        <div class="card-icon bg-violet-100 dark:bg-violet-900">
+          <i class="pi pi-briefcase text-violet-600 dark:text-violet-300"></i>
+        </div>
+        <div class="card-content">
+          <span class="card-label">Proprietário</span>
+          <span class="card-value">{{ area.landOwner }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Estatísticas -->
+  <div *ngIf="!loading && area" class="stats-section">
+    <h2 class="section-title">
+      <i class="pi pi-chart-bar"></i>
+      Estatísticas
+    </h2>
+    <div class="info-cards-grid">
     <!-- Total de Plots -->
     <div class="info-card stats-card">
       <div class="card-icon bg-blue-100 dark:bg-blue-900">
@@ -106,12 +209,6 @@
         <span class="card-hint">{{ formatTimeAgo(area.updatedAt) }}</span>
       </div>
     </div>
-  </div>
-
-  <!-- Notas (se houver) -->
-  <div *ngIf="!loading && area && area.notes" class="notes-section">
-    <i class="pi pi-info-circle"></i>
-    <span>{{ area.notes }}</span>
   </div>
 
   <!-- Layout Principal -->

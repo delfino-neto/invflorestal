@@ -77,6 +77,38 @@
   }
 }
 
+/* Section Titles */
+.section-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-color);
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  i {
+    font-size: 1.25rem;
+    color: var(--primary-color);
+  }
+}
+
+/* Area Info Section */
+.area-info-section {
+  margin-bottom: 2rem;
+}
+
+.area-info-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+/* Stats Section */
+.stats-section {
+  margin-bottom: 1.5rem;
+}
+
 /* Info Cards */
 .info-cards-grid {
   display: grid;
@@ -152,11 +184,19 @@
   .info-cards-grid {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  .area-info-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
   .info-cards-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+
+  .area-info-cards {
+    grid-template-columns: 1fr;
   }
   
   .card-value {
