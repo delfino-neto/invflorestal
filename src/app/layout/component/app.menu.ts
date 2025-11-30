@@ -68,11 +68,10 @@ export class AppMenu {
                 },
                 { 
                     label: 'Dados', 
-                    icon: 'pi pi-fw pi-database', 
-                    disabled: true,
+                    icon: 'pi pi-fw pi-database',
                     items: [
                     { label: 'Importar', icon: 'pi pi-fw pi-upload', routerLink: ['/imports'] },
-                    { label: 'Exportar', icon: 'pi pi-fw pi-download', routerLink: ['/exports'] }
+                    { label: 'Exportar', icon: 'pi pi-fw pi-download', routerLink: ['/exports'], disabled: true }
                     ]
                 },
                 { label: 'Gestão de Usuários', icon: 'pi pi-fw pi-users', routerLink: ['/users'] },
