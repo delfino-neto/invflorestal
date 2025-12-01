@@ -27,6 +27,7 @@ import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
+import Cluster from 'ol/source/Cluster';
 import { fromLonLat, toLonLat } from 'ol/proj';
 import { Feature } from 'ol';
 import { Polygon, Point } from 'ol/geom';
@@ -76,6 +77,12 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
   // Marcadores para visualizar (pontos no mapa)
   @Input() markers: MapMarker[] = [];
   
+  // Habilitar clustering de marcadores (agrupamento inteligente)
+  @Input() enableClustering: boolean = false;
+  
+  // Distância mínima para clustering (em pixels)
+  @Input() clusterDistance: number = 50;
+  
   // Habilitar clique no mapa para selecionar coordenadas
   @Input() enableMapClick: boolean = false;
   
@@ -91,6 +98,7 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
   vectorLayer!: VectorLayer<VectorSource>;
   markersSource!: VectorSource;
   markersLayer!: VectorLayer<VectorSource>;
+  clusterSource?: Cluster; // Source para clustering
   private hasInitialFit = false; // Flag para controlar o fit inicial
   
   // Controle de visibilidade de labels
@@ -159,13 +167,29 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
       renderBuffer: 4096
     });
     
-    // Criar source e layer para marcadores (pontos)
+    // Criar source para marcadores (pontos)
     this.markersSource = new VectorSource();
     
-    this.markersLayer = new VectorLayer({
-      source: this.markersSource,
-      zIndex: 100 // Marcadores ficam acima das geometrias
-    });
+    // Se clustering está habilitado, criar cluster source
+    if (this.enableClustering) {
+      this.clusterSource = new Cluster({
+        distance: this.clusterDistance,
+        source: this.markersSource,
+        minDistance: 20 // Distância mínima entre clusters
+      });
+      
+      this.markersLayer = new VectorLayer({
+        source: this.clusterSource,
+        style: (feature) => this.getClusterStyle(feature as any),
+        zIndex: 100
+      });
+    } else {
+      // Modo tradicional sem clustering
+      this.markersLayer = new VectorLayer({
+        source: this.markersSource,
+        zIndex: 100
+      });
+    }
 
     // Criar mapa
     this.map = new Map({
@@ -189,11 +213,38 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
       let clickedMarker = false;
       
       this.map!.forEachFeatureAtPixel(event.pixel, (feature) => {
-        const markerData = feature.get('markerData');
-        if (markerData && markerData.onClick) {
-          markerData.onClick(markerData);
-          clickedMarker = true;
+        // Se está usando clustering, a feature pode ser um cluster
+        if (this.enableClustering && this.clusterSource) {
+          const features = feature.get('features');
+          if (features && features.length > 1) {
+            // É um cluster com múltiplos pontos - fazer zoom no cluster
+            const extent = feature.getGeometry()!.getExtent();
+            this.map!.getView().fit(extent, {
+              padding: [100, 100, 100, 100],
+              duration: 500,
+              maxZoom: this.map!.getView().getZoom()! + 2
+            });
+            clickedMarker = true;
+            return true; // Parar iteração
+          } else if (features && features.length === 1) {
+            // É um cluster com um único ponto - tratar como marcador normal
+            const markerData = features[0].get('markerData');
+            if (markerData && markerData.onClick) {
+              markerData.onClick(markerData);
+              clickedMarker = true;
+              return true;
+            }
+          }
+        } else {
+          // Modo tradicional sem clustering
+          const markerData = feature.get('markerData');
+          if (markerData && markerData.onClick) {
+            markerData.onClick(markerData);
+            clickedMarker = true;
+            return true;
+          }
         }
+        return false;
       });
       
       // Se não clicou em um marcador e o clique no mapa está habilitado, emitir coordenadas
@@ -210,28 +261,39 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
       let foundMarker = false;
       
       this.map!.forEachFeatureAtPixel(pixel, (feature) => {
-        const markerData = feature.get('markerData');
-        if (markerData) {
-          foundMarker = true;
-          
-          // Se mudou de marcador, atualizar hover
-          if (this.hoveredMarkerFeature !== feature) {
-            // Remover hover do anterior
-            if (this.hoveredMarkerFeature) {
-              const prevData = this.hoveredMarkerFeature.get('markerData');
-              this.applyMarkerStyle(this.hoveredMarkerFeature, prevData, false);
-            }
+        if (this.enableClustering && this.clusterSource) {
+          const features = feature.get('features');
+          if (features) {
+            foundMarker = true;
+            // Para clusters, apenas mudar cursor
+            return true;
+          }
+        } else {
+          const markerData = feature.get('markerData');
+          if (markerData) {
+            foundMarker = true;
             
-            // Aplicar hover no novo
-            this.hoveredMarkerFeature = feature as Feature;
-            this.applyMarkerStyle(feature as Feature, markerData, true);
-            
-            // Chamar callback de hover
-            if (markerData.onHover) {
-              markerData.onHover(markerData);
+            // Se mudou de marcador, atualizar hover
+            if (this.hoveredMarkerFeature !== feature) {
+              // Remover hover do anterior
+              if (this.hoveredMarkerFeature) {
+                const prevData = this.hoveredMarkerFeature.get('markerData');
+                this.applyMarkerStyle(this.hoveredMarkerFeature, prevData, false);
+              }
+              
+              // Aplicar hover no novo
+              this.hoveredMarkerFeature = feature as Feature;
+              this.applyMarkerStyle(feature as Feature, markerData, true);
+              
+              // Chamar callback de hover
+              if (markerData.onHover) {
+                markerData.onHover(markerData);
+              }
             }
+            return true;
           }
         }
+        return false;
       });
       
       // Se não encontrou marcador, remover hover
@@ -544,6 +606,98 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
     });
     
     feature.setStyle(style);
+  }
+  
+  /**
+   * Cria o estilo para clusters de marcadores
+   * Exibe um círculo maior com o número de pontos agrupados
+   */
+  private getClusterStyle(feature: Feature): Style {
+    const features = feature.get('features');
+    const size = features ? features.length : 0;
+    
+    if (size === 1) {
+      // Apenas um marcador - usar estilo normal
+      const marker = features[0].get('markerData');
+      if (marker) {
+        const color = marker.color || '#ff0000';
+        return new Style({
+          image: new Circle({
+            radius: 7,
+            fill: new Fill({
+              color: color
+            }),
+            stroke: new Stroke({
+              color: '#ffffff',
+              width: 2.5
+            })
+          })
+        });
+      }
+    }
+    
+    // Cluster com múltiplos marcadores
+    // Calcular raio baseado na quantidade (até um limite)
+    let radius = 15;
+    let fontSize = '13px';
+    
+    if (size > 100) {
+      radius = 28;
+      fontSize = '16px';
+    } else if (size > 50) {
+      radius = 24;
+      fontSize = '15px';
+    } else if (size > 20) {
+      radius = 20;
+      fontSize = '14px';
+    } else if (size > 10) {
+      radius = 17;
+      fontSize = '13px';
+    }
+    
+    // Cores gradientes baseadas na densidade
+    let fillColor = 'rgba(59, 130, 246, 0.7)'; // Azul claro
+    let strokeColor = 'rgb(37, 99, 235)'; // Azul
+    
+    if (size > 100) {
+      fillColor = 'rgba(239, 68, 68, 0.8)'; // Vermelho
+      strokeColor = 'rgb(220, 38, 38)';
+    } else if (size > 50) {
+      fillColor = 'rgba(249, 115, 22, 0.8)'; // Laranja
+      strokeColor = 'rgb(234, 88, 12)';
+    } else if (size > 20) {
+      fillColor = 'rgba(234, 179, 8, 0.8)'; // Amarelo
+      strokeColor = 'rgb(202, 138, 4)';
+    } else if (size > 10) {
+      fillColor = 'rgba(34, 197, 94, 0.8)'; // Verde
+      strokeColor = 'rgb(22, 163, 74)';
+    }
+    
+    return new Style({
+      image: new Circle({
+        radius: radius,
+        fill: new Fill({
+          color: fillColor
+        }),
+        stroke: new Stroke({
+          color: strokeColor,
+          width: 3
+        })
+      }),
+      text: new Text({
+        text: size.toString(),
+        font: `bold ${fontSize} sans-serif`,
+        fill: new Fill({
+          color: '#ffffff'
+        }),
+        stroke: new Stroke({
+          color: strokeColor,
+          width: 2
+        }),
+        textAlign: 'center',
+        textBaseline: 'middle'
+      })
+    });
   }
 
   updateMapSize(): void {
