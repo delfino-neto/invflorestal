@@ -40,30 +40,9 @@
             <p-card header="Distribuição de Espécies" styleClass="shadow-sm border-gray-200">
                 <p-chart type="bar" [data]="speciesData" [options]="speciesChartOptions"></p-chart>
             </p-card>
-
-            <p-card styleClass="shadow-sm border-gray-200">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-semibold text-gray-900">Mapa de Distribuição</h3>
-                    <button pButton severity="secondary" type="button" label="Ver mapa completo" icon="pi pi-map-marker"
-                        class="p-button-text"></button>
-                </div>
-                <div [style]="{'width': '100%', 'height': '100%'}">
-                    <app-trees-map></app-trees-map>
-                </div>
-            </p-card>
         </div>
 
         <div class="space-y-6">
-            <p-card header="Ações Rápidas" styleClass="shadow-sm border-gray-200">
-                <div class="space-y-3">
-                    <button pButton type="button" label="Cadastrar Nova Espécie" icon="pi pi-plus"
-                        class="w-full"></button>
-                    <button pButton type="button" label="Ver Mapa Completo" severity="info" icon="pi pi-map" class="w-full"></button>
-                    <button pButton type="button" label="Exportar CSV" icon="pi pi-download"
-                        class="p-button-secondary w-full"></button>
-                </div>
-            </p-card>
-
             <!-- Destaques -->
             <p-card header="Destaques" styleClass="shadow-sm border-gray-200">
                 <div class="space-y-4">
@@ -88,6 +67,9 @@
                             <p class="text-sm text-emerald-600">{{ activity.species }}</p>
                             <p class="text-xs text-gray-500 mt-1">{{ activity.time }} • {{ activity.user }}</p>
                         </div>
+                    </div>
+                    <div *ngIf="recentActivities.length === 0" class="text-center py-4 text-gray-500">
+                        <p class="text-sm">Nenhuma atividade recente</p>
                     </div>
                 </div>
             </p-card>

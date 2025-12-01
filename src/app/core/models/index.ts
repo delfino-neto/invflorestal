@@ -13,3 +13,7 @@ export * from './specimen/specimen-object';
 export * from './specimen/species-info';
 
 export * from './media/media';
+
+export * from './dashboard';
+
+export * from './dashboard';

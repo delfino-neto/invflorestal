@@ -1,4 +1,6 @@
 import { AuthService } from "@/core/services/auth.service";
+import { DashboardService } from "@/core/services/dashboard.service";
+import { DashboardStatistics } from "@/core/models/dashboard";
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
 import {CardModule} from 'primeng/card'
@@ -20,8 +22,12 @@ export class DashboardComponent implements OnInit {
     recentActivities: any[] = [];
     suggestions: any[] = [];
     lastUpdate: string = "";
+    loading: boolean = true;
 
-    constructor(private authService: AuthService) { }
+    constructor(
+        private authService: AuthService,
+        private dashboardService: DashboardService
+    ) { }
 
     get username() {
         return this.authService.getName() ?? "Usuário(a)";
@@ -29,49 +35,76 @@ export class DashboardComponent implements OnInit {
 
     ngOnInit(): void {
         this.lastUpdate = new Date().toLocaleString('pt-BR');
+        this.loadDashboardData();
+    }
 
+    loadDashboardData(): void {
+        this.loading = true;
+        this.dashboardService.getStatistics().subscribe({
+            next: (data: DashboardStatistics) => {
+                this.updateStats(data);
+                this.updateSpeciesChart(data);
+                this.updateRecentActivities(data);
+                this.updateSuggestions(data);
+                this.loading = false;
+            },
+            error: (error) => {
+                console.error('Erro ao carregar dados do dashboard:', error);
+                this.loading = false;
+                // Fallback para dados de exemplo em caso de erro
+                this.loadFallbackData();
+            }
+        });
+    }
+
+    updateStats(data: DashboardStatistics): void {
         this.stats = [
             {
-                title: 'Total de Árvores',
-                value: '2,847',
-                change: '+12%',
+                title: 'Total de Espécimes',
+                value: data.totalSpecimens.toString(),
+                change: `+${data.recentSpecimens}`,
                 changeType: 'positive',
-                materialIcon: 'nature',
+                materialIcon: 'potted_plant',
                 color: 'bg-emerald-500'
             },
             {
                 title: 'Espécies Diferentes',
-                value: '156',
-                change: '+3',
-                changeType: 'positive',
+                value: data.totalSpecies.toString(),
+                change: `${data.topSpecies.length} principais`,
+                changeType: 'neutral',
                 materialIcon: 'eco',
                 color: 'bg-green-500'
             },
             {
-                title: 'Registros Recentes',
-                value: '89',
-                change: 'Últimos 7 dias',
+                title: 'Áreas de Coleta',
+                value: data.totalCollectionAreas.toString(),
+                change: 'Cadastradas',
                 changeType: 'neutral',
-                materialIcon: 'calendar_today',
+                materialIcon: 'map',
                 color: 'bg-blue-500'
             },
             {
-                title: 'Taxa de Crescimento',
-                value: '94.2%',
-                change: '+2.1%',
+                title: 'Registros Recentes',
+                value: data.recentSpecimens.toString(),
+                change: 'Últimos 7 dias',
                 changeType: 'positive',
-                materialIcon: 'monitoring',
+                materialIcon: 'calendar_today',
                 color: 'bg-purple-500'
             },
         ];
+    }
+
+    updateSpeciesChart(data: DashboardStatistics): void {
+        const labels = data.topSpecies.map(s => s.speciesName);
+        const counts = data.topSpecies.map(s => s.count);
 
         this.speciesData = {
-            labels: ['Pau-brasil', 'Ipê Amarelo', 'Cedro', 'Jatobá', 'Outros'],
+            labels: labels,
             datasets: [
                 {
-                    label: 'Quantidade de Árvores',
+                    label: 'Quantidade de Espécimes',
                     backgroundColor: '#42A5F5',
-                    data: [342, 298, 256, 189, 1762]
+                    data: counts
                 }
             ]
         };
@@ -102,35 +135,108 @@ export class DashboardComponent implements OnInit {
                 }
             }
         };
+    }
 
-        this.recentActivities = [
-            { id: 1, action: 'Nova espécie cadastrada', species: 'Pau-ferro', time: '2 horas atrás', user: 'João Silva' },
-            { id: 2, action: 'Upload de fotos', species: 'Ipê Roxo', time: '4 horas atrás', user: 'Maria Santos' },
-            { id: 3, action: 'Atualização de dados', species: 'Jequitibá', time: '6 horas atrás', user: 'Pedro Costa' },
-        ];
+    updateRecentActivities(data: DashboardStatistics): void {
+        this.recentActivities = data.recentActivities;
+    }
 
-        this.suggestions = [
-            {
+    updateSuggestions(data: DashboardStatistics): void {
+        this.suggestions = [];
+
+        // Destaque da espécie mais comum
+        if (data.topSpecies.length > 0) {
+            const topSpecies = data.topSpecies[0];
+            this.suggestions.push({
                 type: 'highlight',
                 title: 'Espécie em Destaque',
-                content: 'Pau-brasil teve 23 novos registros esta semana',
+                content: `${topSpecies.speciesName} tem ${topSpecies.count} espécimes registrados`,
                 icon: 'pi pi-star-fill',
                 color: 'text-yellow-600'
-            },
-            {
-                type: 'alert',
-                title: 'Alerta de Inconsistência',
-                content: '5 registros precisam de verificação de coordenadas',
-                icon: 'pi pi-exclamation-triangle',
-                color: 'text-red-600'
-            },
-            {
+            });
+        }
+
+        // Atividade recente
+        if (data.recentSpecimens > 0) {
+            this.suggestions.push({
                 type: 'activity',
                 title: 'Atividade Recente',
-                content: '12 usuários ativos nas últimas 24 horas',
-                icon: 'pi pi-users',
+                content: `${data.recentSpecimens} novos espécimes nos últimos 7 dias`,
+                icon: 'pi pi-chart-line',
                 color: 'text-blue-600'
+            });
+        }
+
+        // Diversidade
+        if (data.totalSpecies > 0 && data.totalSpecimens > 0) {
+            const diversity = (data.totalSpecies / data.totalSpecimens * 100).toFixed(1);
+            this.suggestions.push({
+                type: 'info',
+                title: 'Índice de Diversidade',
+                content: `${diversity}% de diversidade de espécies no inventário`,
+                icon: 'pi pi-info-circle',
+                color: 'text-green-600'
+            });
+        }
+    }
+
+    loadFallbackData(): void {
+        // Dados de exemplo caso a API falhe
+        this.stats = [
+            {
+                title: 'Total de Espécimes',
+                value: '-',
+                change: 'Carregando...',
+                changeType: 'neutral',
+                materialIcon: 'potted_plant',
+                color: 'bg-emerald-500'
             },
+            {
+                title: 'Espécies Diferentes',
+                value: '-',
+                change: 'Carregando...',
+                changeType: 'neutral',
+                materialIcon: 'eco',
+                color: 'bg-green-500'
+            },
+            {
+                title: 'Áreas de Coleta',
+                value: '-',
+                change: 'Carregando...',
+                changeType: 'neutral',
+                materialIcon: 'map',
+                color: 'bg-blue-500'
+            },
+            {
+                title: 'Registros Recentes',
+                value: '-',
+                change: 'Últimos 7 dias',
+                changeType: 'neutral',
+                materialIcon: 'calendar_today',
+                color: 'bg-purple-500'
+            },
+        ];
+
+        this.speciesData = {
+            labels: ['Nenhum dado disponível'],
+            datasets: [
+                {
+                    label: 'Quantidade de Espécimes',
+                    backgroundColor: '#42A5F5',
+                    data: [0]
+                }
+            ]
+        };
+
+        this.recentActivities = [];
+        this.suggestions = [
+            {
+                type: 'info',
+                title: 'Sem dados',
+                content: 'Não foi possível carregar os dados do dashboard',
+                icon: 'pi pi-info-circle',
+                color: 'text-gray-600'
+            }
         ];
     }
 }

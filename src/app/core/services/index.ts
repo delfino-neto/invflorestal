@@ -7,6 +7,7 @@ export * from './specimen-object.service';
 export * from './media.service';
 export * from './species-info.service';
 export * from './data-import.service';
+export * from './dashboard.service';
 
 // Common interfaces
 export interface Page<T> {
