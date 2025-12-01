@@ -167,11 +167,13 @@ export class SpeciesTaxonomyListComponent implements OnInit {
 
   confirmDelete(taxonomy: SpeciesTaxonomy): void {
     this.confirmationService.confirm({
-      message: `Tem certeza que deseja excluir "${taxonomy.scientificName}"?`,
-      header: 'Confirmar Exclusão',
+      message: 'Esta ação não pode ser desfeita. Todos os dados associados a esta espécie serão perdidos.',
+      header: 'Tem certeza?',
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sim',
-      rejectLabel: 'Não',
+      acceptLabel: 'Excluir espécie',
+      rejectLabel: 'Cancelar',
+      acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-outlined',
       accept: () => this.deleteTaxonomy(taxonomy.id!)
     });
   }

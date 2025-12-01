@@ -399,11 +399,13 @@ export class AuditLogsComponent implements OnInit {
 
     deleteLog(log: AuditLog) {
         this.confirmationService.confirm({
-            message: 'Tem certeza que deseja excluir este log?',
-            header: 'Confirmar Exclusão',
+            message: 'Esta ação não pode ser desfeita. Todos os dados associados a este registro serão perdidos.',
+            header: 'Tem certeza?',
             icon: 'pi pi-exclamation-triangle',
-            acceptLabel: 'Sim',
-            rejectLabel: 'Não',
+            acceptLabel: 'Excluir registro',
+            rejectLabel: 'Cancelar',
+            acceptButtonStyleClass: 'p-button-danger',
+            rejectButtonStyleClass: 'p-button-outlined',
             accept: () => {
                 this.auditLogService.deleteAuditLog(log.id).subscribe({
                     next: () => {
@@ -442,11 +444,13 @@ export class AuditLogsComponent implements OnInit {
         }
 
         this.confirmationService.confirm({
-            message: `Tem certeza que deseja excluir ${this.selectedLogs.length} log(s)?`,
-            header: 'Confirmar Exclusão',
+            message: `Esta ação não pode ser desfeita. Todos os dados associados a estes ${this.selectedLogs.length} registros serão perdidos.`,
+            header: 'Tem certeza?',
             icon: 'pi pi-exclamation-triangle',
-            acceptLabel: 'Sim',
-            rejectLabel: 'Não',
+            acceptLabel: 'Excluir registros',
+            rejectLabel: 'Cancelar',
+            acceptButtonStyleClass: 'p-button-danger',
+            rejectButtonStyleClass: 'p-button-outlined',
             accept: () => {
                 const ids = this.selectedLogs.map(log => log.id);
                 this.auditLogService.deleteAuditLogs(ids).subscribe({

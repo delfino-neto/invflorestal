@@ -256,12 +256,13 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
 
   deletePlot(plot: Plot): void {
     this.confirmationService.confirm({
-      message: `Tem certeza que deseja excluir o plot "${plot.plotCode}"?`,
-      header: 'Confirmar Exclusão',
+      message: 'Esta ação não pode ser desfeita. Todos os dados associados a este plot serão perdidos.',
+      header: 'Tem certeza?',
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sim, excluir',
+      acceptLabel: 'Excluir plot',
       rejectLabel: 'Cancelar',
       acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-outlined',
       accept: () => {
         if (plot.id) {
           this.plotService.delete(plot.id).subscribe({

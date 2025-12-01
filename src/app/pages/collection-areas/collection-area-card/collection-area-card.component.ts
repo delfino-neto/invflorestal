@@ -221,12 +221,13 @@ export class CollectionAreaCardComponent implements OnInit, AfterViewInit, OnDes
 
   onDelete(): void {
     this.confirmationService.confirm({
-      message: `Tem certeza que deseja excluir a área "${this.area.name}"?`,
-      header: 'Confirmar Exclusão',
+      message: 'Esta ação não pode ser desfeita. Todos os dados associados a esta área de coleta serão perdidos.',
+      header: 'Tem certeza?',
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sim, excluir',
+      acceptLabel: 'Excluir área',
       rejectLabel: 'Cancelar',
       acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-outlined',
       accept: () => {
         if (this.area.id) {
           this.collectionAreaService.delete(this.area.id).subscribe({

@@ -328,12 +328,13 @@ export class UserManagementComponent implements OnInit {
 
     deleteUser(user: User): void {
         this.confirmationService.confirm({
-            message: `Tem certeza que deseja deletar o usuário ${user.name}?`,
-            header: 'Confirmar Exclusão',
+            message: 'Esta ação não pode ser desfeita. Todos os dados associados a este usuário serão perdidos.',
+            header: 'Tem certeza?',
             icon: 'pi pi-exclamation-triangle',
-            acceptLabel: 'Sim',
-            rejectLabel: 'Não',
+            acceptLabel: 'Excluir usuário',
+            rejectLabel: 'Cancelar',
             acceptButtonStyleClass: 'p-button-danger',
+            rejectButtonStyleClass: 'p-button-outlined',
             accept: () => {
                 this.userService.delete(user.id!).subscribe({
                     next: () => {

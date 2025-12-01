@@ -154,12 +154,13 @@ export class SpecimenListComponent implements OnInit, OnDestroy {
 
   confirmDelete(specimen: SpecimenObject): void {
     this.confirmationService.confirm({
-      message: `Tem certeza que deseja excluir o espécime de ${specimen.speciesCommonName || specimen.speciesScientificName}?`,
-      header: 'Confirmar Exclusão',
+      message: 'Esta ação não pode ser desfeita. Todos os dados associados a este espécime serão perdidos.',
+      header: 'Tem certeza?',
       icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Sim, excluir',
+      acceptLabel: 'Excluir espécime',
       rejectLabel: 'Cancelar',
       acceptButtonStyleClass: 'p-button-danger',
+      rejectButtonStyleClass: 'p-button-outlined',
       accept: () => {
         this.deleteSpecimen(specimen.id!);
       }
