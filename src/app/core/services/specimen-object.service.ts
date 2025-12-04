@@ -35,4 +35,13 @@ export class SpecimenObjectService {
   findByCollectionAreaId(areaId: number): Observable<SpecimenObject[]> {
     return this.http.get<SpecimenObject[]>(`${this.apiUrl}/by-area/${areaId}`);
   }
+
+  findWithFilters(speciesId?: number, areaId?: number, observerId?: number): Observable<SpecimenObject[]> {
+    let params: any = {};
+    if (speciesId) params.speciesId = speciesId;
+    if (areaId) params.areaId = areaId;
+    if (observerId) params.observerId = observerId;
+    
+    return this.http.get<SpecimenObject[]>(`${this.apiUrl}/filter`, { params });
+  }
 }

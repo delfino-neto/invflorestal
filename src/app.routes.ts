@@ -9,6 +9,7 @@ import { COLLECTION_AREA_ROUTES } from './app/pages/collection-areas/collection-
 import { SPECIMEN_ROUTES } from './app/pages/specimens/specimen.routes';
 import { AUDIT_LOG_ROUTES } from './app/pages/audit-logs/audit-logs.routes';
 import { DATA_IMPORT_ROUTES } from './app/pages/data-import/data-import.routes';
+import { MAP_ROUTES } from './app/pages/map/map.routes';
 import { authGuard } from '@/core';
 
 export const routes: Routes = [
@@ -25,7 +26,8 @@ export const routes: Routes = [
             { path: 'collection-areas', children: COLLECTION_AREA_ROUTES },
             { path: 'specimens', children: SPECIMEN_ROUTES },
             { path: 'audit-logs', children: AUDIT_LOG_ROUTES },
-            { path: 'imports', children: DATA_IMPORT_ROUTES }
+            { path: 'imports', children: DATA_IMPORT_ROUTES },
+            { path: 'map', children: MAP_ROUTES }
         ]
     },
     { path: '**', redirectTo: 'error' } // Wildcard route for a 404 page

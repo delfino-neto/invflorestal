@@ -29,7 +29,7 @@ export class AppMenu {
 
         this.model[0].items = [
             { label: 'Início', icon: 'pi pi-fw pi-home', routerLink: ['/dashboard'] },
-            { label: 'Mapa Georreferenciado', icon: 'pi pi-fw pi-map', routerLink: ['/map'], disabled: true },
+            { label: 'Mapa Georreferenciado', icon: 'pi pi-fw pi-map', routerLink: ['/map'] },
         ];
 
         if(this.authService.getRoles()?.includes("ADMIN")){
@@ -46,7 +46,6 @@ export class AppMenu {
                                 exact: false,
                             }
                         },
-                        { label: 'Parcelas', icon: 'pi pi-fw pi-th-large', routerLink: ['/plots'], disabled: true },
                         { 
                             label: 'Espécimes', 
                             icon: 'pi pi-fw pi-sitemap', 
@@ -62,8 +61,6 @@ export class AppMenu {
                     iconClass: 'nature',
                     items: [
                         { label: 'Listar Espécies', icon: 'pi pi-fw pi-th-large', routerLink: ['/species'] },
-                        { label: 'Histórico', icon: 'pi pi-fw pi-history', routerLink: ['/species/history'] },
-                        { label: 'Identificação IA', icon: 'pi pi-fw pi-camera', routerLink: ['/species/identify'] }
                     ]
                 },
                 { 
@@ -71,7 +68,6 @@ export class AppMenu {
                     icon: 'pi pi-fw pi-database',
                     items: [
                     { label: 'Importar', icon: 'pi pi-fw pi-upload', routerLink: ['/imports'] },
-                    { label: 'Exportar', icon: 'pi pi-fw pi-download', routerLink: ['/exports'], disabled: true }
                     ]
                 },
                 { label: 'Gestão de Usuários', icon: 'pi pi-fw pi-users', routerLink: ['/users'] },

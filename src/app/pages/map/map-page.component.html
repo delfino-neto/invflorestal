@@ -1,0 +1,182 @@
+<div class="map-page-container">
+  <!-- Top Bar - Filtros -->
+  <div class="filter-bar bg-white border-b border-gray-200 shadow-sm">
+    <div class="px-6 py-4">
+      <div class="flex items-center gap-4 flex-wrap">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-filter text-gray-600"></i>
+          <span class="text-lg font-semibold text-gray-800">Filtros</span>
+        </div>
+
+        <div class="flex-1 flex items-center gap-4 flex-wrap">
+          <!-- Filtro por Espécie -->
+          <div class="filter-item">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Espécie</label>
+            <p-select
+              [(ngModel)]="selectedSpecies"
+              [options]="speciesList"
+              optionLabel="scientificName"
+              placeholder="Todas as espécies"
+              [filter]="true"
+              filterBy="scientificName,commonName"
+              [showClear]="true"
+              styleClass="w-64"
+            >
+              <ng-template pTemplate="selectedItem">
+                <div *ngIf="selectedSpecies" class="flex items-center gap-2">
+                  <i class="pi pi-leaf text-green-600"></i>
+                  <span class="font-medium">{{ selectedSpecies.scientificName }}</span>
+                </div>
+              </ng-template>
+              <ng-template let-species pTemplate="item">
+                <div class="flex flex-col py-1">
+                  <span class="font-medium text-gray-900">{{ species.scientificName }}</span>
+                  <span class="text-sm text-gray-500">{{ species.commonName }}</span>
+                </div>
+              </ng-template>
+            </p-select>
+          </div>
+
+          <!-- Filtro por Área -->
+          <div class="filter-item">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Área de Coleta</label>
+            <p-select
+              [(ngModel)]="selectedArea"
+              [options]="areasList"
+              optionLabel="name"
+              placeholder="Todas as áreas"
+              [filter]="true"
+              filterBy="name,code"
+              [showClear]="true"
+              styleClass="w-64"
+            >
+              <ng-template pTemplate="selectedItem">
+                <div *ngIf="selectedArea" class="flex items-center gap-2">
+                  <i class="pi pi-map-marker text-blue-600"></i>
+                  <span class="font-medium">{{ selectedArea.name }}</span>
+                </div>
+              </ng-template>
+              <ng-template let-area pTemplate="item">
+                <div class="flex flex-col py-1">
+                  <span class="font-medium text-gray-900">{{ area.name }}</span>
+                  <span class="text-sm text-gray-500">{{ area.code }}</span>
+                </div>
+              </ng-template>
+            </p-select>
+          </div>
+
+          <!-- Filtro por Observador -->
+          <div class="filter-item">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Observador</label>
+            <p-select
+              [(ngModel)]="selectedObserver"
+              [options]="observersList"
+              optionLabel="name"
+              placeholder="Todos os observadores"
+              [filter]="true"
+              filterBy="name,email"
+              [showClear]="true"
+              styleClass="w-64"
+            >
+              <ng-template pTemplate="selectedItem">
+                <div *ngIf="selectedObserver" class="flex items-center gap-2">
+                  <i class="pi pi-user text-purple-600"></i>
+                  <span class="font-medium">{{ selectedObserver.name }}</span>
+                </div>
+              </ng-template>
+              <ng-template let-user pTemplate="item">
+                <div class="flex flex-col py-1">
+                  <span class="font-medium text-gray-900">{{ user.name }}</span>
+                  <span class="text-sm text-gray-500">{{ user.email }}</span>
+                </div>
+              </ng-template>
+            </p-select>
+          </div>
+
+          <!-- Botões -->
+          <div class="flex items-end gap-2 ml-auto">
+            <p-button
+              label="Filtrar"
+              icon="pi pi-search"
+              (onClick)="applyFilters()"
+              [loading]="loading"
+              styleClass="p-button-primary"
+              pTooltip="Aplicar filtros"
+              tooltipPosition="bottom"
+            ></p-button>
+            
+            <p-button
+              label="Limpar"
+              icon="pi pi-times"
+              (onClick)="clearFilters()"
+              [disabled]="loading"
+              styleClass="p-button-outlined p-button-secondary"
+              pTooltip="Limpar todos os filtros"
+              tooltipPosition="bottom"
+            ></p-button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contador de resultados -->
+      <div class="mt-3 pt-3 border-t border-gray-100">
+        <div class="flex items-center gap-2 text-sm text-gray-600">
+          <i class="pi pi-info-circle"></i>
+          <span *ngIf="!loading">
+            <strong class="text-gray-900">{{ specimens.length }}</strong> 
+            {{ specimens.length === 1 ? 'espécime encontrado' : 'espécimes encontrados' }}
+          </span>
+          <span *ngIf="loading" class="flex items-center gap-2">
+            <i class="pi pi-spin pi-spinner"></i>
+            Carregando espécimes...
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mapa -->
+  <div class="map-container">
+    <div *ngIf="loading && initialLoad" class="loading-overlay">
+      <div class="flex flex-col items-center gap-4">
+        <p-progressSpinner 
+          styleClass="w-16 h-16"
+          strokeWidth="4"
+          fill="transparent"
+          animationDuration=".8s"
+        ></p-progressSpinner>
+        <span class="text-lg font-medium text-gray-700">Carregando mapa...</span>
+      </div>
+    </div>
+
+    <app-map-visualizer
+      *ngIf="!initialLoad"
+      [height]="'100%'"
+      [centerLat]="centerLat"
+      [centerLon]="centerLon"
+      [initialZoom]="initialZoom"
+      [markers]="markers"
+      [enableClustering]="true"
+      [clusterDistance]="60"
+    ></app-map-visualizer>
+
+    <!-- Mensagem quando não há espécimes -->
+    <div *ngIf="!loading && !initialLoad && specimens.length === 0" class="empty-state">
+      <div class="flex flex-col items-center gap-4 text-center">
+        <i class="pi pi-map text-6xl text-gray-400"></i>
+        <div>
+          <h3 class="text-xl font-semibold text-gray-800 mb-2">Nenhum espécime encontrado</h3>
+          <p class="text-gray-600">
+            Tente ajustar os filtros para visualizar espécimes no mapa
+          </p>
+        </div>
+        <p-button
+          label="Limpar Filtros"
+          icon="pi pi-refresh"
+          (onClick)="clearFilters()"
+          styleClass="p-button-outlined"
+        ></p-button>
+      </div>
+    </div>
+  </div>
+</div>
