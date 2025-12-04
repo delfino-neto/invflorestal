@@ -21,6 +21,16 @@
   background: #f3f4f6;
 }
 
+.map-controls {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
 .loading-overlay {
   position: absolute;
   top: 0;

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -41,7 +41,10 @@ import { MapVisualizerComponent, MapMarker } from '@/shared/components/map-visua
   styleUrls: ['./map-page.component.scss']
 })
 export class MapPageComponent implements OnInit {
+  @ViewChild(MapVisualizerComponent) mapVisualizer?: MapVisualizerComponent;
+  
   specimens: SpecimenObject[] = [];
+  allSpecimens: SpecimenObject[] = []; // Todos os espécimes sem filtro
   markers: MapMarker[] = [];
   
   // Filtros
@@ -49,7 +52,12 @@ export class MapPageComponent implements OnInit {
   selectedArea?: CollectionArea;
   selectedObserver?: User;
   
-  // Listas para dropdowns
+  // Listas completas (sem filtro)
+  allSpeciesList: SpeciesTaxonomy[] = [];
+  allAreasList: CollectionArea[] = [];
+  allObserversList: User[] = [];
+  
+  // Listas filtradas para dropdowns
   speciesList: SpeciesTaxonomy[] = [];
   areasList: CollectionArea[] = [];
   observersList: User[] = [];
@@ -71,34 +79,81 @@ export class MapPageComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadFilters();
-    this.loadSpecimens();
+    this.loadInitialData();
   }
 
-  loadFilters(): void {
-    // Carregar espécies
+  loadInitialData(): void {
+    this.loading = true;
+    
+    // Carregar todos os espécimes primeiro
+    this.specimenService.findWithFilters().subscribe({
+      next: (data: SpecimenObject[]) => {
+        this.allSpecimens = data;
+        this.specimens = data;
+        this.updateMarkers();
+        this.updateMapCenter();
+        this.loading = false;
+        this.initialLoad = false;
+        
+        // Depois carregar as listas de filtros
+        this.loadAllFilters();
+        this.updateFilteredLists();
+      },
+      error: (error: any) => {
+        console.error('Erro ao carregar espécimes:', error);
+        this.loading = false;
+        this.initialLoad = false;
+      }
+    });
+  }
+
+  loadAllFilters(): void {
+    // Carregar todas as espécies
     this.speciesService.getSpeciesTaxonomies(0, 1000).subscribe({
       next: (response: any) => {
-        this.speciesList = response.content;
+        this.allSpeciesList = response.content;
+        this.updateFilteredLists();
       },
       error: (error: any) => console.error('Erro ao carregar espécies:', error)
     });
 
-    // Carregar áreas
+    // Carregar todas as áreas
     this.areaService.search(0, 1000).subscribe({
       next: (response: any) => {
-        this.areasList = response.content;
+        this.allAreasList = response.content;
+        this.updateFilteredLists();
       },
       error: (error: any) => console.error('Erro ao carregar áreas:', error)
     });
 
-    // Carregar observadores
+    // Carregar todos os observadores
     this.userService.search(0, 1000).subscribe({
       next: (response: any) => {
-        this.observersList = response.content;
+        this.allObserversList = response.content;
+        this.updateFilteredLists();
       },
       error: (error: any) => console.error('Erro ao carregar observadores:', error)
     });
+  }
+
+  updateFilteredLists(): void {
+    // Filtrar espécies baseado nos espécimes atuais
+    const availableSpeciesIds = new Set(this.specimens.map(s => s.speciesId));
+    this.speciesList = this.allSpeciesList.filter(species => 
+      species.id && availableSpeciesIds.has(species.id)
+    );
+
+    // Filtrar áreas baseado nos espécimes atuais
+    const availableAreaIds = new Set(this.specimens.map(s => s.areaId).filter(id => id !== undefined));
+    this.areasList = this.allAreasList.filter(area => 
+      area.id && availableAreaIds.has(area.id)
+    );
+
+    // Filtrar observadores baseado nos espécimes atuais
+    const availableObserverIds = new Set(this.specimens.map(s => s.observerId));
+    this.observersList = this.allObserversList.filter(observer => 
+      observer.id && availableObserverIds.has(observer.id)
+    );
   }
 
   loadSpecimens(): void {
@@ -113,15 +168,18 @@ export class MapPageComponent implements OnInit {
         this.specimens = data;
         this.updateMarkers();
         this.updateMapCenter();
+        this.updateFilteredLists();
         this.loading = false;
-        this.initialLoad = false;
       },
       error: (error: any) => {
         console.error('Erro ao carregar espécimes:', error);
         this.loading = false;
-        this.initialLoad = false;
       }
     });
+  }
+
+  onFilterChange(): void {
+    this.loadSpecimens();
   }
 
   updateMarkers(): void {
@@ -134,18 +192,17 @@ export class MapPageComponent implements OnInit {
       color: this.getMarkerColor(specimen.speciesId),
       data: specimen
     }));
+    
+    // Aguardar o Angular atualizar a view e depois ajustar o zoom
+    setTimeout(() => {
+      if (this.mapVisualizer) {
+        this.mapVisualizer.fitToMarkers();
+      }
+    }, 300);
   }
 
   updateMapCenter(): void {
-    if (this.specimens.length > 0 && this.initialLoad) {
-      // Calcular centro baseado nos espécimes
-      const avgLat = this.specimens.reduce((sum, s) => sum + s.latitude, 0) / this.specimens.length;
-      const avgLon = this.specimens.reduce((sum, s) => sum + s.longitude, 0) / this.specimens.length;
-      
-      this.centerLat = avgLat;
-      this.centerLon = avgLon;
-      this.initialZoom = 10;
-    }
+    // Não precisa mais calcular centro manualmente, o fitToMarkers faz isso
   }
 
   getMarkerColor(speciesId: number): string {
@@ -162,12 +219,20 @@ export class MapPageComponent implements OnInit {
     this.selectedSpecies = undefined;
     this.selectedArea = undefined;
     this.selectedObserver = undefined;
-    this.loadSpecimens();
+    this.specimens = this.allSpecimens;
+    this.updateMarkers();
+    this.updateFilteredLists();
   }
 
   onMarkerClick(marker: MapMarker): void {
     const specimen = marker.data as SpecimenObject;
     console.log('Espécime clicado:', specimen);
     // Aqui você pode abrir um dialog com detalhes do espécime
+  }
+
+  resetMapView(): void {
+    if (this.mapVisualizer) {
+      this.mapVisualizer.fitToMarkers();
+    }
   }
 }

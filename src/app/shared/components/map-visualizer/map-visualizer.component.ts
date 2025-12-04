@@ -562,8 +562,40 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
         
         this.markersSource.addFeature(feature);
       });
+      
+      // Ajustar zoom para mostrar todos os marcadores
+      this.fitToMarkers();
     } catch (error) {
       console.error('Erro ao carregar marcadores:', error);
+    }
+  }
+  
+  /**
+   * Ajusta o zoom do mapa para exibir todos os marcadores
+   */
+  public fitToMarkers(): void {
+    if (!this.map || !this.markersSource) return;
+    
+    const features = this.markersSource.getFeatures();
+    if (features.length === 0) return;
+    
+    const extent = this.markersSource.getExtent();
+    
+    // Se há apenas um marcador, fazer zoom nele com um nível fixo
+    if (features.length === 1) {
+      const coordinate = features[0].getGeometry()!.getExtent();
+      this.map.getView().animate({
+        center: [(coordinate[0] + coordinate[2]) / 2, (coordinate[1] + coordinate[3]) / 2],
+        zoom: 15,
+        duration: 500
+      });
+    } else {
+      // Múltiplos marcadores - fazer fit no extent
+      this.map.getView().fit(extent, {
+        padding: [80, 80, 80, 80],
+        maxZoom: 16,
+        duration: 500
+      });
     }
   }
   

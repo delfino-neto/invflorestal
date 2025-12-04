@@ -14,6 +14,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Espécie</label>
             <p-select
               [(ngModel)]="selectedSpecies"
+              (onChange)="onFilterChange()"
               [options]="speciesList"
               optionLabel="scientificName"
               placeholder="Todas as espécies"
@@ -23,10 +24,12 @@
               styleClass="w-64"
             >
               <ng-template pTemplate="selectedItem">
-                <div *ngIf="selectedSpecies" class="flex items-center gap-2">
-                  <i class="pi pi-leaf text-green-600"></i>
-                  <span class="font-medium">{{ selectedSpecies.scientificName }}</span>
-                </div>
+                @if (selectedSpecies) {
+                  <div class="flex items-center gap-2">
+                    <i class="pi pi-leaf text-green-600"></i>
+                    <span class="font-medium">{{ selectedSpecies.scientificName }}</span>
+                  </div>
+                }
               </ng-template>
               <ng-template let-species pTemplate="item">
                 <div class="flex flex-col py-1">
@@ -42,6 +45,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Área de Coleta</label>
             <p-select
               [(ngModel)]="selectedArea"
+              (onChange)="onFilterChange()"
               [options]="areasList"
               optionLabel="name"
               placeholder="Todas as áreas"
@@ -51,10 +55,12 @@
               styleClass="w-64"
             >
               <ng-template pTemplate="selectedItem">
-                <div *ngIf="selectedArea" class="flex items-center gap-2">
-                  <i class="pi pi-map-marker text-blue-600"></i>
-                  <span class="font-medium">{{ selectedArea.name }}</span>
-                </div>
+                @if (selectedArea) {
+                  <div class="flex items-center gap-2">
+                    <i class="pi pi-map-marker text-blue-600"></i>
+                    <span class="font-medium">{{ selectedArea.name }}</span>
+                  </div>
+                }
               </ng-template>
               <ng-template let-area pTemplate="item">
                 <div class="flex flex-col py-1">
@@ -70,6 +76,7 @@
             <label class="block text-sm font-medium text-gray-700 mb-1">Observador</label>
             <p-select
               [(ngModel)]="selectedObserver"
+              (onChange)="onFilterChange()"
               [options]="observersList"
               optionLabel="name"
               placeholder="Todos os observadores"
@@ -79,10 +86,12 @@
               styleClass="w-64"
             >
               <ng-template pTemplate="selectedItem">
-                <div *ngIf="selectedObserver" class="flex items-center gap-2">
-                  <i class="pi pi-user text-purple-600"></i>
-                  <span class="font-medium">{{ selectedObserver.name }}</span>
-                </div>
+                @if (selectedObserver) {
+                  <div class="flex items-center gap-2">
+                    <i class="pi pi-user text-purple-600"></i>
+                    <span class="font-medium">{{ selectedObserver.name }}</span>
+                  </div>
+                }
               </ng-template>
               <ng-template let-user pTemplate="item">
                 <div class="flex flex-col py-1">
@@ -96,20 +105,10 @@
           <!-- Botões -->
           <div class="flex items-end gap-2 ml-auto">
             <p-button
-              label="Filtrar"
-              icon="pi pi-search"
-              (onClick)="applyFilters()"
-              [loading]="loading"
-              styleClass="p-button-primary"
-              pTooltip="Aplicar filtros"
-              tooltipPosition="bottom"
-            ></p-button>
-            
-            <p-button
               label="Limpar"
               icon="pi pi-times"
               (onClick)="clearFilters()"
-              [disabled]="loading"
+              [disabled]="loading || (!selectedSpecies && !selectedArea && !selectedObserver)"
               styleClass="p-button-outlined p-button-secondary"
               pTooltip="Limpar todos os filtros"
               tooltipPosition="bottom"
@@ -122,14 +121,18 @@
       <div class="mt-3 pt-3 border-t border-gray-100">
         <div class="flex items-center gap-2 text-sm text-gray-600">
           <i class="pi pi-info-circle"></i>
-          <span *ngIf="!loading">
-            <strong class="text-gray-900">{{ specimens.length }}</strong> 
-            {{ specimens.length === 1 ? 'espécime encontrado' : 'espécimes encontrados' }}
-          </span>
-          <span *ngIf="loading" class="flex items-center gap-2">
-            <i class="pi pi-spin pi-spinner"></i>
-            Carregando espécimes...
-          </span>
+          @if (!loading) {
+            <span>
+              <strong class="text-gray-900">{{ specimens.length }}</strong> 
+              {{ specimens.length === 1 ? 'espécime encontrado' : 'espécimes encontrados' }}
+            </span>
+          }
+          @if (loading) {
+            <span class="flex items-center gap-2">
+              <i class="pi pi-spin pi-spinner"></i>
+              Carregando espécimes...
+            </span>
+          }
         </div>
       </div>
     </div>
@@ -137,46 +140,64 @@
 
   <!-- Mapa -->
   <div class="map-container">
-    <div *ngIf="loading && initialLoad" class="loading-overlay">
-      <div class="flex flex-col items-center gap-4">
-        <p-progressSpinner 
-          styleClass="w-16 h-16"
-          strokeWidth="4"
-          fill="transparent"
-          animationDuration=".8s"
-        ></p-progressSpinner>
-        <span class="text-lg font-medium text-gray-700">Carregando mapa...</span>
-      </div>
+    <!-- Controles do mapa -->
+    <div class="map-controls">
+      <p-button
+        icon="pi pi-refresh"
+        (onClick)="resetMapView()"
+        [rounded]="true"
+        severity="secondary"
+        pTooltip="Ajustar visualização"
+        tooltipPosition="left"
+      ></p-button>
     </div>
 
-    <app-map-visualizer
-      *ngIf="!initialLoad"
-      [height]="'100%'"
-      [centerLat]="centerLat"
-      [centerLon]="centerLon"
-      [initialZoom]="initialZoom"
-      [markers]="markers"
-      [enableClustering]="true"
-      [clusterDistance]="60"
-    ></app-map-visualizer>
+    @if (loading && initialLoad) {
+      <div class="loading-overlay">
+        <div class="flex flex-col items-center gap-4">
+          <p-progressSpinner 
+            styleClass="w-16 h-16"
+            strokeWidth="4"
+            fill="transparent"
+            animationDuration=".8s"
+          ></p-progressSpinner>
+          <span class="text-lg font-medium text-gray-700">Carregando mapa...</span>
+        </div>
+      </div>
+    }
+
+    @if (!initialLoad) {
+      <app-map-visualizer
+        [height]="'100%'"
+        [centerLat]="centerLat"
+        [centerLon]="centerLon"
+        [initialZoom]="initialZoom"
+        [markers]="markers"
+        [enableClustering]="true"
+        [clusterDistance]="50"
+        [maxZoom]="18"
+      ></app-map-visualizer>
+    }
 
     <!-- Mensagem quando não há espécimes -->
-    <div *ngIf="!loading && !initialLoad && specimens.length === 0" class="empty-state">
-      <div class="flex flex-col items-center gap-4 text-center">
-        <i class="pi pi-map text-6xl text-gray-400"></i>
-        <div>
-          <h3 class="text-xl font-semibold text-gray-800 mb-2">Nenhum espécime encontrado</h3>
-          <p class="text-gray-600">
-            Tente ajustar os filtros para visualizar espécimes no mapa
-          </p>
+    @if (!loading && !initialLoad && specimens.length === 0) {
+      <div class="empty-state">
+        <div class="flex flex-col items-center gap-4 text-center">
+          <i class="pi pi-map text-6xl text-gray-400"></i>
+          <div>
+            <h3 class="text-xl font-semibold text-gray-800 mb-2">Nenhum espécime encontrado</h3>
+            <p class="text-gray-600">
+              Tente ajustar os filtros para visualizar espécimes no mapa
+            </p>
+          </div>
+          <p-button
+            label="Limpar Filtros"
+            icon="pi pi-refresh"
+            (onClick)="clearFilters()"
+            styleClass="p-button-outlined"
+          ></p-button>
         </div>
-        <p-button
-          label="Limpar Filtros"
-          icon="pi pi-refresh"
-          (onClick)="clearFilters()"
-          styleClass="p-button-outlined"
-        ></p-button>
       </div>
-    </div>
+    }
   </div>
 </div>
