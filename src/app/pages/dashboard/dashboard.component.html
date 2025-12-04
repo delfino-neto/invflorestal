@@ -45,30 +45,69 @@
         <div class="space-y-6">
             <!-- Destaques -->
             <p-card header="Destaques" styleClass="shadow-sm border-gray-200">
-                <div class="space-y-4">
+                <div class="space-y-3">
                     <div *ngFor="let suggestion of suggestions"
-                        class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <i [class]="suggestion.icon + ' text-xl mt-0.5 ' + suggestion.color"></i>
-                        <div>
-                            <h4 class="text-sm font-medium text-gray-900">{{ suggestion.title }}</h4>
-                            <p class="text-sm text-gray-600 mt-1">{{ suggestion.content }}</p>
+                        class="group relative flex items-start gap-4 p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all duration-200 bg-white">
+                        <!-- Icon Container -->
+                        <div class="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110"
+                            [ngClass]="{
+                                'bg-yellow-50': suggestion.color === 'text-yellow-600',
+                                'bg-blue-50': suggestion.color === 'text-blue-600',
+                                'bg-green-50': suggestion.color === 'text-green-600',
+                                'bg-gray-50': suggestion.color === 'text-gray-600'
+                            }">
+                            <i [class]="suggestion.icon + ' text-lg ' + suggestion.color"></i>
                         </div>
+                        
+                        <!-- Content -->
+                        <div class="flex-1 min-w-0">
+                            <h4 class="text-sm font-semibold text-gray-900 mb-1 leading-tight">{{ suggestion.title }}</h4>
+                            <p class="text-sm text-gray-600 leading-relaxed">{{ suggestion.content }}</p>
+                        </div>
+                    </div>
+                    <div *ngIf="suggestions.length === 0" class="text-center py-8 text-gray-400">
+                        <i class="pi pi-info-circle text-2xl mb-2"></i>
+                        <p class="text-sm">Nenhum destaque no momento</p>
                     </div>
                 </div>
             </p-card>
 
             <!-- Atividades Recentes -->
             <p-card header="Atividades Recentes" styleClass="shadow-sm border-gray-200">
-                <div class="space-y-4">
-                    <div *ngFor="let activity of recentActivities" class="flex items-start space-x-3">
-                        <div class="w-2 h-2 bg-emerald-500 rounded-full mt-2"></div>
-                        <div class="flex-1">
-                            <p class="text-sm font-medium text-gray-900">{{ activity.action }}</p>
-                            <p class="text-sm text-emerald-600">{{ activity.species }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ activity.time }} • {{ activity.user }}</p>
+                <div class="space-y-2">
+                    <div *ngFor="let activity of recentActivities" 
+                        class="group relative flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 cursor-pointer">
+                        <!-- Status Indicator -->
+                        <div class="flex-shrink-0 mt-1.5">
+                            <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                        </div>
+                        
+                        <!-- Content -->
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-900 mb-0.5">{{ activity.action }}</p>
+                            <p class="text-sm text-emerald-600 font-medium mb-1">{{ activity.species }}</p>
+                            <div class="flex items-center gap-2 text-xs text-gray-500">
+                                <span class="flex items-center gap-1">
+                                    <i class="pi pi-clock text-[10px]"></i>
+                                    {{ activity.time }}
+                                </span>
+                                <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                                <span class="flex items-center gap-1">
+                                    <i class="pi pi-user text-[10px]"></i>
+                                    {{ activity.user }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Hover Indicator -->
+                        <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                            <i class="pi pi-chevron-right text-gray-400 text-xs"></i>
                         </div>
                     </div>
-                    <div *ngIf="recentActivities.length === 0" class="text-center py-4 text-gray-500">
+                    
+                    <!-- Empty State -->
+                    <div *ngIf="recentActivities.length === 0" class="text-center py-8 text-gray-400">
+                        <i class="pi pi-inbox text-2xl mb-2"></i>
                         <p class="text-sm">Nenhuma atividade recente</p>
                     </div>
                 </div>
