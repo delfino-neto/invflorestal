@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnChanges, SimpleChanges, Input, Output, EventEmitter } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { CommonModule } from '@angular/common';
-import { ToastModule } from 'primeng/toast';
+import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
+import { FloatLabelModule } from 'primeng/floatlabel';
 import { SpeciesTaxonomyService } from '../../../core/services/species-taxonomy.service';
 import { SpeciesTaxonomy } from '../../../core/models/species/species-taxonomy';
 
@@ -15,40 +15,48 @@ import { SpeciesTaxonomy } from '../../../core/models/species/species-taxonomy';
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    DialogModule,
     InputTextModule,
     ButtonModule,
-    ToastModule
+    FloatLabelModule
   ],
-  providers: [MessageService],
   templateUrl: './species-taxonomy-form.component.html',
   styleUrl: './species-taxonomy-form.component.scss'
 })
-export class SpeciesTaxonomyFormComponent implements OnInit {
+export class SpeciesTaxonomyFormComponent implements OnInit, OnChanges {
+  @Input() visible: boolean = false;
+  @Input() taxonomyId: number | null = null;
+  @Output() visibleChange = new EventEmitter<boolean>();
+  @Output() onSave = new EventEmitter<void>();
+  
   taxonomyForm!: FormGroup;
   isEditMode = false;
-  taxonomyId: number | null = null;
   isSubmitting = false;
   loading = false;
 
   constructor(
     private fb: FormBuilder,
     private taxonomyService: SpeciesTaxonomyService,
-    private messageService: MessageService,
-    private router: Router,
-    private route: ActivatedRoute
+    private messageService: MessageService
   ) {
     this.initializeForm();
   }
 
   ngOnInit(): void {
-    this.route.paramMap.subscribe(params => {
-      const id = params.get('id');
-      if (id) {
-        this.isEditMode = true;
-        this.taxonomyId = +id;
-        this.loadTaxonomy(this.taxonomyId);
-      }
-    });
+    if (this.taxonomyId) {
+      this.isEditMode = true;
+      this.loadTaxonomy(this.taxonomyId);
+    }
+  }
+
+  ngOnChanges(): void {
+    if (this.visible && this.taxonomyId) {
+      this.isEditMode = true;
+      this.loadTaxonomy(this.taxonomyId);
+    } else if (this.visible && !this.taxonomyId) {
+      this.isEditMode = false;
+      this.taxonomyForm.reset();
+    }
   }
 
   private initializeForm(): void {
@@ -68,10 +76,6 @@ export class SpeciesTaxonomyFormComponent implements OnInit {
       genus: ['', [
         Validators.maxLength(50),
         Validators.pattern(/^[A-Z][a-z]+$/)
-      ]],
-      species: ['', [
-        Validators.maxLength(50),
-        Validators.pattern(/^[a-z]+$/)
       ]],
       code: ['', [
         Validators.minLength(3),
@@ -113,7 +117,9 @@ export class SpeciesTaxonomyFormComponent implements OnInit {
             ? 'Taxonomia atualizada com sucesso!' 
             : 'Taxonomia criada com sucesso!'
         );
-        setTimeout(() => this.router.navigate(['/species/taxonomy']), 1500);
+        this.isSubmitting = false;
+        this.closeDialog();
+        this.onSave.emit();
       },
       error: (error) => {
         this.showError('Erro ao salvar taxonomia');
@@ -124,7 +130,15 @@ export class SpeciesTaxonomyFormComponent implements OnInit {
   }
 
   onCancel(): void {
-    this.router.navigate(['/species']);
+    this.closeDialog();
+  }
+
+  closeDialog(): void {
+    this.visible = false;
+    this.visibleChange.emit(false);
+    this.taxonomyForm.reset();
+    this.taxonomyId = null;
+    this.isEditMode = false;
   }
 
   onScientificNameChange(event: any): void {
@@ -136,10 +150,6 @@ export class SpeciesTaxonomyFormComponent implements OnInit {
       
       if (!this.taxonomyForm.get('genus')?.value && genus) {
         this.taxonomyForm.patchValue({ genus });
-      }
-      
-      if (!this.taxonomyForm.get('species')?.value && species) {
-        this.taxonomyForm.patchValue({ species });
       }
       
       if (genus && species && !this.taxonomyForm.get('code')?.value) {

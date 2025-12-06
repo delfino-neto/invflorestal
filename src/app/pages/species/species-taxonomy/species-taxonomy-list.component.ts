@@ -1,5 +1,4 @@
 import { Component, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MessageService, ConfirmationService } from 'primeng/api';
@@ -18,6 +17,7 @@ import { ProgressBarModule } from 'primeng/progressbar';
 import { ChipModule } from 'primeng/chip';
 import { SpeciesTaxonomyService } from '../../../core/services/species-taxonomy.service';
 import { SpeciesTaxonomy } from '../../../core/models/species/species-taxonomy';
+import { SpeciesTaxonomyFormComponent } from './species-taxonomy-form.component';
 
 @Component({
   selector: 'app-species-taxonomy-list',
@@ -36,7 +36,8 @@ import { SpeciesTaxonomy } from '../../../core/models/species/species-taxonomy';
     IconFieldModule,
     InputIconModule,
     ProgressBarModule,
-    ChipModule
+    ChipModule,
+    SpeciesTaxonomyFormComponent
   ],
   providers: [MessageService, ConfirmationService],
   templateUrl: './species-taxonomy-list.component.html',
@@ -54,12 +55,15 @@ export class SpeciesTaxonomyListComponent implements OnInit {
   currentPage = 0;
   currentPageSize = 10;
   private searchSubject = new Subject<string>();
+  
+  // Dialog
+  showDialog = false;
+  selectedTaxonomyId: number | null = null;
 
   constructor(
     private taxonomyService: SpeciesTaxonomyService,
     private messageService: MessageService,
-    private confirmationService: ConfirmationService,
-    private router: Router
+    private confirmationService: ConfirmationService
   ) {
     this.searchSubject.pipe(
       debounceTime(500)
@@ -158,11 +162,19 @@ export class SpeciesTaxonomyListComponent implements OnInit {
   }
 
   navigateToNew(): void {
-    this.router.navigate(['/species/new']);
+    this.selectedTaxonomyId = null;
+    this.showDialog = true;
   }
 
   navigateToEdit(id: number): void {
-    this.router.navigate(['/species/edit', id]);
+    this.selectedTaxonomyId = id;
+    this.showDialog = true;
+  }
+
+  onDialogSave(): void {
+    this.showDialog = false;
+    this.selectedTaxonomyId = null;
+    this.loadTaxonomies({ first: 0, rows: this.currentPageSize });
   }
 
   confirmDelete(taxonomy: SpeciesTaxonomy): void {

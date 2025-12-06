@@ -206,4 +206,11 @@
       </ng-template>
     </p-table>
   </p-card>
+
+  <!-- Dialog de Formulário -->
+  <app-species-taxonomy-form
+    [(visible)]="showDialog"
+    [taxonomyId]="selectedTaxonomyId"
+    (onSave)="onDialogSave()"
+  ></app-species-taxonomy-form>
 </div>
