@@ -98,3 +98,105 @@
     padding: 2rem;
   }
 }
+
+// Drawer - Estilo simples e elegante
+:host ::ng-deep {
+  .p-drawer {
+    .p-drawer-content {
+      background: #f9fafb;
+      padding: 1rem;
+    }
+  }
+  
+  // Popover estilo elegante
+  .p-popover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 0;
+    
+    .p-popover-content {
+      padding: 0;
+    }
+  }
+}
+
+.cluster-menu {
+  min-width: 280px;
+  max-width: 280px;
+  background: white;
+
+  .cluster-menu-section-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .cluster-menu-items {
+    max-height: 280px;
+    overflow-y: auto;
+
+    .cluster-menu-item {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.625rem 0.75rem;
+      border: none;
+      background: white;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      text-align: left;
+
+      &:hover {
+        filter: brightness(0.9);
+        background: var(--p-gray-200);
+      }
+
+      .cluster-avatar {
+        width: 20px;
+        height: 20px;
+        border-radius: 5px;
+        background: linear-gradient(135deg, var(--p-primary-400) 0%, var(--p-primary-600) 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        i {
+          font-size: 1.125rem;
+          color: black;
+        }
+      }
+
+      .cluster-menu-content {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+
+        .cluster-species-name {
+          font-size: 0.875rem;
+          font-weight: 600;
+          color: #0f172a;
+          font-style: italic;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .cluster-area-name {
+          font-size: 0.75rem;
+          color: #64748b;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+}

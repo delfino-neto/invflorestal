@@ -8,6 +8,12 @@ import { SelectModule } from 'primeng/select';
 import { ButtonModule } from 'primeng/button';
 import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import { TooltipModule } from 'primeng/tooltip';
+import { DialogModule } from 'primeng/dialog';
+import { DrawerModule } from 'primeng/drawer';
+import { Popover } from 'primeng/popover';
+import { DividerModule } from 'primeng/divider';
+import { TagModule } from 'primeng/tag';
+import { AvatarModule } from 'primeng/avatar';
 
 // Services
 import { SpecimenObjectService } from '@/core/services/specimen-object.service';
@@ -35,13 +41,20 @@ import { MapVisualizerComponent, MapMarker } from '@/shared/components/map-visua
     ButtonModule,
     ProgressSpinnerModule,
     TooltipModule,
-    MapVisualizerComponent
+    MapVisualizerComponent,
+    DialogModule,
+    DrawerModule,
+    Popover,
+    DividerModule,
+    TagModule,
+    AvatarModule
   ],
   templateUrl: './map-page.component.html',
   styleUrls: ['./map-page.component.scss']
 })
 export class MapPageComponent implements OnInit {
   @ViewChild(MapVisualizerComponent) mapVisualizer?: MapVisualizerComponent;
+  @ViewChild('clusterPopover') clusterPopover?: Popover;
   
   specimens: SpecimenObject[] = [];
   allSpecimens: SpecimenObject[] = []; // Todos os espécimes sem filtro
@@ -65,6 +78,15 @@ export class MapPageComponent implements OnInit {
   // Estado
   loading = false;
   initialLoad = true;
+  
+  // Sidebar de detalhes
+  showSpecimenDetails = false;
+  selectedSpecimen?: SpecimenObject;
+  
+  // Popover de seleção (para clusters na mesma posição)
+  clusterSpecimens: SpecimenObject[] = [];
+  clusterPopoverEvent?: MouseEvent;
+  popoverAnchor?: HTMLElement;
   
   // Centro do mapa (Brasília)
   centerLat = -15.7801;
@@ -190,7 +212,8 @@ export class MapPageComponent implements OnInit {
       label: specimen.speciesScientificName || 'Espécie não identificada',
       type: 'specimen',
       color: this.getMarkerColor(specimen.speciesId),
-      data: specimen
+      data: specimen,
+      onClick: (marker: MapMarker, event?: any) => this.handleMarkerClick(marker, event)
     }));
     
     // Aguardar o Angular atualizar a view e depois ajustar o zoom
@@ -224,15 +247,121 @@ export class MapPageComponent implements OnInit {
     this.updateFilteredLists();
   }
 
-  onMarkerClick(marker: MapMarker): void {
-    const specimen = marker.data as SpecimenObject;
-    console.log('Espécime clicado:', specimen);
-    // Aqui você pode abrir um dialog com detalhes do espécime
+  handleMarkerClick(marker: MapMarker, event?: any): void {
+    console.log('Marker clicked:', marker, 'Event:', event);
+    
+    // Encontrar todos os espécimes na mesma posição (cluster indivisível)
+    const samePosition = this.specimens.filter(s => 
+      Math.abs(s.latitude - marker.latitude) < 0.000001 && 
+      Math.abs(s.longitude - marker.longitude) < 0.000001
+    );
+
+    console.log('Same position specimens:', samePosition.length);
+
+    if (samePosition.length > 1) {
+      // Múltiplos espécimes na mesma posição - mostrar popover de seleção
+      console.log('Showing cluster popover', event);
+      this.clusterSpecimens = samePosition;
+      
+      // Extrair coordenadas do evento do OpenLayers
+      setTimeout(() => {
+        if (this.clusterPopover && event) {
+          // Remover âncora anterior se existir
+          if (this.popoverAnchor) {
+            document.body.removeChild(this.popoverAnchor);
+          }
+
+          // O evento do OpenLayers tem originalEvent que é o evento DOM real
+          const originalEvent = event.originalEvent;
+          
+          let clientX: number;
+          let clientY: number;
+          
+          if (originalEvent && originalEvent.clientX !== undefined) {
+            // Usar o evento DOM original
+            clientX = originalEvent.clientX;
+            clientY = originalEvent.clientY;
+            console.log('Using original event coordinates:', clientX, clientY);
+          } else if (event.pixel) {
+            // Calcular posição a partir do pixel do evento OpenLayers
+            const mapElement = event.map?.getTargetElement();
+            if (mapElement) {
+              const rect = mapElement.getBoundingClientRect();
+              clientX = rect.left + event.pixel[0];
+              clientY = rect.top + event.pixel[1];
+              console.log('Calculated coordinates from pixel:', clientX, clientY);
+            } else {
+              // Fallback para o centro da tela
+              clientX = window.innerWidth / 2;
+              clientY = window.innerHeight / 2;
+            }
+          } else {
+            // Fallback para o centro da tela
+            clientX = window.innerWidth / 2;
+            clientY = window.innerHeight / 2;
+          }
+
+          // Criar elemento âncora invisível na posição do clique
+          this.popoverAnchor = document.createElement('div');
+          this.popoverAnchor.style.position = 'fixed';
+          this.popoverAnchor.style.left = `${clientX - 20}px`;
+          this.popoverAnchor.style.top = `${clientY}px`;
+          this.popoverAnchor.style.width = '0px';
+          this.popoverAnchor.style.height = '0px';
+          this.popoverAnchor.style.pointerEvents = 'none';
+          this.popoverAnchor.style.zIndex = '9999';
+          document.body.appendChild(this.popoverAnchor);
+
+          console.log('Created anchor at:', clientX, clientY);
+          
+          // Mostrar popover usando o elemento âncora
+          this.clusterPopover.show(null, this.popoverAnchor);
+        }
+      }, 0);
+    } else if (samePosition.length === 1) {
+      // Apenas um espécime - mostrar detalhes diretamente
+      console.log('Showing single specimen');
+      this.selectedSpecimen = samePosition[0];
+      this.showSpecimenDetails = true;
+    } else {
+      // Fallback: usar o marker data
+      console.log('Using marker data');
+      this.selectedSpecimen = marker.data as SpecimenObject;
+      this.showSpecimenDetails = true;
+    }
+  }
+
+  selectSpecimenFromCluster(specimen: SpecimenObject): void {
+    this.clusterPopover?.hide();
+    
+    // Limpar elemento âncora
+    if (this.popoverAnchor) {
+      document.body.removeChild(this.popoverAnchor);
+      this.popoverAnchor = undefined;
+    }
+    
+    this.selectedSpecimen = specimen;
+    this.showSpecimenDetails = true;
+  }
+
+  closeSpecimenDetails(): void {
+    this.showSpecimenDetails = false;
+    this.selectedSpecimen = undefined;
   }
 
   resetMapView(): void {
     if (this.mapVisualizer) {
       this.mapVisualizer.fitToMarkers();
     }
+  }
+
+  formatDate(date: Date | undefined): string {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('pt-BR');
+  }
+
+  formatCoordinate(coord: number | undefined): string {
+    if (coord === undefined) return 'N/A';
+    return coord.toFixed(6);
   }
 }

@@ -217,20 +217,43 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
         if (this.enableClustering && this.clusterSource) {
           const features = feature.get('features');
           if (features && features.length > 1) {
-            // É um cluster com múltiplos pontos - fazer zoom no cluster
-            const extent = feature.getGeometry()!.getExtent();
-            this.map!.getView().fit(extent, {
-              padding: [100, 100, 100, 100],
-              duration: 500,
-              maxZoom: this.map!.getView().getZoom()! + 2
+            // Verificar se todos os pontos estão na mesma posição (cluster indivisível)
+            const firstFeature = features[0];
+            const firstCoords = firstFeature.getGeometry()?.getCoordinates();
+            
+            const allSamePosition = features.every((f: Feature) => {
+              const coords = (f.getGeometry() as any)?.getCoordinates();
+              return coords && firstCoords && 
+                     Math.abs(coords[0] - firstCoords[0]) < 0.0001 && 
+                     Math.abs(coords[1] - firstCoords[1]) < 0.0001;
             });
-            clickedMarker = true;
-            return true; // Parar iteração
+            
+            if (allSamePosition) {
+              // Cluster indivisível - chamar onClick do primeiro marcador
+              // O componente pai irá detectar múltiplos na mesma posição
+              const markerData = firstFeature.get('markerData');
+              if (markerData && markerData.onClick) {
+                console.log('Clicked indivisible cluster with', features.length, 'markers');
+                markerData.onClick(markerData, event);
+                clickedMarker = true;
+                return true;
+              }
+            } else {
+              // É um cluster divisível - fazer zoom no cluster
+              const extent = feature.getGeometry()!.getExtent();
+              this.map!.getView().fit(extent, {
+                padding: [100, 100, 100, 100],
+                duration: 500,
+                maxZoom: this.map!.getView().getZoom()! + 2
+              });
+              clickedMarker = true;
+              return true; // Parar iteração
+            }
           } else if (features && features.length === 1) {
             // É um cluster com um único ponto - tratar como marcador normal
             const markerData = features[0].get('markerData');
             if (markerData && markerData.onClick) {
-              markerData.onClick(markerData);
+              markerData.onClick(markerData, event);
               clickedMarker = true;
               return true;
             }
@@ -239,7 +262,7 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
           // Modo tradicional sem clustering
           const markerData = feature.get('markerData');
           if (markerData && markerData.onClick) {
-            markerData.onClick(markerData);
+            markerData.onClick(markerData, event);
             clickedMarker = true;
             return true;
           }
