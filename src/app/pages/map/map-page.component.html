@@ -205,116 +205,101 @@
   <p-drawer
     [(visible)]="showSpecimenDetails"
     position="right"
-    [style]="{ width: '28rem' }"
-    [modal]="false"
+    [style]="{ width: '24rem' }"
+    [modal]="true"
   >
     <ng-template pTemplate="header">
-      <div class="flex items-center gap-3 w-full">
-        <div class="w-10 h-10 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center flex-shrink-0">
-          <i class="pi pi-eye text-white"></i>
-        </div>
-        <div class="flex-1 min-w-0">
-          <h3 class="text-base font-semibold text-gray-900 m-0">Detalhes do Espécime</h3>
-          <p class="text-xs text-gray-500 m-0 truncate">ID: #{{ selectedSpecimen?.id }}</p>
-        </div>
+      <div class="drawer-header">
+        <h3 class="drawer-title">Detalhes do Espécime</h3>
+        <span class="drawer-subtitle">ID #{{ selectedSpecimen?.id }}</span>
       </div>
     </ng-template>
 
     @if (selectedSpecimen) {
-      <div class="space-y-4">
+      <div class="drawer-content">
         <!-- Espécie -->
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <div class="flex items-center gap-2 mb-3">
-            <i class="pi pi-leaf text-emerald-600"></i>
-            <h4 class="text-sm font-semibold text-gray-900 m-0">Espécie</h4>
-          </div>
-          <div class="space-y-2">
-            <div>
-              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Nome Científico</label>
-              <p class="text-sm font-medium text-emerald-600 italic mt-0.5">{{ selectedSpecimen.speciesScientificName || 'N/A' }}</p>
+        <div class="drawer-section">
+          <h4 class="section-title">Espécie</h4>
+          <div class="section-content">
+            <div class="field-group">
+              <label class="field-label">Nome Científico</label>
+              <p class="field-value field-value-primary">{{ selectedSpecimen.speciesScientificName || 'N/A' }}</p>
             </div>
-            <div>
-              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Nome Comum</label>
-              <p class="text-sm text-gray-900 mt-0.5">{{ selectedSpecimen.speciesCommonName || 'N/A' }}</p>
+            <div class="field-group">
+              <label class="field-label">Nome Comum</label>
+              <p class="field-value">{{ selectedSpecimen.speciesCommonName || 'N/A' }}</p>
             </div>
           </div>
         </div>
 
         <!-- Localização -->
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <div class="flex items-center gap-2 mb-3">
-            <i class="pi pi-map-marker text-blue-600"></i>
-            <h4 class="text-sm font-semibold text-gray-900 m-0">Localização</h4>
-          </div>
-          <div class="space-y-2">
-            <div>
-              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Área de Coleta</label>
-              <p class="text-sm text-gray-900 mt-0.5">{{ selectedSpecimen.areaName || 'N/A' }}</p>
+        <div class="drawer-section">
+          <h4 class="section-title">Localização</h4>
+          <div class="section-content">
+            <div class="field-group">
+              <label class="field-label">Área de Coleta</label>
+              <p class="field-value">{{ selectedSpecimen.areaName || 'N/A' }}</p>
             </div>
-            <div>
-              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Parcela</label>
-              <p class="text-sm text-gray-900 mt-0.5">{{ selectedSpecimen.plotCode || 'N/A' }}</p>
+            <div class="field-group">
+              <label class="field-label">Parcela</label>
+              <p class="field-value">{{ selectedSpecimen.plotCode || 'N/A' }}</p>
             </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Latitude</label>
-                <p class="text-sm text-gray-900 font-mono mt-0.5">{{ formatCoordinate(selectedSpecimen.latitude) }}</p>
+            <div class="field-row">
+              <div class="field-group">
+                <label class="field-label">Latitude</label>
+                <p class="field-value field-value-mono">{{ formatCoordinate(selectedSpecimen.latitude) }}</p>
               </div>
-              <div>
-                <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Longitude</label>
-                <p class="text-sm text-gray-900 font-mono mt-0.5">{{ formatCoordinate(selectedSpecimen.longitude) }}</p>
+              <div class="field-group">
+                <label class="field-label">Longitude</label>
+                <p class="field-value field-value-mono">{{ formatCoordinate(selectedSpecimen.longitude) }}</p>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Observador -->
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <div class="flex items-center gap-2 mb-3">
-            <i class="pi pi-user text-purple-600"></i>
-            <h4 class="text-sm font-semibold text-gray-900 m-0">Observador</h4>
-          </div>
-          <div class="flex items-center gap-3">
-            <p-avatar 
-              [label]="selectedSpecimen.observerFullName?.charAt(0) || '?'"
-              size="large"
-              [style]="{ 'background-color': '#8b5cf6', 'color': '#ffffff' }"
-            ></p-avatar>
-            <p class="text-sm text-gray-900 m-0">{{ selectedSpecimen.observerFullName || 'N/A' }}</p>
+        <div class="drawer-section">
+          <h4 class="section-title">Observador</h4>
+          <div class="section-content">
+            <div class="observer-info">
+              <p-avatar 
+                  class="metadata-avatar"
+                  [label]="getInitials(selectedSpecimen.observerFullName ?? 'N/A')" 
+                  shape="square"
+                  [style]="{ 'background-color': getUserAvatarColor(selectedSpecimen.observerFullName ?? 'N/A'), 'color': '#ffffff' }"
+              ></p-avatar>
+              <p class="field-value">{{ selectedSpecimen.observerFullName || 'N/A' }}</p>
+            </div>
           </div>
         </div>
 
         <!-- Datas -->
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <div class="flex items-center gap-2 mb-3">
-            <i class="pi pi-calendar text-orange-600"></i>
-            <h4 class="text-sm font-semibold text-gray-900 m-0">Registro</h4>
-          </div>
-          <div class="space-y-2">
-            <div>
-              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Criado em</label>
-              <p class="text-sm text-gray-900 mt-0.5">{{ formatDate(selectedSpecimen.createdAt) }}</p>
+        <div class="drawer-section">
+          <h4 class="section-title">Registro</h4>
+          <div class="section-content">
+            <div class="field-group">
+              <label class="field-label">Criado em</label>
+              <p class="field-value">{{ formatDate(selectedSpecimen.createdAt) }}</p>
             </div>
-            <div>
-              <label class="text-xs font-medium text-gray-500 uppercase tracking-wide">Atualizado em</label>
-              <p class="text-sm text-gray-900 mt-0.5">{{ formatDate(selectedSpecimen.updatedAt) }}</p>
+            <div class="field-group">
+              <label class="field-label">Atualizado em</label>
+              <p class="field-value">{{ formatDate(selectedSpecimen.updatedAt) }}</p>
             </div>
           </div>
         </div>
 
         <!-- Imagens -->
         @if (selectedSpecimen.imageUrls && selectedSpecimen.imageUrls.length > 0) {
-          <div class="bg-white rounded-lg border border-gray-200 p-4">
-            <div class="flex items-center gap-2 mb-3">
-              <i class="pi pi-images text-pink-600"></i>
-              <h4 class="text-sm font-semibold text-gray-900 m-0">Imagens ({{ selectedSpecimen.imageUrls.length }})</h4>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              @for (imageUrl of selectedSpecimen.imageUrls; track imageUrl) {
-                <div class="relative aspect-square rounded-lg overflow-hidden border border-gray-200 hover:border-emerald-500 transition-colors cursor-pointer">
-                  <img [src]="imageUrl" [alt]="selectedSpecimen.speciesScientificName" class="w-full h-full object-cover" />
-                </div>
-              }
+          <div class="drawer-section">
+            <h4 class="section-title">Imagens ({{ selectedSpecimen.imageUrls.length }})</h4>
+            <div class="section-content">
+              <div class="image-grid">
+                @for (imageUrl of selectedSpecimen.imageUrls; track imageUrl) {
+                  <div class="image-item">
+                    <img [src]="'/api'+imageUrl" [alt]="selectedSpecimen.speciesScientificName" />
+                  </div>
+                }
+              </div>
             </div>
           </div>
         }

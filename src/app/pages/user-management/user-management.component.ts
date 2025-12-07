@@ -378,22 +378,33 @@ export class UserManagementComponent implements OnInit {
     }
 
     getUserAvatarColor(name: string): string {
+        if (!name) return '#6b7280'; // cor padrão se não houver nome
+        
+        // Array de cores harmoniosas para avatares
         const colors = [
-            '#3B82F6', // blue
-            '#10B981', // green
-            '#F59E0B', // amber
-            '#EF4444', // red
-            '#8B5CF6', // violet
-            '#EC4899', // pink
-            '#14B8A6', // teal
-            '#F97316', // orange
+        '#ef4444', // red-500
+        '#f97316', // orange-500
+        '#eab308', // yellow-500
+        '#22c55e', // green-500
+        '#10b981', // emerald-500
+        '#06b6d4', // cyan-500
+        '#3b82f6', // blue-500
+        '#6366f1', // indigo-500
+        '#8b5cf6', // violet-500
+        '#a855f7', // purple-500
+        '#ec4899', // pink-500
+        '#f43f5e', // rose-500
         ];
         
-        const hash = name.split('').reduce((acc, char) => {
-            return char.charCodeAt(0) + ((acc << 5) - acc);
-        }, 0);
+        // Gerar um hash simples do nome
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
         
-        return colors[Math.abs(hash) % colors.length];
+        // Usar o hash para selecionar uma cor
+        const index = Math.abs(hash) % colors.length;
+        return colors[index];
     }
 
     formatDate(date: Date | string): string {
