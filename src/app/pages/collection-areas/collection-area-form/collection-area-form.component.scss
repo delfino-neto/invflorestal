@@ -1,26 +1,48 @@
 .collection-area-form-container {
   min-height: 100vh;
   background: var(--surface-ground);
-  padding: 2rem;
+  padding: 0;
 
   @media (max-width: 768px) {
-    padding: 1rem;
+    padding: 0;
   }
 }
 
-.form-header {
-  background: var(--surface-card);
-  border-radius: 0.75rem;
-  padding: 2rem;
-  margin-bottom: 2rem;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-  border: 1px solid var(--surface-border);
+// Header Padrão
+.page-header {
+  background: white;
+  padding: 1.5rem 2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
 
-  .header-content {
+  .breadcrumb {
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    gap: 2rem;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+
+    .breadcrumb-item {
+      color: #64748b;
+      transition: color 0.2s;
+
+      &.breadcrumb-current {
+        color: #0f172a;
+        font-weight: 500;
+      }
+    }
+
+    .breadcrumb-separator {
+      color: #cbd5e1;
+      font-size: 0.75rem;
+    }
+  }
+
+  .header-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
 
     @media (max-width: 768px) {
       flex-direction: column;
@@ -28,31 +50,46 @@
     }
   }
 
-  .header-left {
+  .header-title-section {
     display: flex;
-    gap: 1.25rem;
     align-items: center;
-    flex: 1;
+    gap: 0.75rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
 
     @media (max-width: 768px) {
-      gap: 1rem;
-    }
-
-    .icon-wrapper {
-      width: 56px;
-      height: 56px;
-      min-width: 56px;
-      background: var(--primary-color);
-      border-radius: 0.75rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(var(--primary-500), 0.15);
-
-      i {
-        font-size: 1.75rem;
-        color: white;
+      width: 100%;
+      
+      button {
+        flex: 1;
       }
+    }
+  }
+}
+
+// Conteúdo do formulário
+.form-content {
+  padding: 0 2rem 2rem;
+
+  @media (max-width: 768px) {
+    padding: 0 1rem 1rem;
+  }
+}
+
+    i {
+      font-size: 1.75rem;
+      color: white;
     }
 
     .header-text {
@@ -81,7 +118,6 @@
         font-size: 0.875rem;
       }
     }
-  }
 
   .header-actions {
     display: flex;
@@ -98,17 +134,8 @@
 
     ::ng-deep .p-button {
       transition: all 0.2s ease;
-
-      &:not(:disabled):hover {
-        transform: translateY(-2px);
-      }
-
-      &:not(:disabled):active {
-        transform: translateY(0);
-      }
     }
   }
-}
 
 .form-content {
   .form-grid {

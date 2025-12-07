@@ -1,36 +1,43 @@
 <div class="collection-area-form-container">
-  <!-- Header -->
-  <div class="form-header">
-    <div class="header-content">
-      <div class="header-left">
-        <div class="icon-wrapper">
-          <i class="pi pi-map"></i>
-        </div>
-        <div class="header-text">
-          <h1 class="header-title">
-            {{ isEditMode ? 'Editar Área de Coleta' : 'Nova Área de Coleta' }}
-          </h1>
-          <p class="header-subtitle">
-            {{ isEditMode ? 'Atualize as informações da área de inventário' : 'Desenhe e defina uma nova área de inventário florestal' }}
-          </p>
-        </div>
+  <!-- Header Padrão -->
+  <div class="page-header">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <span class="breadcrumb-item">Cadastros</span>
+      <i class="pi pi-angle-right breadcrumb-separator"></i>
+      <span class="breadcrumb-item">Áreas de Coleta</span>
+      <i class="pi pi-angle-right breadcrumb-separator"></i>
+      <span class="breadcrumb-item breadcrumb-current">
+        {{ isEditMode ? 'Editar' : 'Nova Área' }}
+      </span>
+    </div>
+
+    <!-- Título e Ações -->
+    <div class="header-main">
+      <div class="header-title-section">
+        <h1 class="page-title">
+          {{ isEditMode ? 'Editar Área de Coleta' : 'Nova Área de Coleta' }}
+        </h1>
       </div>
       <div class="header-actions">
-        <p-button
+        <button
+          pButton
           label="Cancelar"
           icon="pi pi-times"
           severity="secondary"
           [outlined]="true"
-          (onClick)="onCancel()"
+          (click)="onCancel()"
           [disabled]="isSubmitting"
-        />
-        <p-button
-          label="Salvar Área"
+        ></button>
+        <button
+          pButton
+          [label]="isEditMode ? 'Atualizar' : 'Salvar Área'"
           icon="pi pi-check"
-          (onClick)="onSubmit()"
+          severity="primary"
+          (click)="onSubmit()"
           [loading]="isSubmitting"
           [disabled]="form.invalid || !hasDrawnPolygon"
-        />
+        ></button>
       </div>
     </div>
   </div>
