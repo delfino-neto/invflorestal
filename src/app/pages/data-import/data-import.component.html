@@ -68,6 +68,42 @@
 
             <p-divider></p-divider>
 
+            <!-- Preview Section -->
+            <div class="card mb-4" *ngIf="filePreview && filePreview.length > 0">
+                <div class="flex gap-2 mb-3 items-center">
+                    <i class="pi bg-gray-300 p-2 rounded-md pi-file-excel text-xl"></i>
+                    <div class="m-0 text-xl font-bold">Preview do Arquivo</div>
+                    <p-tag [value]="filePreview.length + ' linhas'" severity="info"></p-tag>
+                </div>
+
+                <p-table 
+                    [showGridlines]="true"
+                    [stripedRows]="true"
+                    [value]="filePreview" 
+                    [scrollable]="true"
+                    scrollHeight="400px"
+                    styleClass="p-datatable-sm">
+                    <ng-template pTemplate="header">
+                    <tr>
+                        <th style="width: 60px; text-align: center;">#</th>
+                        <th *ngFor="let col of previewColumns; let i = index" style="min-width: 150px;">
+                        Col {{ i }}
+                        </th>
+                    </tr>
+                    </ng-template>
+                    <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
+                    <tr>
+                        <td class="text-center" style="background: var(--surface-50)">
+                        {{ rowIndex }}
+                        </td>
+                        <td *ngFor="let col of previewColumns">
+                        {{ row[col] || '-' }}
+                        </td>
+                    </tr>
+                    </ng-template>
+                </p-table>
+            </div>
+
                 <!-- Configuration Form -->
                 <form [formGroup]="importForm" class="flex gap-4">
 
@@ -121,12 +157,12 @@
                             </div>
         
                             <div class="field col-6">
-                            <label for="sheetName" class="block font-semibold mb-2">Planilha</label>
+                            <label for="sheetName" class="block font-semibold mb-2">Planilha (XLSX)</label>
                             <input
                                 pInputText
                                 id="sheetName"
                                 formControlName="sheetName"
-                                placeholder="Primeira"
+                                placeholder="Sheet #01"
                                 class="w-full"
                                 [disabled]="uploading">
                             </div>
@@ -231,40 +267,6 @@
                 <p class="text-center text-color-secondary text-sm mt-2">Processando arquivo...</p>
                 </div>
             </div>
-
-        <!-- Preview Section -->
-        <div class="card mb-4" *ngIf="filePreview && filePreview.length > 0">
-        <div class="flex align-items-center gap-2 mb-3">
-            <i class="pi pi-file-excel text-xl"></i>
-            <h5 class="m-0">Preview do Arquivo</h5>
-            <p-tag [value]="filePreview.length + ' linhas'" severity="info"></p-tag>
-        </div>
-
-        <p-table 
-            [value]="filePreview" 
-            [scrollable]="true"
-            scrollHeight="400px"
-            styleClass="p-datatable-sm">
-            <ng-template pTemplate="header">
-            <tr>
-                <th style="width: 60px; text-align: center;">#</th>
-                <th *ngFor="let col of previewColumns; let i = index" style="min-width: 150px;">
-                Col {{ i }}
-                </th>
-            </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-row let-rowIndex="rowIndex">
-            <tr>
-                <td class="text-center" style="background: var(--surface-50)">
-                {{ rowIndex }}
-                </td>
-                <td *ngFor="let col of previewColumns">
-                {{ row[col] || '-' }}
-                </td>
-            </tr>
-            </ng-template>
-        </p-table>
-        </div>
 
         <!-- Results Section -->
         <div *ngIf="importResult && !uploading" class="mt-4">
