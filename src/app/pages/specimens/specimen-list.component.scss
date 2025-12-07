@@ -1,5 +1,72 @@
+.page-header {
+  background: white;
+  padding: 1.5rem 2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+
+    .breadcrumb-item {
+      color: #64748b;
+      transition: color 0.2s;
+
+      &.breadcrumb-current {
+        color: #0f172a;
+        font-weight: 500;
+      }
+    }
+
+    .breadcrumb-separator {
+      color: #cbd5e1;
+      font-size: 0.75rem;
+    }
+  }
+
+  .header-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .header-title-section {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .page-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin: 0;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.25rem 0.75rem;
+    background: #dcfce7;
+    color: #16a34a;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border-radius: 9999px;
+    text-transform: capitalize;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+}
+
 .specimen-list-container {
-  padding: 2rem;
   max-width: 1800px;
   margin: 0 auto;
   min-height: 100vh;

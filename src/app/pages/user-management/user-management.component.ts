@@ -29,6 +29,7 @@ import { UserService } from "@/core/services/user.service";
 
 @Component({
     templateUrl: './user-management.component.html',
+    styleUrls: ['./user-management.component.scss'],
     standalone: true,
     imports: [
         CommonModule, 

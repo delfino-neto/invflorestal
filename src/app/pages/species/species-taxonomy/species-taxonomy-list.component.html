@@ -2,123 +2,135 @@
   <p-toast></p-toast>
   <p-confirmDialog></p-confirmDialog>
   
-  <p-card>
-    <ng-template pTemplate="header">
-      <div class="p-4 card-header">
-        <h2>
-          <i class="material-symbols-outlined">potted_plant</i>
-          Listagem de Espécies
-        </h2>
-        <button 
-          pButton 
-          type="button" 
-          label="Nova Espécie" 
+<!-- Header -->
+  <div class="page-header">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <span class="breadcrumb-item">Cadastros</span>
+      <i class="pi pi-angle-right breadcrumb-separator"></i>
+      <span class="breadcrumb-item breadcrumb-current">Espécies</span>
+    </div>
+
+    <!-- Título e Ações -->
+    <div class="header-main">
+      <div class="header-title-section">
+        <h1 class="page-title">Listagem de Espécies</h1>
+      </div>
+      <div class="header-actions">
+        <button
+          pButton
           icon="pi pi-plus"
-          (click)="navigateToNew()">
-        </button>
-      </div>
-    </ng-template>
-
-    <!-- Filtros -->
-    <div class="filters-container">
-      <div class="filters-grid">
-        <!-- Busca -->
-        <div class="filter-field">
-          <label for="search">Buscar</label>
-          <p-iconfield>
-            <p-inputicon styleClass="pi pi-search" />
-            <input 
-              class="w-full"
-              id="search-species"
-              name="search-species"
-              type="text" 
-              pInputText 
-              [(ngModel)]="searchTerm"
-              (ngModelChange)="onSearchChange()"
-              placeholder="Nome científico, comum ou código..."
-            />
-          </p-iconfield>
-        </div>
-
-        <!-- Filtro por Família -->
-        <div class="filter-field">
-          <label for="family">Família</label>
-          <p-select
-            id="family"
-            [(ngModel)]="selectedFamily"
-            [options]="families"
-            (onChange)="onFilterChange()"
-            placeholder="Todas as famílias"
-            [showClear]="true"
-            styleClass="w-full"
-          />
-        </div>
-
-        <!-- Filtro por Gênero -->
-        <div class="filter-field">
-          <label for="genus">Gênero</label>
-          <p-select
-            id="genus"
-            [(ngModel)]="selectedGenus"
-            [options]="genera"
-            (onChange)="onFilterChange()"
-            placeholder="Todos os gêneros"
-            [showClear]="true"
-            styleClass="w-full"
-          />
-        </div>
-
-        <!-- Botão Limpar -->
-        <div class="filter-field filter-actions">
-          <label>&nbsp;</label>
-          <button 
-            pButton 
-            type="button" 
-            label="Limpar Filtros" 
-            icon="pi pi-filter-slash"
-            class="p-button-outlined"
-            (click)="clearFilters()"
-            [disabled]="!searchTerm && !selectedFamily && !selectedGenus">
-          </button>
-        </div>
-      </div>
-
-      <!-- Feedback de filtros ativos -->
-      <div class="active-filters" *ngIf="hasActiveFilters()">
-        <div class="filters-info">
-          <i class="pi pi-filter"></i>
-          <span>Filtros ativos:</span>
-          
-          <div class="filter-chips">
-            <p-chip 
-              *ngIf="searchTerm" 
-              [label]="'Busca: &quot;' + searchTerm + '&quot;'"
-              [removable]="true"
-              (onRemove)="clearSearch()"
-              styleClass="filter-chip search-chip">
-            </p-chip>
-            
-            <p-chip 
-              *ngIf="selectedFamily" 
-              [label]="'Família: ' + selectedFamily"
-              [removable]="true"
-              (onRemove)="clearFamily()"
-              styleClass="filter-chip family-chip">
-            </p-chip>
-            
-            <p-chip 
-              *ngIf="selectedGenus" 
-              [label]="'Gênero: ' + selectedGenus"
-              [removable]="true"
-              (onRemove)="clearGenus()"
-              styleClass="filter-chip genus-chip">
-            </p-chip>
-          </div>
-          
-          <span class="results-count">{{ totalRecords }} resultado(s)</span>
-        </div>
+          label="Nova Espécie"
+          severity="primary"
+          (click)="navigateToNew()"
+        ></button>
       </div>
     </div>
+  </div>
+
+  <p-card>
+    <ng-template pTemplate="header">
+      <!-- Filtros -->
+      <div class="filters-container">
+        <div class="filters-grid">
+          <!-- Busca -->
+          <div class="filter-field">
+            <label for="search">Buscar</label>
+            <p-iconfield>
+              <p-inputicon styleClass="pi pi-search" />
+              <input 
+                class="w-full"
+                id="search-species"
+                name="search-species"
+                type="text" 
+                pInputText 
+                [(ngModel)]="searchTerm"
+                (ngModelChange)="onSearchChange()"
+                placeholder="Nome científico, comum ou código..."
+              />
+            </p-iconfield>
+          </div>
+  
+          <!-- Filtro por Família -->
+          <div class="filter-field">
+            <label for="family">Família</label>
+            <p-select
+              id="family"
+              [(ngModel)]="selectedFamily"
+              [options]="families"
+              (onChange)="onFilterChange()"
+              placeholder="Todas as famílias"
+              [showClear]="true"
+              styleClass="w-full"
+            />
+          </div>
+  
+          <!-- Filtro por Gênero -->
+          <div class="filter-field">
+            <label for="genus">Gênero</label>
+            <p-select
+              id="genus"
+              [(ngModel)]="selectedGenus"
+              [options]="genera"
+              (onChange)="onFilterChange()"
+              placeholder="Todos os gêneros"
+              [showClear]="true"
+              styleClass="w-full"
+            />
+          </div>
+  
+          <!-- Botão Limpar -->
+          <div class="filter-field filter-actions">
+            <label>&nbsp;</label>
+            <button 
+              pButton 
+              type="button" 
+              label="Limpar Filtros" 
+              icon="pi pi-filter-slash"
+              class="p-button-outlined"
+              (click)="clearFilters()"
+              [disabled]="!searchTerm && !selectedFamily && !selectedGenus">
+            </button>
+          </div>
+        </div>
+  
+        <!-- Feedback de filtros ativos -->
+        <div class="active-filters" *ngIf="hasActiveFilters()">
+          <div class="filters-info">
+            <i class="pi pi-filter"></i>
+            <span>Filtros ativos:</span>
+            
+            <div class="filter-chips">
+              <p-chip 
+                *ngIf="searchTerm" 
+                [label]="'Busca: &quot;' + searchTerm + '&quot;'"
+                [removable]="true"
+                (onRemove)="clearSearch()"
+                styleClass="filter-chip search-chip">
+              </p-chip>
+              
+              <p-chip 
+                *ngIf="selectedFamily" 
+                [label]="'Família: ' + selectedFamily"
+                [removable]="true"
+                (onRemove)="clearFamily()"
+                styleClass="filter-chip family-chip">
+              </p-chip>
+              
+              <p-chip 
+                *ngIf="selectedGenus" 
+                [label]="'Gênero: ' + selectedGenus"
+                [removable]="true"
+                (onRemove)="clearGenus()"
+                styleClass="filter-chip genus-chip">
+              </p-chip>
+            </div>
+            
+            <span class="results-count">{{ totalRecords }} resultado(s)</span>
+          </div>
+        </div>
+      </div>
+    </ng-template>
 
     <!-- Barra de progresso -->
     <div class="loading-bar" *ngIf="loading">

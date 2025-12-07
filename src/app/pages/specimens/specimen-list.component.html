@@ -3,40 +3,44 @@
   <p-confirmDialog />
 
   <!-- Header -->
-  <div class="header-section mb-6">
-    <div class="flex justify-between items-start mb-4">
-      <div class="flex-1">
-        <h1 class="text-4xl font-bold text-surface-900 dark:text-surface-0 mb-2 flex items-center gap-3">
-          <i class="pi pi-sitemap text-primary"></i>
-          Espécimes Cadastrados
-        </h1>
-        <p class="text-surface-600 dark:text-surface-400 text-lg">
-          Visualize e gerencie os espécimes registrados nos inventários florestais
-        </p>
-      </div>
-      <button
-        pButton
-        icon="pi pi-plus"
-        label="Novo Espécime"
-        class="p-button-success p-button-lg"
-        (click)="navigateToNew()"
-      ></button>
+  <div class="page-header">
+    <!-- Breadcrumb -->
+    <div class="breadcrumb">
+      <span class="breadcrumb-item">Cadastros</span>
+      <i class="pi pi-angle-right breadcrumb-separator"></i>
+      <span class="breadcrumb-item breadcrumb-current">Espécimes</span>
     </div>
 
-    <!-- Search and Controls -->
-    <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
-      <p-iconfield iconPosition="left" class="w-full md:w-96">
-        <p-inputicon styleClass="pi pi-search" />
-        <input
-          type="text"
-          pInputText
-          [(ngModel)]="searchTerm"
-          (input)="onSearch($event)"
-          placeholder="Buscar por espécie, parcela ou observador..."
-          class="w-full"
-        />
-      </p-iconfield>
+    <!-- Título e Ações -->
+    <div class="header-main">
+      <div class="header-title-section">
+        <h1 class="page-title">Espécimes</h1>
+      </div>
+      <div class="header-actions">
+        <button
+          pButton
+          icon="pi pi-plus"
+          label="Novo Espécime"
+          severity="primary"
+          (click)="navigateToNew()"
+        ></button>
+      </div>
     </div>
+  </div>
+
+  <!-- Search and Controls -->
+  <div class="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
+    <p-iconfield iconPosition="left" class="w-full md:w-96">
+      <p-inputicon styleClass="pi pi-search" />
+      <input
+        type="text"
+        pInputText
+        [(ngModel)]="searchTerm"
+        (input)="onSearch($event)"
+        placeholder="Buscar por espécie, parcela ou observador..."
+        class="w-full"
+      />
+    </p-iconfield>
   </div>
 
   <!-- DataView -->

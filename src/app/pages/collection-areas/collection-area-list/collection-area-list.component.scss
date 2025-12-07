@@ -77,15 +77,6 @@
   }
 }
 
-// Conteúdo da página
-.collection-area-list-container > *:not(.page-header) {
-  padding: 0 2rem;
-
-  @media (max-width: 768px) {
-    padding: 0 1rem;
-  }
-}
-
 .skeleton-card {
   animation: pulse 1.5s ease-in-out infinite;
 }
