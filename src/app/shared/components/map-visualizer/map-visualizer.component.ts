@@ -25,6 +25,7 @@ import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
 import OSM from 'ol/source/OSM';
+import XYZ from 'ol/source/XYZ';
 import VectorLayer from 'ol/layer/Vector';
 import VectorSource from 'ol/source/Vector';
 import Cluster from 'ol/source/Cluster';
@@ -492,10 +493,10 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
     
     switch (type) {
       case 'satellite':
-        // Esri World Imagery (Satélite)
-        source = new OSM({
-          url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-          attributions: '© Esri, Maxar, Earthstar Geographics'
+        source = new XYZ({
+          url: 'https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}',
+          attributions: '© Google',
+          maxZoom: 20
         });
         break;
         
