@@ -75,9 +75,37 @@
     padding: 0.5rem;
     border-radius: 6px;
     transition: background 0.2s ease;
+    cursor: pointer;
 
     &:hover {
       background: var(--surface-50);
+    }
+
+    .menu-radio {
+      width: 18px;
+      height: 18px;
+      border: 2px solid var(--surface-border);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+
+      .radio-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: transparent;
+        transition: all 0.2s ease;
+
+        &.active {
+          background: var(--primary-color);
+        }
+      }
+
+      &:has(.radio-dot.active) {
+        border-color: var(--primary-color);
+      }
     }
 
     .menu-label {

@@ -1,6 +1,72 @@
 <div class="map-visualizer-container" [style.height]="height">
   <!-- Toolbar -->
   <div class="map-toolbar-compact">
+    <!-- Botão de Tipo de Mapa -->
+    <p-button
+      #mapTypeBtn
+      variant="outlined"
+      type="button"
+      severity="info"
+      (click)="mapTypeMenu.toggle($event)"
+      pTooltip="Tipo de mapa"
+      tooltipPosition="bottom"
+      size="small">
+        <ng-template pTemplate="icon">
+            <i [style]="{'font-size': '12pt'}" class="material-symbols-outlined">map</i>
+        </ng-template>
+    </p-button>
+
+    <p-menu #mapTypeMenu appendTo="body" [model]="[]" [popup]="true" styleClass="labels-menu">
+      <ng-template pTemplate="start">
+        <div class="labels-menu-content">
+          <div class="menu-header">
+            <i [style]="{'font-size': '1rem'}" class="material-symbols-outlined">map</i>
+            <span>Tipo de Mapa</span>
+          </div>
+          
+          <div class="menu-item" (click)="changeBaseLayer('streets'); mapTypeMenu.hide()">
+            <div class="menu-radio">
+              <div class="radio-dot" [class.active]="baseLayerType === 'streets'"></div>
+            </div>
+            <label class="menu-label">
+              <i class="material-symbols-outlined">route</i>
+              <span>Ruas</span>
+            </label>
+          </div>
+
+          <div class="menu-item" (click)="changeBaseLayer('satellite'); mapTypeMenu.hide()">
+            <div class="menu-radio">
+              <div class="radio-dot" [class.active]="baseLayerType === 'satellite'"></div>
+            </div>
+            <label class="menu-label">
+              <i class="material-symbols-outlined">satellite_alt</i>
+              <span>Satélite</span>
+            </label>
+          </div>
+
+          <div class="menu-item" (click)="changeBaseLayer('terrain'); mapTypeMenu.hide()">
+            <div class="menu-radio">
+              <div class="radio-dot" [class.active]="baseLayerType === 'terrain'"></div>
+            </div>
+            <label class="menu-label">
+              <i class="material-symbols-outlined">terrain</i>
+              <span>Relevo</span>
+            </label>
+          </div>
+
+          <div class="menu-item" (click)="changeBaseLayer('topo'); mapTypeMenu.hide()">
+            <div class="menu-radio">
+              <div class="radio-dot" [class.active]="baseLayerType === 'topo'"></div>
+            </div>
+            <label class="menu-label">
+              <i class="material-symbols-outlined">landscape</i>
+              <span>Topográfico</span>
+            </label>
+          </div>
+        </div>
+      </ng-template>
+    </p-menu>
+
     <!-- Botão de Camadas de Geometria -->
     <p-button
       #layersBtn

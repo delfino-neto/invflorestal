@@ -105,6 +105,10 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
   showAreaLabels = true;
   showPlotLabels = true;
   
+  // Controle de camada base do mapa
+  baseLayerType: 'streets' | 'satellite' | 'terrain' | 'topo' = 'streets';
+  private baseLayer!: TileLayer<any>;
+  
   // Controle de visibilidade individual de cada geometria (index -> visible)
   geometryVisibility: { [key: number]: boolean } = {};
   
@@ -191,13 +195,14 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
       });
     }
 
+    // Criar camada base
+    this.baseLayer = this.createBaseLayer(this.baseLayerType);
+
     // Criar mapa
     this.map = new Map({
       target: this.mapContainer.nativeElement,
       layers: [
-        new TileLayer({
-          source: new OSM()
-        }),
+        this.baseLayer,
         this.vectorLayer,
         this.markersLayer
       ],
@@ -478,6 +483,65 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
   isGeometryVisible(index: number): boolean {
     return this.geometryVisibility[index] !== false;
   }
+  
+  /**
+   * Cria uma camada base baseada no tipo especificado
+   */
+  private createBaseLayer(type: 'streets' | 'satellite' | 'terrain' | 'topo'): TileLayer<any> {
+    let source;
+    
+    switch (type) {
+      case 'satellite':
+        // Esri World Imagery (Satélite)
+        source = new OSM({
+          url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+          attributions: '© Esri, Maxar, Earthstar Geographics'
+        });
+        break;
+        
+      case 'terrain':
+        // OpenTopoMap (Relevo/Terreno)
+        source = new OSM({
+          url: 'https://{a-c}.tile.opentopomap.org/{z}/{x}/{y}.png',
+          attributions: 'Map data: © OpenStreetMap contributors, SRTM'
+        });
+        break;
+        
+      case 'topo':
+        // Esri World Topo (Topográfico)
+        source = new OSM({
+          url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}',
+          attributions: '© Esri, HERE, Garmin, FAO, NOAA, USGS'
+        });
+        break;
+        
+      case 'streets':
+      default:
+        // OpenStreetMap padrão (Ruas)
+        source = new OSM();
+        break;
+    }
+    
+    return new TileLayer({ source });
+  }
+  
+  /**
+   * Troca a camada base do mapa
+   */
+  changeBaseLayer(type: 'streets' | 'satellite' | 'terrain' | 'topo'): void {
+    if (!this.map) return;
+    
+    this.baseLayerType = type;
+    const newBaseLayer = this.createBaseLayer(type);
+    
+    // Substituir a camada base (sempre é a primeira camada)
+    const layers = this.map.getLayers();
+    layers.removeAt(0);
+    layers.insertAt(0, newBaseLayer);
+    
+    this.baseLayer = newBaseLayer;
+  }
+
 
   highlightAndFlyTo(index: number): void {
     this.highlightedIndex = index;
