@@ -57,7 +57,7 @@ export class MapPageComponent implements OnInit {
   @ViewChild('clusterPopover') clusterPopover?: Popover;
   
   specimens: SpecimenObject[] = [];
-  allSpecimens: SpecimenObject[] = []; // Todos os espécimes sem filtro
+  allSpecimens: SpecimenObject[] = [];
   markers: MapMarker[] = [];
   
   // Filtros
@@ -248,19 +248,17 @@ export class MapPageComponent implements OnInit {
   }
 
   handleMarkerClick(marker: MapMarker, event?: any): void {
-    console.log('Marker clicked:', marker, 'Event:', event);
-    
+    // Marker click handled
     // Encontrar todos os espécimes na mesma posição (cluster indivisível)
     const samePosition = this.specimens.filter(s => 
       Math.abs(s.latitude - marker.latitude) < 0.000001 && 
       Math.abs(s.longitude - marker.longitude) < 0.000001
     );
 
-    console.log('Same position specimens:', samePosition.length);
+    // Número de espécimes na mesma posição: samePosition.length
 
     if (samePosition.length > 1) {
       // Múltiplos espécimes na mesma posição - mostrar popover de seleção
-      console.log('Showing cluster popover', event);
       this.clusterSpecimens = samePosition;
       
       // Extrair coordenadas do evento do OpenLayers
@@ -281,15 +279,13 @@ export class MapPageComponent implements OnInit {
             // Usar o evento DOM original
             clientX = originalEvent.clientX;
             clientY = originalEvent.clientY;
-            console.log('Using original event coordinates:', clientX, clientY);
           } else if (event.pixel) {
             // Calcular posição a partir do pixel do evento OpenLayers
             const mapElement = event.map?.getTargetElement();
-            if (mapElement) {
+              if (mapElement) {
               const rect = mapElement.getBoundingClientRect();
               clientX = rect.left + event.pixel[0];
               clientY = rect.top + event.pixel[1];
-              console.log('Calculated coordinates from pixel:', clientX, clientY);
             } else {
               // Fallback para o centro da tela
               clientX = window.innerWidth / 2;
@@ -312,7 +308,6 @@ export class MapPageComponent implements OnInit {
           this.popoverAnchor.style.zIndex = '9999';
           document.body.appendChild(this.popoverAnchor);
 
-          console.log('Created anchor at:', clientX, clientY);
           
           // Mostrar popover usando o elemento âncora
           this.clusterPopover.show(null, this.popoverAnchor);
@@ -320,12 +315,10 @@ export class MapPageComponent implements OnInit {
       }, 0);
     } else if (samePosition.length === 1) {
       // Apenas um espécime - mostrar detalhes diretamente
-      console.log('Showing single specimen');
       this.selectedSpecimen = samePosition[0];
       this.showSpecimenDetails = true;
     } else {
       // Fallback: usar o marker data
-      console.log('Using marker data');
       this.selectedSpecimen = marker.data as SpecimenObject;
       this.showSpecimenDetails = true;
     }

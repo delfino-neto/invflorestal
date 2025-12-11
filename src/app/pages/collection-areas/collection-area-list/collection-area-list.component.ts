@@ -52,7 +52,6 @@ export class CollectionAreaListComponent implements OnInit, OnDestroy {
   loading = true;
   searchTerm = '';
   
-  // Paginação
   currentPage = 0;
   pageSize = 8;
   totalRecords = 0;

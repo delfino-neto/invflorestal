@@ -3,9 +3,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import * as Cesium from 'cesium';
 const FadeOutBeamType = 'FadeOutBeam';
 const FadeOutBeamSource = `
-  // =========================================================================
-  // FUNÇÕES DE RUÍDO PROCEDURAL (NOISE) - Inalteradas
-  // =========================================================================
   float random(vec2 st) {
     return fract(sin(dot(st.xy, vec2(12.9898, 78.233))) * 43758.5453123);
   }
@@ -32,14 +29,10 @@ const FadeOutBeamSource = `
     return value;
   }
 
-  // =========================================================================
-  // FUNÇÃO PRINCIPAL DO MATERIAL - COM BRILHO AUMENTADO
-  // =========================================================================
   czm_material czm_getMaterial(czm_materialInput materialInput) {
     czm_material material = czm_getDefaultMaterial(materialInput);
     vec2 st = materialInput.st;
 
-    // --- CÁLCULOS DOS EFEFTOS ---
     float verticalFade = pow(1.0 - st.t, fadeFactor);
     float pulse = sin(time * 2.0) * 0.5 + 1.0;
     float glow = glowPower * pulse;
@@ -50,21 +43,11 @@ const FadeOutBeamSource = `
     float sparkleNoise = noise(sparkleNoiseCoord);
     float combinedNoise = smoothstep(0.4, 0.8, auroraNoise + sparkleNoise * 0.2);
 
-    // --- APLICAÇÃO FINAL COM BRILHO AUMENTADO ---
-
-    // ✅ AUMENTO DA OPACIDADE BASE: Deixa o "núcleo" do raio mais visível.
     float baseAlpha = 0.3; 
     float auroraEffect = combinedNoise * 0.5;
 
-    // O alpha agora é um pouco mais alto para uma presença mais forte.
     material.alpha = verticalFade * (baseAlpha + auroraEffect) * glow;
-    
-    // A cor difusa permanece a mesma.
     material.diffuse = color.rgb;
-    
-    // ✅ AUMENTO DA EMISSÃO DE LUZ: Esta é a mudança principal.
-    // Adicionamos um multiplicador final (ex: * 1.5) para aumentar drasticamente o brilho.
-    // É como aumentar a potência da "lâmpada" dentro do raio.
     material.emission = color.rgb * (baseAlpha + auroraEffect) * glow * verticalFade * 1.5;
 
     return material;
@@ -318,23 +301,19 @@ export class ExampleComponent implements OnInit {
   public async onFileSelected(event: Event): Promise<void> {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) {
-      console.log("Nenhum arquivo selecionado.");
+      // Nenhum arquivo selecionado; operação abortada
       return;
     }
     const file = input.files[0];
 
     try {
-      console.log("Lendo arquivo...");
-      // Chama o nosso serviço para obter o vetor de coordenadas
+      // Chama o serviço para obter o vetor de coordenadas
       const coordinates = await this.xlsxReader.getCoordinatesFromFile(file);
-      console.log(`Sucesso! ${coordinates.length} coordenadas lidas.`);
-      
-      // Agora, chama a função para criar os feixes usando essas coordenadas
+      // Criar feixes a partir das coordenadas lidas
       this.createBeamsFromCoordinates(coordinates);
 
     } catch (error) {
-      console.error("Falha ao carregar coordenadas do arquivo.", error);
-      // Aqui você pode mostrar uma mensagem de erro para o usuário
+      // Falha ao carregar coordenadas do arquivo
     }
   }
 

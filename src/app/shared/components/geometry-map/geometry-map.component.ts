@@ -68,11 +68,10 @@ import KML from 'ol/format/KML';
 export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, OnChanges, ControlValueAccessor {
   @ViewChild('mapContainer', { static: false }) mapContainer!: ElementRef<HTMLDivElement>;
 
-  // Inputs para customização
   @Input() height: string = 'calc(100vh - 250px)';
   @Input() minHeight: string = '600px';
-  @Input() centerLat: number = -15.7801;  // Brasília
-  @Input() centerLon: number = -47.9292;  // Brasília
+  @Input() centerLat: number = -15.7801;
+  @Input() centerLon: number = -47.9292;
   @Input() initialZoom: number = 12;
   @Input() maxZoom: number = 16;
   @Input() showClearButton: boolean = true;
@@ -80,51 +79,32 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
   @Input() strokeColor: string = 'rgb(59, 130, 246)';
   @Input() strokeWidth: number = 3;
   @Input() disabled: boolean = false;
-  
-  // Helper geometry (geometria auxiliar de referência, ex: área da CollectionArea)
   @Input() helperGeometry: string | null = null;
   @Input() helperFillColor: string = 'rgba(0, 0, 0, 0.2)';
   @Input() helperStrokeColor: string = 'rgba(0, 0, 0, 1)';
   @Input() helperStrokeWidth: number = 2;
-
-  // Multiple helper plots (outros plots da mesma área)
   @Input() helperPlots: Array<{ geometry: string; label: string; color?: string }> = [];
-
-  // Output para eventos
   @Output() geometryChange = new EventEmitter<string | null>();
   @Output() drawStart = new EventEmitter<void>();
   @Output() drawEnd = new EventEmitter<string>();
-
-  // Estado interno
   map?: Map;
   vectorSource!: VectorSource;
   vectorLayer!: VectorLayer<VectorSource>;
-  
-  // Helper layer (geometria de referência)
   helperVectorSource!: VectorSource;
   helperVectorLayer!: VectorLayer<VectorSource>;
-
-  // Helper plots layer (outros plots)
   helperPlotsSource!: VectorSource;
   helperPlotsLayer!: VectorLayer<VectorSource>;
-  
   draw?: Draw;
   modify?: Modify;
   snap?: Snap;
-  helperSnap?: Snap; // Snap para a geometria helper
-  helperPlotsSnap?: Snap; // Snap para os plots helper
+  helperSnap?: Snap;
+  helperPlotsSnap?: Snap;
   hasDrawnPolygon = false;
-
-  // Estado das ferramentas
   isDrawingActive = false;
   private isModifying = false;
-
-  // Formatadores OpenLayers
   private geoJSONFormat = new GeoJSON();
   private wktFormat = new WKT();
   private kmlFormat = new KML();
-
-  // ControlValueAccessor
   private onChange: (value: string | null) => void = () => {};
   private onTouched: () => void = () => {};
 

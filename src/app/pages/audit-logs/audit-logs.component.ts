@@ -50,11 +50,8 @@ export class AuditLogsComponent implements OnInit {
     totalRecords = 0;
     loading = false;
     
-    // Pagination
     currentPage = 0;
     pageSize = 20;
-    
-    // Filters
     selectedAction: AuditAction | null = null;
     searchTerm = '';
     
@@ -123,7 +120,6 @@ export class AuditLogsComponent implements OnInit {
                         this.loading = false;
                     },
                     error: (error) => {
-                        console.error('Error loading audit logs:', error);
                         this.loading = false;
                     }
                 });
@@ -136,7 +132,6 @@ export class AuditLogsComponent implements OnInit {
                         this.loading = false;
                     },
                     error: (error) => {
-                        console.error('Error loading audit logs:', error);
                         this.loading = false;
                     }
                 });
@@ -415,7 +410,6 @@ export class AuditLogsComponent implements OnInit {
                         this.loadAuditLogs();
                     },
                     error: (error) => {
-                        console.error('Error deleting audit log:', error);
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Erro',
@@ -462,7 +456,6 @@ export class AuditLogsComponent implements OnInit {
                         this.loadAuditLogs();
                     },
                     error: (error) => {
-                        console.error('Error deleting audit logs:', error);
                         this.messageService.add({
                             severity: 'error',
                             summary: 'Erro',

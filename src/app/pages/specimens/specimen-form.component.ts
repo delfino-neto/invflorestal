@@ -368,7 +368,7 @@ export class SpecimenFormComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Erro ao carregar usuário atual:', error);
+        // Erro ao carregar usuário atual
       }
     });
   }
@@ -396,7 +396,7 @@ export class SpecimenFormComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Erro ao carregar geometria do plot:', error);
+        // Erro ao carregar geometria do plot
       }
     });
   }
@@ -525,7 +525,6 @@ export class SpecimenFormComponent implements OnInit {
         }
       },
       error: (error) => {
-        console.error('Erro ao criar espécime:', error);
         this.messageService.add({
           severity: 'error',
           summary: 'Erro',

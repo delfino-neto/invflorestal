@@ -113,7 +113,6 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
           this.loading = false;
         },
         error: (error) => {
-          console.error('Erro ao carregar área:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Erro',
@@ -139,7 +138,6 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
           this.lastPlotsVersion = 0;
         },
         error: (error) => {
-          console.error('Erro ao carregar plots:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Erro',
@@ -162,7 +160,6 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
           this.loadingSpecimens = false;
         },
         error: (error) => {
-          console.error('Erro ao carregar espécimes:', error);
           this.messageService.add({
             severity: 'error',
             summary: 'Erro',
@@ -191,7 +188,6 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
 
   onSpecimenClick(specimen: SpecimenObject): void {
     // Por enquanto apenas mostra no console, pode abrir um dialog ou navegar para detalhe
-    console.log('Clicou no espécime:', specimen);
     this.messageService.add({
       severity: 'info',
       summary: specimen.speciesScientificName || 'Espécime',
@@ -272,7 +268,6 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
               this.loadPlots();
             },
             error: (error) => {
-              console.error('Erro ao excluir plot:', error);
               this.messageService.add({
                 severity: 'error',
                 summary: 'Erro',

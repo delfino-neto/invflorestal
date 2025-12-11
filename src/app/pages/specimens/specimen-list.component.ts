@@ -114,8 +114,7 @@ export class SpecimenListComponent implements OnInit, OnDestroy {
           this.specimens = response.content;
           this.totalRecords = response.totalElements;
           this.loading = false;
-          console.log('Specimens loaded:', this.specimens);
-          console.log('Total records:', this.totalRecords);
+          // Debug logs removed
         },
         error: (error) => {
           console.error('Erro ao carregar espécimes:', error);

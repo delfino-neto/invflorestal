@@ -1,8 +1,6 @@
 import { Component, Input, Output, EventEmitter, OnInit, AfterViewInit, ElementRef, ViewChild, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ConfirmationService, MessageService } from 'primeng/api';
-
-// PrimeNG
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -11,8 +9,6 @@ import { ChipModule } from 'primeng/chip';
 import { AvatarModule } from 'primeng/avatar';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule } from 'primeng/toast';
-
-// OpenLayers
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -23,8 +19,6 @@ import { fromLonLat } from 'ol/proj';
 import { Feature } from 'ol';
 import { Polygon } from 'ol/geom';
 import { Fill, Stroke, Style } from 'ol/style';
-
-// Services & Models
 import { CollectionAreaService } from '@/core/services/collection-area.service';
 import { CollectionArea } from '@/core/models/collection/collection-area';
 
@@ -88,7 +82,6 @@ export class CollectionAreaCardComponent implements OnInit, AfterViewInit, OnDes
       const coordinates = this.parseGeometry(this.area.geometry);
       
       if (!coordinates || coordinates.length === 0) {
-        console.warn('Geometria inválida para a área:', this.area.id);
         return;
       }
 
@@ -138,7 +131,7 @@ export class CollectionAreaCardComponent implements OnInit, AfterViewInit, OnDes
       });
 
     } catch (error) {
-      console.error('Erro ao inicializar mapa:', error);
+      // mapa não pôde ser inicializado
     }
   }
 
@@ -170,10 +163,9 @@ export class CollectionAreaCardComponent implements OnInit, AfterViewInit, OnDes
         return coordinates;
       }
 
-      console.warn('Formato de geometria não reconhecido, usando mock');
+            // formato de geometria não reconhecido, usando mock
       return this.getMockGeometry();
     } catch (error) {
-      console.warn('Erro ao parsear geometria, usando mock:', error);
       return this.getMockGeometry();
     }
   }
@@ -231,7 +223,6 @@ export class CollectionAreaCardComponent implements OnInit, AfterViewInit, OnDes
               this.delete.emit(this.area.id);
             },
             error: (error) => {
-              console.error('Erro ao excluir área:', error);
               this.messageService.add({
                 severity: 'error',
                 summary: 'Erro',

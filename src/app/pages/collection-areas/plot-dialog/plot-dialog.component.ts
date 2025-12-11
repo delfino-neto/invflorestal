@@ -2,20 +2,14 @@ import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChange
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormControl, ReactiveFormsModule, FormsModule, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
-
-// PrimeNG
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { DividerModule } from 'primeng/divider';
 import { ToastModule } from 'primeng/toast';
-
-// Services & Models
 import { PlotService } from '@/core/services/plot.service';
 import { Plot, PlotRequest } from '@/core/models/collection/plot';
-
-// Shared Components
 import { GeometryMapComponent } from '@/shared/components/geometry-map';
 
 @Component({

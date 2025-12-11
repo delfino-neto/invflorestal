@@ -58,13 +58,11 @@ export class XlsxReaderService {
           resolve(coordinates);
 
         } catch (error) {
-          console.error("Erro ao processar o arquivo XLSX:", error);
           reject(error);
         }
       };
 
       reader.onerror = (error) => {
-        console.error("Erro ao ler o arquivo:", error);
         reject(error);
       };
 

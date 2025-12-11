@@ -239,7 +239,6 @@ export class MapVisualizerComponent implements OnInit, AfterViewInit, OnDestroy,
               // O componente pai irá detectar múltiplos na mesma posição
               const markerData = firstFeature.get('markerData');
               if (markerData && markerData.onClick) {
-                console.log('Clicked indivisible cluster with', features.length, 'markers');
                 markerData.onClick(markerData, event);
                 clickedMarker = true;
                 return true;
