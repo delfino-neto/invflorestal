@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
-// PrimeNG
+
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -16,7 +16,7 @@ import { AvatarModule } from 'primeng/avatar';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 
-// Services & Models
+
 import { SpecimenObjectService } from '@/core/services/specimen-object.service';
 import { SpecimenObject } from '@/core/models/specimen/specimen-object';
 
@@ -45,7 +45,7 @@ export class SpecimenDetailComponent implements OnInit, OnDestroy {
   loading = true;
   specimenId!: number;
 
-  // Placeholder data for history (will be replaced with real API data)
+  
   history: any[] = [];
 
   private destroy$ = new Subject<void>();
@@ -81,7 +81,7 @@ export class SpecimenDetailComponent implements OnInit, OnDestroy {
         next: (specimen) => {
           this.specimen = specimen;
           this.loading = false;
-          // TODO: Load history from SpeciesInfo API
+          
           this.loadHistory();
         },
         error: (error) => {
@@ -98,8 +98,8 @@ export class SpecimenDetailComponent implements OnInit, OnDestroy {
   }
 
   loadHistory(): void {
-    // TODO: Implementar chamada à API de SpeciesInfo
-    // Por enquanto, apenas dados de exemplo
+    
+    
     this.history = [];
   }
 

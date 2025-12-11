@@ -56,7 +56,7 @@ export class SpeciesTaxonomyListComponent implements OnInit {
   currentPageSize = 10;
   private searchSubject = new Subject<string>();
   
-  // Dialog
+  
   showDialog = false;
   selectedTaxonomyId: number | null = null;
 

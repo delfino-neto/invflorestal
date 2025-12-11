@@ -5,7 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { forkJoin } from 'rxjs';
 
-// PrimeNG
+
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
@@ -20,7 +20,7 @@ import { DialogModule } from 'primeng/dialog';
 import { TooltipModule } from 'primeng/tooltip';
 import { DividerModule } from 'primeng/divider';
 
-// Services & Models
+
 import { SpecimenObjectService } from '@/core/services/specimen-object.service';
 import { SpeciesTaxonomyService } from '@/core/services/species-taxonomy.service';
 import { PlotService } from '@/core/services/plot.service';
@@ -73,18 +73,18 @@ export class SpecimenFormComponent implements OnInit {
   specimenId?: number;
   createdObjectId?: number;
 
-  // Photos
+  
   selectedPhotos: PhotoFile[] = [];
   previewVisible = false;
   previewImageIndex = 0;
   fileUploadComponent: any;
   
-  // Map properties
+  
   selectedPlotGeometry?: string;
   currentMarker: MapMarker[] = [];
   mapGeometries: Array<{ geometry: string; label?: string; fillColor?: string; strokeColor?: string }> = [];
 
-  // Dropdown options
+  
   species: any[] = [];
   plots: any[] = [];
   filteredPlots: any[] = [];
@@ -144,11 +144,11 @@ export class SpecimenFormComponent implements OnInit {
       condition: [null]
     });
     
-    // Observar mudanças no areaId para filtrar plots
+    
     this.locationForm.get('areaId')?.valueChanges.subscribe(areaId => {
       if (areaId) {
         this.filterPlotsByArea(areaId);
-        // Limpar plotId quando mudar de área
+        
         this.locationForm.patchValue({ plotId: null }, { emitEvent: false });
       } else {
         this.filteredPlots = [];
@@ -157,7 +157,7 @@ export class SpecimenFormComponent implements OnInit {
       }
     });
     
-    // Observar mudanças no plotId para carregar geometria
+    
     this.locationForm.get('plotId')?.valueChanges.subscribe(plotId => {
       if (plotId) {
         this.loadPlotGeometry(plotId);
@@ -167,7 +167,7 @@ export class SpecimenFormComponent implements OnInit {
       }
     });
     
-    // Observar mudanças nas coordenadas para atualizar marcador
+    
     this.locationForm.get('latitude')?.valueChanges.subscribe(() => this.updateMarker());
     this.locationForm.get('longitude')?.valueChanges.subscribe(() => this.updateMarker());
   }
@@ -177,7 +177,7 @@ export class SpecimenFormComponent implements OnInit {
     
     if (!files || files.length === 0) return;
 
-    // Verificar duplicatas por nome e tamanho
+    
     for (const file of files) {
       if (!file.type.startsWith('image/')) {
         this.messageService.add({
@@ -188,7 +188,7 @@ export class SpecimenFormComponent implements OnInit {
         continue;
       }
 
-      // Verificar se já existe no array
+      
       const alreadyExists = this.selectedPhotos.some(
         photo => photo.file.name === file.name && photo.file.size === file.size
       );
@@ -310,7 +310,7 @@ export class SpecimenFormComponent implements OnInit {
           value: u.id
         }));
         this.loadingData.users = false;
-        // Auto-preencher observador após carregar usuários
+        
         this.loadCurrentUserAsObserver();
       },
       error: () => {
@@ -347,7 +347,7 @@ export class SpecimenFormComponent implements OnInit {
   
   filterPlotsByArea(areaId: number): void {
     this.filteredPlots = this.plots.filter(p => {
-      // Extrair areaId do label que tem formato "PLOT-X - Área Y"
+      
       const match = p.label.match(/(\d+)$/);
       return match && parseInt(match[1]) === areaId;
     });
@@ -357,7 +357,7 @@ export class SpecimenFormComponent implements OnInit {
     this.authService.me().subscribe({
       next: (user) => {
         if (user?.name && this.users.length > 0) {
-          // Buscar o usuário na lista pelo nome
+          
           const currentUserInList = this.users.find(u => u.label === user.name);
           
           if (currentUserInList) {
@@ -368,7 +368,7 @@ export class SpecimenFormComponent implements OnInit {
         }
       },
       error: (error) => {
-        // Erro ao carregar usuário atual
+        
       }
     });
   }
@@ -396,7 +396,7 @@ export class SpecimenFormComponent implements OnInit {
         }
       },
       error: (error) => {
-        // Erro ao carregar geometria do plot
+        
       }
     });
   }
@@ -409,7 +409,7 @@ export class SpecimenFormComponent implements OnInit {
       this.currentMarker = [{
         latitude: Number(lat),
         longitude: Number(lon),
-        color: '#f97316', // Laranja vibrante para destacar do fundo verde
+        color: '#f97316', 
         label: '📍 Espécime'
       }];
     } else {
@@ -418,7 +418,7 @@ export class SpecimenFormComponent implements OnInit {
   }
   
   onMapClick(event: { latitude: number; longitude: number }): void {
-    // Atualizar os campos de latitude e longitude quando o usuário clicar no mapa
+    
     this.locationForm.patchValue({
       latitude: Number(event.latitude.toFixed(8)),
       longitude: Number(event.longitude.toFixed(8))
@@ -436,7 +436,7 @@ export class SpecimenFormComponent implements OnInit {
     this.loading = true;
     this.specimenService.findById(id).subscribe({
       next: (specimen) => {
-        // Preencher locationForm
+        
         this.locationForm.patchValue({
           areaId: specimen.areaId,
           plotId: specimen.plotId,
@@ -444,7 +444,7 @@ export class SpecimenFormComponent implements OnInit {
           longitude: specimen.longitude
         });
         
-        // Preencher speciesInfoForm
+        
         this.speciesInfoForm.patchValue({
           speciesId: specimen.speciesId,
           observerId: specimen.observerId
@@ -479,14 +479,14 @@ export class SpecimenFormComponent implements OnInit {
     
     const infoData = this.speciesInfoForm.value;
     
-    // Combinar dados dos dois forms incluindo SpeciesInfo
+    
     const objectRequest: SpecimenObjectRequest = {
       plotId: this.locationForm.value.plotId,
       speciesId: this.speciesInfoForm.value.speciesId,
       latitude: this.locationForm.value.latitude,
       longitude: this.locationForm.value.longitude,
       observerId: this.speciesInfoForm.value.observerId,
-      // SpeciesInfo fields
+      
       observationDate: infoData.observationDate,
       heightM: infoData.heightM,
       dbmCm: infoData.dbmCm,

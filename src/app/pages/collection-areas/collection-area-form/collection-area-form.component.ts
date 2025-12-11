@@ -5,7 +5,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { MessageService } from 'primeng/api';
 import { trigger, transition, style, animate } from '@angular/animations';
 
-// PrimeNG
+
 import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { ButtonModule } from 'primeng/button';
@@ -16,12 +16,12 @@ import { AutoCompleteModule } from 'primeng/autocomplete';
 import { InputNumberModule } from 'primeng/inputnumber';
 import { CheckboxModule } from 'primeng/checkbox';
 
-// Services & Models
+
 import { CollectionAreaService } from '@/core/services/collection-area.service';
 import { CollectionAreaRequest } from '@/core/models/collection/collection-area';
 import { AuthService } from '@/core/services/auth.service';
 
-// Shared Components
+
 import { GeometryMapComponent } from '@/shared/components/geometry-map';
 import { TooltipModule } from 'primeng/tooltip';
 import { TextareaModule } from 'primeng/textarea';
@@ -72,7 +72,7 @@ export class CollectionAreaFormComponent implements OnInit {
   
   private readonly INSTRUCTIONS_SEEN_KEY = 'collection_area_instructions_seen';
 
-  // Instruções para o usuário
+  
   drawingInstructions = [
     'Clique no mapa para começar a desenhar',
     'Continue clicando para adicionar pontos',
@@ -80,7 +80,7 @@ export class CollectionAreaFormComponent implements OnInit {
     'Arraste os pontos para ajustar a forma'
   ];
 
-  // Opções de autocomplete
+  
   biomeOptions = [
     'Amazônia',
     'Mata Atlântica',
@@ -147,7 +147,7 @@ export class CollectionAreaFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Verificar se é modo de edição
+    
     this.route.params.subscribe(params => {
       if (params['id']) {
         this.isEditMode = true;
@@ -156,7 +156,7 @@ export class CollectionAreaFormComponent implements OnInit {
       }
     });
     
-    // Verificar se deve mostrar instruções
+    
     this.checkIfShouldShowInstructions();
   }
 
@@ -310,7 +310,7 @@ export class CollectionAreaFormComponent implements OnInit {
     return '';
   }
 
-  // Métodos de filtro para autocomplete
+  
   filterBiomes(event: any): void {
     const query = event.query.toLowerCase();
     this.filteredBiomes = this.biomeOptions.filter(biome => 

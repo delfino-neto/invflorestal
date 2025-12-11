@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
-// PrimeNG
+
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -17,12 +17,12 @@ import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { ChipModule } from 'primeng/chip';
 import { AvatarModule } from 'primeng/avatar';
 
-// Services & Models
+
 import { CollectionAreaService } from '@/core/services/collection-area.service';
 import { CollectionArea } from '@/core/models/collection/collection-area';
 import { Page } from '@/core/services';
 
-// Components
+
 import { CollectionAreaCardComponent } from '../collection-area-card/collection-area-card.component';
 
 @Component({
@@ -114,7 +114,7 @@ export class CollectionAreaListComponent implements OnInit, OnDestroy {
   }
 
   onDelete(id: number): void {
-    // A confirmação será tratada no card component
+    
     this.loadAreas();
   }
 }

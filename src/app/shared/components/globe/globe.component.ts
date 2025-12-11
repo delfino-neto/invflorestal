@@ -20,13 +20,13 @@ export class GlobeComponent implements OnInit {
     public async onFileSelected(event: Event): Promise<void> {
         const input = event.target as HTMLInputElement;
         if (!input.files?.length) {
-            // Nenhum arquivo selecionado; abortando
+            
             return;
         }
         const file = input.files[0];
 
         try {
-            // Ler e processar o arquivo
+            
             const coordinates = await this.xlsxReader.getCoordinatesFromFile(file);
             this.createBeamsFromCoordinates(coordinates);
 

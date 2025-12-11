@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
-// PrimeNG
+
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TagModule } from 'primeng/tag';
@@ -55,14 +55,14 @@ export class AuditLogsComponent implements OnInit {
     selectedAction: AuditAction | null = null;
     searchTerm = '';
     
-    // Dialog
+    
     detailDialog = false;
     selectedLog?: AuditLog;
     
-    // Selection
+    
     selectedLogs: AuditLog[] = [];
     
-    // Actions dropdown
+    
     actions = [
         { label: 'Todas as Ações', value: null },
         { label: 'Criar', value: AuditAction.CREATE },
@@ -336,7 +336,7 @@ export class AuditLogsComponent implements OnInit {
     }
 
     private exportAsExcel(data: AuditLog[]) {
-        // Simula formato Excel com TSV (Tab Separated Values)
+        
         const headers = ['ID', 'Ação', 'Entidade', 'ID Entidade', 'Usuário', 'Email', 'Descrição', 'IP', 'Navegador', 'Data/Hora'];
         const tsvContent = [
             headers.join('\t'),

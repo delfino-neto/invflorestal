@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, takeUntil, debounceTime } from 'rxjs';
 
-// PrimeNG
+
 import { DataViewModule } from 'primeng/dataview';
 import { ButtonModule } from 'primeng/button';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -25,7 +25,7 @@ import { PaginatorModule } from 'primeng/paginator';
 import { GalleriaModule } from 'primeng/galleria';
 import { ImageModule } from 'primeng/image';
 
-// Services & Models
+
 import { SpecimenObjectService } from '@/core/services/specimen-object.service';
 import { SpecimenObject } from '@/core/models/specimen/specimen-object';
 import { Page } from '@/core/services';
@@ -64,12 +64,12 @@ export class SpecimenListComponent implements OnInit, OnDestroy {
   loading = true;
   searchTerm = '';
   
-  // Paginação
+  
   currentPage = 0;
   pageSize = 12;
   totalRecords = 0;
   
-  // Controles de visualização
+  
   layout: 'grid' | 'list' = 'grid';
   
   private destroy$ = new Subject<void>();
@@ -114,7 +114,7 @@ export class SpecimenListComponent implements OnInit, OnDestroy {
           this.specimens = response.content;
           this.totalRecords = response.totalElements;
           this.loading = false;
-          // Debug logs removed
+          
         },
         error: (error) => {
           console.error('Erro ao carregar espécimes:', error);
@@ -188,7 +188,7 @@ export class SpecimenListComponent implements OnInit, OnDestroy {
   }
 
   getSeverity(specimen: SpecimenObject): string {
-    // Pode ser customizado com base em alguma lógica de negócio
+    
     return 'success';
   }
 
@@ -222,18 +222,18 @@ export class SpecimenListComponent implements OnInit, OnDestroy {
     if (!name) return '#6b7280';
     
     const colors = [
-      '#ef4444', // red-500
-      '#f97316', // orange-500
-      '#eab308', // yellow-500
-      '#22c55e', // green-500
-      '#10b981', // emerald-500
-      '#06b6d4', // cyan-500
-      '#3b82f6', // blue-500
-      '#6366f1', // indigo-500
-      '#8b5cf6', // violet-500
-      '#a855f7', // purple-500
-      '#ec4899', // pink-500
-      '#f43f5e', // rose-500
+      '#ef4444', 
+      '#f97316', 
+      '#eab308', 
+      '#22c55e', 
+      '#10b981', 
+      '#06b6d4', 
+      '#3b82f6', 
+      '#6366f1', 
+      '#8b5cf6', 
+      '#a855f7', 
+      '#ec4899', 
+      '#f43f5e', 
     ];
     
     let hash = 0;

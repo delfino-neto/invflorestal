@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 
-// PrimeNG
+
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { FileUploadModule } from 'primeng/fileupload';
@@ -19,7 +19,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { ChipModule } from 'primeng/chip';
 import * as XLSX from 'xlsx';
 
-// Services & Models
+
 import { PlotService } from '@/core/services/plot.service';
 import { Plot } from '@/core/models/collection/plot';
 import { CollectionAreaService } from '@/core/services/collection-area.service';
@@ -186,7 +186,7 @@ export class DataImportComponent implements OnInit {
   }
 
   parseCSVPreview(data: string): void {
-    const lines = data.split('\n').slice(0, 20); // First 20 lines
+    const lines = data.split('\n').slice(0, 20); 
     const preview: any[] = [];
     
     lines.forEach((line, index) => {
@@ -262,7 +262,7 @@ export class DataImportComponent implements OnInit {
     this.uploading = true;
     this.importResult = null;
 
-    // Prepare column mapping
+    
     const columnMapping: { [key: number]: string } = {};
     this.columnMappings
       .filter(m => m.fieldName !== '')

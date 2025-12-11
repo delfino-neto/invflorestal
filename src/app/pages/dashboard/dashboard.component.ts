@@ -51,7 +51,7 @@ export class DashboardComponent implements OnInit {
             error: (error) => {
                 console.error('Erro ao carregar dados do dashboard:', error);
                 this.loading = false;
-                // Fallback para dados de exemplo em caso de erro
+                
                 this.loadFallbackData();
             }
         });
@@ -144,7 +144,7 @@ export class DashboardComponent implements OnInit {
     updateSuggestions(data: DashboardStatistics): void {
         this.suggestions = [];
 
-        // Destaque da espécie mais comum
+        
         if (data.topSpecies.length > 0) {
             const topSpecies = data.topSpecies[0];
             this.suggestions.push({
@@ -156,7 +156,7 @@ export class DashboardComponent implements OnInit {
             });
         }
 
-        // Atividade recente
+        
         if (data.recentSpecimens > 0) {
             this.suggestions.push({
                 type: 'activity',
@@ -167,7 +167,7 @@ export class DashboardComponent implements OnInit {
             });
         }
 
-        // Diversidade
+        
         if (data.totalSpecies > 0 && data.totalSpecimens > 0) {
             const diversity = (data.totalSpecies / data.totalSpecimens * 100).toFixed(1);
             this.suggestions.push({
@@ -181,7 +181,7 @@ export class DashboardComponent implements OnInit {
     }
 
     loadFallbackData(): void {
-        // Dados de exemplo caso a API falhe
+        
         this.stats = [
             {
                 title: 'Total de Espécimes',

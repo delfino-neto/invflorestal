@@ -3,7 +3,7 @@ import { Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule, Validators } from "@angular/forms";
 import { MessageService, ConfirmationService } from 'primeng/api';
 
-// PrimeNG
+
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
@@ -63,16 +63,16 @@ export class UserManagementComponent implements OnInit {
     totalRecords = 0;
     loading = false;
     
-    // Dialog
+    
     userDialog = false;
     userForm!: FormGroup;
     isEditMode = false;
     editingUserId?: number;
     
-    // Search
+    
     searchTerm = '';
     
-    // Pagination
+    
     currentPage = 0;
     pageSize = 10;
 
@@ -163,11 +163,11 @@ export class UserManagementComponent implements OnInit {
         this.isEditMode = true;
         this.editingUserId = user.id;
         
-        // Para edição, senha é opcional
+        
         this.userForm.get('password')?.clearValidators();
         this.userForm.get('password')?.updateValueAndValidity();
         
-        // Extrair IDs das roles
+        
         const roleIds = this.roles
             .filter(role => user.roles.includes(role.name))
             .map(role => role.id);
@@ -199,7 +199,7 @@ export class UserManagementComponent implements OnInit {
         const formValue = this.userForm.value;
         
         if (this.isEditMode && this.editingUserId) {
-            // Update
+            
             const updateRequest: UserUpdateRequest = {
                 firstName: formValue.firstName,
                 lastName: formValue.lastName,
@@ -209,7 +209,7 @@ export class UserManagementComponent implements OnInit {
                 roleIds: formValue.roleIds
             };
             
-            // Só incluir senha se foi preenchida
+            
             if (formValue.password && formValue.password.trim() !== '') {
                 updateRequest.password = formValue.password;
             }
@@ -233,7 +233,7 @@ export class UserManagementComponent implements OnInit {
                 }
             });
         } else {
-            // Create
+            
             const createRequest: UserRequest = {
                 firstName: formValue.firstName,
                 lastName: formValue.lastName,
@@ -379,31 +379,31 @@ export class UserManagementComponent implements OnInit {
     }
 
     getUserAvatarColor(name: string): string {
-        if (!name) return '#6b7280'; // cor padrão se não houver nome
+        if (!name) return '#6b7280'; 
         
-        // Array de cores harmoniosas para avatares
+        
         const colors = [
-        '#ef4444', // red-500
-        '#f97316', // orange-500
-        '#eab308', // yellow-500
-        '#22c55e', // green-500
-        '#10b981', // emerald-500
-        '#06b6d4', // cyan-500
-        '#3b82f6', // blue-500
-        '#6366f1', // indigo-500
-        '#8b5cf6', // violet-500
-        '#a855f7', // purple-500
-        '#ec4899', // pink-500
-        '#f43f5e', // rose-500
+        '#ef4444', 
+        '#f97316', 
+        '#eab308', 
+        '#22c55e', 
+        '#10b981', 
+        '#06b6d4', 
+        '#3b82f6', 
+        '#6366f1', 
+        '#8b5cf6', 
+        '#a855f7', 
+        '#ec4899', 
+        '#f43f5e', 
         ];
         
-        // Gerar um hash simples do nome
+        
         let hash = 0;
         for (let i = 0; i < name.length; i++) {
         hash = name.charCodeAt(i) + ((hash << 5) - hash);
         }
         
-        // Usar o hash para selecionar uma cor
+        
         const index = Math.abs(hash) % colors.length;
         return colors[index];
     }

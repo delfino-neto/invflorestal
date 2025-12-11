@@ -131,7 +131,7 @@ export class CollectionAreaCardComponent implements OnInit, AfterViewInit, OnDes
       });
 
     } catch (error) {
-      // mapa não pôde ser inicializado
+      
     }
   }
 
@@ -163,7 +163,7 @@ export class CollectionAreaCardComponent implements OnInit, AfterViewInit, OnDes
         return coordinates;
       }
 
-            // formato de geometria não reconhecido, usando mock
+            
       return this.getMockGeometry();
     } catch (error) {
       return this.getMockGeometry();

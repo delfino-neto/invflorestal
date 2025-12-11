@@ -15,7 +15,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
-// PrimeNG
+
 import { ButtonModule } from 'primeng/button';
 import { TooltipModule } from 'primeng/tooltip';
 import { ToolbarModule } from 'primeng/toolbar';
@@ -24,7 +24,7 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { MessageService } from 'primeng/api';
 import { ToastModule } from 'primeng/toast';
 
-// OpenLayers
+
 import Map from 'ol/Map';
 import View from 'ol/View';
 import TileLayer from 'ol/layer/Tile';
@@ -111,8 +111,8 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
   constructor(private messageService: MessageService) {}
 
   ngOnInit(): void {
-    // Observar mudanças na geometria auxiliar
-    // Nota: Para mudanças dinâmicas, usar ngOnChanges seria melhor
+    
+    
   }
 
   ngAfterViewInit(): void {
@@ -127,9 +127,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     }
   }
 
-  /**
-   * Detecta mudanças nos inputs (principalmente helperGeometry e helperPlots)
-   */
+  
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['helperGeometry'] && !changes['helperGeometry'].firstChange) {
       this.updateHelperGeometry();
@@ -139,18 +137,16 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     }
   }
 
-  /**
-   * Atualiza a geometria auxiliar (helper) no mapa
-   */
+  
   private updateHelperGeometry(): void {
     if (!this.helperVectorSource || !this.map) {
       return;
     }
 
-    // Limpar geometria auxiliar anterior
+    
     this.helperVectorSource.clear();
 
-    // Se não houver geometria auxiliar, apenas retornar
+    
     if (!this.helperGeometry) {
       return;
     }
@@ -164,19 +160,19 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
         
         this.helperVectorSource.addFeature(feature);
 
-        // Criar/recriar helperSnap se ainda não existir
+        
         if (!this.helperSnap) {
           this.helperSnap = new Snap({
             source: this.helperVectorSource
           });
           this.map.addInteraction(this.helperSnap);
         } else {
-          // Re-adicionar snap se já existe para garantir que está ativo
+          
           this.map.removeInteraction(this.helperSnap);
           this.map.addInteraction(this.helperSnap);
         }
 
-        // Se não houver polígono desenhado ainda, ajustar view para mostrar a geometria auxiliar
+        
         if (!this.hasDrawnPolygon) {
           this.zoomToHelperGeometry();
         }
@@ -186,9 +182,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     }
   }
 
-  /**
-   * Ajusta o zoom para mostrar a geometria auxiliar
-   */
+  
   private zoomToHelperGeometry(): void {
     if (!this.map || !this.helperVectorSource) return;
     
@@ -205,32 +199,30 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     }
   }
 
-  /**
-   * Atualiza os plots helper (outros plots da mesma área)
-   */
+  
   private updateHelperPlots(): void {
     if (!this.helperPlotsSource || !this.map) {
       return;
     }
 
-    // Limpar plots anteriores
+    
     this.helperPlotsSource.clear();
 
-    // Se não houver plots, apenas retornar
+    
     if (!this.helperPlots || this.helperPlots.length === 0) {
       return;
     }
 
-    // Cores pré-definidas para os plots
+    
     const defaultColors = [
-      'rgba(239, 68, 68, 0.3)',   // Red
-      'rgba(249, 115, 22, 0.3)',  // Orange
-      'rgba(234, 179, 8, 0.3)',   // Yellow
-      'rgba(34, 197, 94, 0.3)',   // Green
-      'rgba(59, 130, 246, 0.3)',  // Blue
-      'rgba(168, 85, 247, 0.3)',  // Purple
-      'rgba(236, 72, 153, 0.3)',  // Pink
-      'rgba(20, 184, 166, 0.3)',  // Teal
+      'rgba(239, 68, 68, 0.3)',   
+      'rgba(249, 115, 22, 0.3)',  
+      'rgba(234, 179, 8, 0.3)',   
+      'rgba(34, 197, 94, 0.3)',   
+      'rgba(59, 130, 246, 0.3)',  
+      'rgba(168, 85, 247, 0.3)',  
+      'rgba(236, 72, 153, 0.3)',  
+      'rgba(20, 184, 166, 0.3)',  
     ];
 
     try {
@@ -241,11 +233,11 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
           const polygon = new Polygon([coordinates.map(coord => fromLonLat(coord))]);
           const feature = new Feature({ geometry: polygon });
           
-          // Usar cor fornecida ou cor padrão baseada no índice
+          
           const fillColor = plot.color || defaultColors[index % defaultColors.length];
           const strokeColor = this.rgbaToRgb(fillColor, 0.8);
           
-          // Estilo com label
+          
           feature.setStyle(new Style({
             fill: new Fill({
               color: fillColor
@@ -273,14 +265,14 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
         }
       });
 
-      // Criar/recriar helperPlotsSnap se ainda não existir
+      
       if (!this.helperPlotsSnap && this.helperPlotsSource.getFeatures().length > 0) {
         this.helperPlotsSnap = new Snap({
           source: this.helperPlotsSource
         });
         this.map.addInteraction(this.helperPlotsSnap);
       } else if (this.helperPlotsSnap && this.helperPlotsSource.getFeatures().length > 0) {
-        // Re-adicionar snap se já existe para garantir que está ativo
+        
         this.map.removeInteraction(this.helperPlotsSnap);
         this.map.addInteraction(this.helperPlotsSnap);
       }
@@ -289,9 +281,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     }
   }
 
-  /**
-   * Converte RGBA para RGB com opacidade ajustada
-   */
+  
   private rgbaToRgb(rgba: string, opacity: number): string {
     const match = rgba.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
     if (match) {
@@ -303,7 +293,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
   initializeMap(): void {
     if (!this.mapContainer) return;
 
-    // Criar source e layer para geometria auxiliar (helper)
+    
     this.helperVectorSource = new VectorSource();
     
     this.helperVectorLayer = new VectorLayer({
@@ -315,23 +305,23 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
         stroke: new Stroke({
           color: this.helperStrokeColor,
           width: this.helperStrokeWidth,
-          lineDash: [5, 5] // Linha tracejada para diferenciar
+          lineDash: [5, 5] 
         })
       }),
-      zIndex: 1, // Abaixo da camada principal
-      renderBuffer: 4096 // Aumentar buffer para melhor performance
+      zIndex: 1, 
+      renderBuffer: 4096 
     });
 
-    // Criar source e layer para helper plots (outros plots)
+    
     this.helperPlotsSource = new VectorSource();
     
     this.helperPlotsLayer = new VectorLayer({
       source: this.helperPlotsSource,
-      zIndex: 1.5, // Entre helper geometry e camada principal
-      renderBuffer: 4096 // Aumentar buffer para melhor performance
+      zIndex: 1.5, 
+      renderBuffer: 4096 
     });
 
-    // Criar source e layer para vetores principais
+    
     this.vectorSource = new VectorSource();
     
     this.vectorLayer = new VectorLayer({
@@ -359,7 +349,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       renderBuffer: 4096
     });
 
-    // Criar mapa
+    
     this.map = new Map({
       target: this.mapContainer.nativeElement,
       layers: [
@@ -376,17 +366,17 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       })
     });
 
-    // Carregar geometria auxiliar se fornecida
+    
     if (this.helperGeometry) {
       this.updateHelperGeometry();
     }
 
-    // Carregar helper plots se fornecidos
+    
     if (this.helperPlots && this.helperPlots.length > 0) {
       this.updateHelperPlots();
     }
 
-    // Adicionar evento para mudar cursor quando hover sobre features
+    
     this.map.on('pointermove', (evt: any) => {
       if (this.disabled || this.isDrawingActive) return;
       
@@ -403,14 +393,14 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       mapElement.style.cursor = hit ? 'grab' : 'default';
     });
 
-    // Inicializar interações de modificação e snap (sempre disponíveis)
+    
     this.initializeModifyAndSnap();
   }
 
   initializeModifyAndSnap(): void {
     if (!this.map || this.disabled) return;
 
-    // Modificar geometria existente
+    
     this.modify = new Modify({
       source: this.vectorSource,
       style: new Style({
@@ -427,7 +417,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       })
     });
 
-    // Evento ao modificar
+    
     this.modify.on('modifystart', () => {
       this.isModifying = true;
       const mapElement = this.map?.getTargetElement() as HTMLElement;
@@ -440,19 +430,19 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       this.isModifying = false;
       const mapElement = this.map?.getTargetElement() as HTMLElement;
       if (mapElement) {
-        // mapElement.style.cursor = 'default';
+        
         if (this.disabled || this.isDrawingActive) return;
       
         const mapElement = this.map!.getTargetElement() as HTMLElement;
         if (!mapElement || !this.hasDrawnPolygon) return;
 
-        // Se estiver modificando, manter cursor grabbing
+        
         if (this.isModifying) {
           mapElement.style.cursor = 'grabbing';
           return;
         }
 
-        // Caso contrário, verificar se está sobre o polígono
+        
         const pixel = this.map!.getEventPixel(evt.mapBrowserEvent.originalEvent);
         const hit = this.map!.hasFeatureAtPixel(pixel);
         mapElement.style.cursor = hit ? 'grab' : 'default';
@@ -465,12 +455,12 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       }
     });
 
-    // Snap para facilitar o ajuste - incluindo helper geometry
+    
     this.snap = new Snap({
       source: this.vectorSource
     });
 
-    // Adicionar snap também para a geometria helper (mantém referência para reusar)
+    
     if (this.helperVectorSource) {
       this.helperSnap = new Snap({
         source: this.helperVectorSource
@@ -478,7 +468,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       this.map.addInteraction(this.helperSnap);
     }
 
-    // Adicionar snap também para os helper plots
+    
     if (this.helperPlotsSource && this.helperPlotsSource.getFeatures().length > 0) {
       this.helperPlotsSnap = new Snap({
         source: this.helperPlotsSource
@@ -486,12 +476,12 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       this.map.addInteraction(this.helperPlotsSnap);
     }
 
-    // Adicionar modify e snap ao mapa (sempre ativos)
+    
     this.map.addInteraction(this.modify);
     this.map.addInteraction(this.snap);
   }
 
-  // Controle de ferramentas
+  
   toggleDrawing(): void {
     if (this.disabled) return;
     
@@ -514,20 +504,20 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     if (this.map && this.draw) {
       this.map.addInteraction(this.draw);
       
-      // IMPORTANTE: Snap deve ser adicionado DEPOIS do Draw para funcionar corretamente
-      // Re-adicionar o snap principal
+      
+      
       if (this.snap) {
         this.map.removeInteraction(this.snap);
         this.map.addInteraction(this.snap);
       }
       
-      // Re-adicionar snap para helper geometry
+      
       if (this.helperSnap) {
         this.map.removeInteraction(this.helperSnap);
         this.map.addInteraction(this.helperSnap);
       }
 
-      // Re-adicionar snap para helper plots
+      
       if (this.helperPlotsSnap) {
         this.map.removeInteraction(this.helperPlotsSnap);
         this.map.addInteraction(this.helperPlotsSnap);
@@ -545,7 +535,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
   createDrawInteraction(): void {
     if (!this.map || this.disabled) return;
 
-    // Desenhar polígono
+    
     this.draw = new Draw({
       source: this.vectorSource,
       type: 'Polygon',
@@ -567,17 +557,17 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       })
     });
 
-    // Evento ao começar a desenhar
+    
     this.draw.on('drawstart', () => {
       this.vectorSource.clear();
       this.hasDrawnPolygon = false;
       this.drawStart.emit();
     });
 
-    // Evento ao finalizar desenho
+    
     this.draw.on('drawend', () => {
       this.hasDrawnPolygon = true;
-      // Desativar ferramenta de desenho após finalizar
+      
       setTimeout(() => {
         this.deactivateDrawTool();
         const geometry = this.getGeometryFromMap();
@@ -616,10 +606,10 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
         this.vectorSource.addFeature(feature);
         this.hasDrawnPolygon = true;
 
-        // Ajustar view para mostrar o polígono
+        
         this.zoomToPolygon();
 
-        // Garantir que os snaps estejam ativos após carregar geometria
+        
         this.ensureSnapsActive();
       }
     } catch (error) {
@@ -627,32 +617,30 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     }
   }
 
-  /**
-   * Garante que todos os snaps estão ativos
-   */
+  
   private ensureSnapsActive(): void {
     if (!this.map) return;
 
-    // Re-adicionar snap principal se existir
+    
     if (this.snap) {
       this.map.removeInteraction(this.snap);
       this.map.addInteraction(this.snap);
     }
 
-    // Re-adicionar snap helper geometry se existir
+    
     if (this.helperSnap) {
       this.map.removeInteraction(this.helperSnap);
       this.map.addInteraction(this.helperSnap);
     }
 
-    // Re-adicionar snap helper plots se existir
+    
     if (this.helperPlotsSnap) {
       this.map.removeInteraction(this.helperPlotsSnap);
       this.map.addInteraction(this.helperPlotsSnap);
     }
   }
 
-  // Método auxiliar para zoom no polígono
+  
   zoomToPolygon(): void {
     if (!this.map || !this.hasDrawnPolygon) return;
     
@@ -670,7 +658,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
   }
 
   parseGeometry(geometry: string): [number, number][] {
-    // Formato PostgreSQL: ((lon1,lat1),(lon2,lat2),...)
+    
     if (geometry.startsWith('((') && geometry.endsWith('))')) {
       const cleanedGeometry = geometry.slice(2, -2);
       return cleanedGeometry.split('),(').map(pair => {
@@ -679,14 +667,14 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       });
     }
 
-    // Formato GeoJSON
+    
     try {
       const geojson = JSON.parse(geometry);
       if (geojson.type === 'Polygon' && geojson.coordinates) {
         return geojson.coordinates[0] as [number, number][];
       }
     } catch (e) {
-      // Não é JSON
+      
     }
 
     return [];
@@ -703,13 +691,13 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     const geometry = feature.getGeometry() as Polygon;
     const coordinates = geometry.getCoordinates()[0];
 
-    // Converter de projeção do mapa para lon/lat
+    
     const lonLatCoords = coordinates.map((coord: Coordinate) => {
       const [lon, lat] = toLonLat(coord);
       return `(${lon},${lat})`;
     });
 
-    // Formato PostgreSQL
+    
     return `(${lonLatCoords.join(',')})`;
   }
 
@@ -727,11 +715,9 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     }
   }
 
-  // ========== IMPORTAÇÃO DE GEOMETRIAS ==========
+  
 
-  /**
-   * Importa geometria de um arquivo
-   */
+  
   onFileSelect(event: any): void {
     const file = event.files[0];
     if (!file) return;
@@ -746,15 +732,13 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     reader.readAsText(file);
   }
 
-  /**
-   * Importa geometria de diferentes formatos
-   */
+  
   importGeometry(content: string, filename: string): void {
     try {
       let features: Feature[] = [];
       const extension = filename.split('.').pop()?.toLowerCase();
 
-      // Tentar detectar e importar baseado no formato
+      
       if (extension === 'geojson' || extension === 'json') {
         features = this.importGeoJSON(content);
       } else if (extension === 'kml') {
@@ -762,7 +746,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       } else if (extension === 'wkt' || extension === 'txt') {
         features = this.importWKT(content);
       } else {
-        // Tentar auto-detectar
+        
         features = this.autoDetectFormat(content);
       }
 
@@ -788,9 +772,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     }
   }
 
-  /**
-   * Importa de GeoJSON
-   */
+  
   private importGeoJSON(content: string): Feature[] {
     try {
       const features = this.geoJSONFormat.readFeatures(content, {
@@ -809,9 +791,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     }
   }
 
-  /**
-   * Importa de KML
-   */
+  
   private importKML(content: string): Feature[] {
     try {
       const features = this.kmlFormat.readFeatures(content, {
@@ -824,9 +804,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     }
   }
 
-  /**
-   * Importa de WKT
-   */
+  
   private importWKT(content: string): Feature[] {
     try {
       const feature = this.wktFormat.readFeature(content.trim(), {
@@ -839,45 +817,41 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     }
   }
 
-  /**
-   * Tenta auto-detectar o formato
-   */
+  
   private autoDetectFormat(content: string): Feature[] {
     const trimmed = content.trim();
 
-    // Tentar GeoJSON
+    
     if (trimmed.startsWith('{') || trimmed.startsWith('[')) {
       try {
         return this.importGeoJSON(trimmed);
       } catch (e) {
-        // Continuar tentando outros formatos
+        
       }
     }
 
-    // Tentar KML
+    
     if (trimmed.startsWith('<')) {
       try {
         return this.importKML(trimmed);
       } catch (e) {
-        // Continuar tentando outros formatos
+        
       }
     }
 
-    // Tentar WKT
+    
     if (trimmed.toUpperCase().startsWith('POLYGON')) {
       try {
         return this.importWKT(trimmed);
       } catch (e) {
-        // Continuar tentando outros formatos
+        
       }
     }
 
     throw new Error('Formato não reconhecido. Use GeoJSON, KML ou WKT.');
   }
 
-  /**
-   * Filtra apenas polígonos das features e converte MultiPolygon em Polygon
-   */
+  
   private filterPolygons(features: Feature[]): Feature[] {
     const polygons: Feature[] = [];
 
@@ -889,14 +863,14 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       const geomType = geometry.getType();
 
       if (geomType === 'Polygon') {
-        // Já é um polígono, adicionar diretamente
+        
         polygons.push(feature);
       } else if (geomType === 'MultiPolygon') {
-        // Converter MultiPolygon em múltiplos Polygons
+        
         const multiPolygon = geometry as MultiPolygon;
         const polygonGeometries = multiPolygon.getPolygons();
         
-        // Pegar apenas o primeiro polígono do MultiPolygon
+        
         if (polygonGeometries.length > 0) {
           const newFeature = new Feature({
             geometry: polygonGeometries[0]
@@ -909,23 +883,21 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     return polygons;
   }
 
-  /**
-   * Carrega features no mapa
-   */
+  
   private loadFeaturesIntoMap(features: Feature[]): void {
     if (features.length === 0) {
       throw new Error('Nenhum polígono encontrado no arquivo');
     }
 
-    // Limpar mapa e adicionar primeira feature (polígono)
+    
     this.vectorSource.clear();
     this.vectorSource.addFeature(features[0]);
     this.hasDrawnPolygon = true;
 
-    // Ajustar zoom para mostrar o polígono
+    
     this.zoomToPolygon();
 
-    // Emitir mudança
+    
     const geometry = this.getGeometryFromMap();
     if (geometry) {
       this.onChange(geometry);
@@ -933,7 +905,7 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
       this.geometryChange.emit(geometry);
     }
 
-    // Se houver mais de um polígono ou foi MultiPolygon, avisar
+    
     if (features.length > 1) {
       this.messageService.add({
         severity: 'info',
@@ -944,9 +916,9 @@ export class GeometryMapComponent implements OnInit, AfterViewInit, OnDestroy, O
     }
   }
 
-  // ========== FIM IMPORTAÇÃO ==========
+  
 
-  // ControlValueAccessor implementation
+  
   writeValue(value: string | null): void {
     if (value) {
       this.loadGeometry(value);

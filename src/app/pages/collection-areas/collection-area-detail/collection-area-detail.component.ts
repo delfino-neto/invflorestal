@@ -60,16 +60,16 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
   loadingPlots = false;
   loadingSpecimens = false;
   
-  // Dialog states
+  
   showPlotDialog = false;
   isEditingPlot = false;
   plotGeometry?: string;
   
-  // Cache para geometrias do mapa
-  private cachedMapGeometries: Array<{ geometry: string; label?: string; fillColor?: string; strokeColor?: string; strokeWidth?: number }> = [];
-  private lastPlotsVersion = 0; // Para detectar mudanças nos plots
   
-  // Controle de highlight no mapa
+  private cachedMapGeometries: Array<{ geometry: string; label?: string; fillColor?: string; strokeColor?: string; strokeWidth?: number }> = [];
+  private lastPlotsVersion = 0; 
+  
+  
   highlightedGeometryIndex?: number;
   
   private destroy$ = new Subject<void>();
@@ -133,7 +133,7 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
         next: (response) => {
           this.plots = response.content;
           this.loadingPlots = false;
-          // Invalidar cache quando plots mudam
+          
           this.cachedMapGeometries = [];
           this.lastPlotsVersion = 0;
         },
@@ -171,13 +171,13 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
   }
 
   updateSpecimenMarkers(): void {
-    // Criar marcadores a partir dos espécimes
+    
     this.specimenMarkers = this.specimens.map(specimen => ({
       id: specimen.id,
       latitude: Number(specimen.latitude),
       longitude: Number(specimen.longitude),
       type: 'specimen',
-      color: '#10b981', // Verde esmeralda
+      color: '#10b981', 
       label: specimen.speciesCommonName || specimen.speciesScientificName?.split(' ').slice(0, 2).join(' ') || '',
       data: specimen,
       onClick: (marker: MapMarker) => {
@@ -187,7 +187,7 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
   }
 
   onSpecimenClick(specimen: SpecimenObject): void {
-    // Por enquanto apenas mostra no console, pode abrir um dialog ou navegar para detalhe
+    
     this.messageService.add({
       severity: 'info',
       summary: specimen.speciesScientificName || 'Espécime',
@@ -218,7 +218,7 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
     this.importDialogRef?.onClose.subscribe((importedPlot) => {
       if (importedPlot) {
         this.loadPlots();
-        // Highlight do plot importado após recarregar
+        
         setTimeout(() => {
           const plotIndex = this.plots.findIndex(p => p.id === importedPlot.id);
           if (plotIndex !== -1) {
@@ -281,10 +281,10 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
   }
 
   selectPlotOnMap(plot: Plot): void {
-    // Encontrar o índice do plot nas geometrias (área é index 0, plots começam em 1)
+    
     const plotIndex = this.plots.findIndex(p => p.id === plot.id);
     if (plotIndex !== -1) {
-      // +1 porque a área está no index 0
+      
       this.highlightedGeometryIndex = plotIndex + 1;
       this.selectedPlot = plot;
     }
@@ -356,7 +356,7 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
     return uniqueSpecies.size;
   }
 
-  // Retorna os outros plots (exceto o selecionado) para usar como helper
+  
   getOtherPlots(): Array<{ geometry: string; label: string }> {
     if (!this.selectedPlot) {
       return this.plots.map(plot => ({
@@ -373,22 +373,22 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
       }));
   }
 
-  // Prepara geometrias para o MapVisualizer (com cache)
+  
   getMapGeometries(): Array<{ geometry: string; label?: string; fillColor?: string; strokeColor?: string; strokeWidth?: number }> {
-    // Criar uma versão baseada no tamanho e ids dos plots
+    
     const currentVersion = this.plots.length + (this.area?.id || 0);
     
-    // Se nada mudou, retornar o cache
+    
     if (currentVersion === this.lastPlotsVersion && this.cachedMapGeometries.length > 0) {
       return this.cachedMapGeometries;
     }
     
-    // Atualizar versão
+    
     this.lastPlotsVersion = currentVersion;
     
     const geometries: Array<{ geometry: string; label?: string; fillColor?: string; strokeColor?: string; strokeWidth?: number }> = [];
 
-    // Adicionar área da coleção (azul tracejado)
+    
     if (this.area?.geometry) {
       geometries.push({
         geometry: this.area.geometry,
@@ -399,19 +399,19 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
       });
     }
 
-    // Cores para os plots
+    
     const plotColors = [
-      'rgba(239, 68, 68, 0.3)',   // Red
-      'rgba(249, 115, 22, 0.3)',  // Orange
-      'rgba(234, 179, 8, 0.3)',   // Yellow
-      'rgba(34, 197, 94, 0.3)',   // Green
-      'rgba(168, 85, 247, 0.3)',  // Purple
-      'rgba(236, 72, 153, 0.3)',  // Pink
-      'rgba(20, 184, 166, 0.3)',  // Teal
-      'rgba(16, 185, 129, 0.3)',  // Emerald
+      'rgba(239, 68, 68, 0.3)',   
+      'rgba(249, 115, 22, 0.3)',  
+      'rgba(234, 179, 8, 0.3)',   
+      'rgba(34, 197, 94, 0.3)',   
+      'rgba(168, 85, 247, 0.3)',  
+      'rgba(236, 72, 153, 0.3)',  
+      'rgba(20, 184, 166, 0.3)',  
+      'rgba(16, 185, 129, 0.3)',  
     ];
 
-    // Adicionar plots
+    
     this.plots.forEach((plot, index) => {
       const fillColor = plotColors[index % plotColors.length];
       const strokeColor = this.rgbaToRgb(fillColor, 0.8);
@@ -425,7 +425,7 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
       });
     });
 
-    // Cachear resultado
+    
     this.cachedMapGeometries = geometries;
     return geometries;
   }
@@ -438,7 +438,7 @@ export class CollectionAreaDetailComponent implements OnInit, OnDestroy {
     return rgba;
   }
 
-  // Para o mapa: combinar geometria da área com plots
+  
   getCombinedGeometries(): { area?: string; plots: Array<{ id?: number; geometry: string; code: string }> } {
     return {
       area: this.area?.geometry,

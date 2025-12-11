@@ -91,7 +91,7 @@ export class PlotDialogComponent implements OnInit, OnChanges {
       this.form.reset();
     }
 
-    // Subscribe to geometry changes to auto-calculate area
+    
     this.geometryControl.valueChanges.subscribe(geometry => {
       if (geometry && !this.isEditMode) {
         this.calculateAreaFromGeometry(geometry);
@@ -101,18 +101,18 @@ export class PlotDialogComponent implements OnInit, OnChanges {
 
   calculateAreaFromGeometry(geometryWKT: string): void {
     try {
-      // Parse geometry (formato PostgreSQL: ((x1,y1),(x2,y2),...))
+      
       let coordinates: [number, number][] = [];
 
       if (geometryWKT.startsWith('((') && geometryWKT.endsWith('))')) {
-        // Formato PostgreSQL
+        
         const cleanedGeometry = geometryWKT.slice(2, -2);
         coordinates = cleanedGeometry.split('),(').map(pair => {
           const [lon, lat] = pair.split(',').map(Number);
           return [lon, lat] as [number, number];
         });
       } else {
-        // Tentar GeoJSON
+        
         try {
           const geojson = JSON.parse(geometryWKT);
           if (geojson.type === 'Polygon' && geojson.coordinates) {
@@ -126,20 +126,20 @@ export class PlotDialogComponent implements OnInit, OnChanges {
 
       if (coordinates.length < 3) return;
 
-      // Calcular área usando fórmula de Shoelace (em graus)
-      // Depois converter para m² usando aproximação no equador
+      
+      
       const areaInDegrees = this.calculatePolygonAreaDegrees(coordinates);
       
-      // Converter de graus² para m²
-      // 1 grau de latitude ≈ 111,320 metros
-      // 1 grau de longitude varia com latitude, mas usamos aproximação média
+      
+      
+      
       const avgLat = coordinates.reduce((sum, coord) => sum + coord[1], 0) / coordinates.length;
-      const latMeters = 111320; // metros por grau de latitude
-      const lonMeters = 111320 * Math.cos(avgLat * Math.PI / 180); // metros por grau de longitude
+      const latMeters = 111320; 
+      const lonMeters = 111320 * Math.cos(avgLat * Math.PI / 180); 
       
       const areaM2 = Math.abs(areaInDegrees * latMeters * lonMeters);
 
-      // Auto-preencher apenas se ainda não foi preenchido
+      
       if (!this.form.get('areaM2')?.value || this.form.get('areaM2')?.value === 0) {
         this.form.patchValue({ areaM2: Math.round(areaM2 * 100) / 100 }, { emitEvent: false });
       }
