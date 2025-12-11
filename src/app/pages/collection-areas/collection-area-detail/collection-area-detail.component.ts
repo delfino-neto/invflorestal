@@ -4,7 +4,6 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { MessageService, ConfirmationService } from 'primeng/api';
 
-// PrimeNG
 import { CardModule } from 'primeng/card';
 import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
@@ -17,7 +16,6 @@ import { TagModule } from 'primeng/tag';
 import { TooltipModule } from 'primeng/tooltip';
 import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
 
-// Services & Models
 import { CollectionAreaService } from '@/core/services/collection-area.service';
 import { PlotService } from '@/core/services/plot.service';
 import { SpecimenObjectService } from '@/core/services/specimen-object.service';
@@ -25,7 +23,6 @@ import { CollectionArea } from '@/core/models/collection/collection-area';
 import { Plot, PlotRequest } from '@/core/models/collection/plot';
 import { SpecimenObject } from '@/core/models/specimen/specimen-object';
 
-// Shared Components
 import { PlotDialogComponent } from '../plot-dialog/plot-dialog.component';
 import { PlotImportDialogComponent } from '../plot-import-dialog/plot-import-dialog.component';
 import { MapVisualizerComponent, MapMarker } from '@/shared/components/map-visualizer';

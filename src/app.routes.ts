@@ -1,7 +1,6 @@
 import { Routes } from '@angular/router';
 import { AppLayout } from './app/layout/component/app.layout';
 import { AUTH_ROUTES } from './app/pages/auth/auth.routes';
-// import { DASHBOARD_ROUTES } from './app/pages/dashboard/dashboard.routes';
 import { DASHBOARD_ROUTES } from './app/pages/dashboard/dashboard.routes';
 import { USER_MANAGEMENT_ROUTES } from './app/pages/user-management/user-management.routes';
 import { SPECIES_ROUTES } from './app/pages/species/species.routes';
@@ -30,5 +29,5 @@ export const routes: Routes = [
             { path: 'map', children: MAP_ROUTES }
         ]
     },
-    { path: '**', redirectTo: 'error' } // Wildcard route for a 404 page
+    { path: '**', redirectTo: 'error' }
 ];

@@ -22,7 +22,8 @@ export interface SpecimenObjectRequest {
     latitude: number;
     longitude: number;
     observerId: number;
-    // SpeciesInfo fields
+
+    // SpeciesInfo
     observationDate?: Date;
     heightM?: number;
     dbmCm?: number;

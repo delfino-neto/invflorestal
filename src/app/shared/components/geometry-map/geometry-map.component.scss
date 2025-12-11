@@ -46,7 +46,6 @@
       }
     }
 
-    // Estilos para o botão de upload
     ::ng-deep {
       p-fileupload {
         .p-fileupload-choose {
@@ -154,7 +153,6 @@
     }
   }
 
-  // Cursores dinâmicos baseados no modo
   &.drawing-mode {
     .map {
       cursor: crosshair !important;
@@ -177,7 +175,6 @@
     }
   }
 
-  // Cursor normal quando disabled
   &:has(.map[disabled]) {
     .map {
       cursor: not-allowed !important;
@@ -191,7 +188,6 @@
   }
 }
 
-// Responsividade
 @media (max-width: 768px) {
   .map-container {
     .map-toolbar-compact {
