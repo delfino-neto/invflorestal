@@ -218,6 +218,15 @@ export class SpecimenListComponent implements OnInit, OnDestroy {
       .toUpperCase();
   }
 
+  getUrlThumbnail(imageUrl: string): string {
+    if (imageUrl) {
+      const filename = imageUrl.split('/').pop();
+      const url = "/api/uploads/media/thumbnail/" + filename + "?width=400&height=400&fit=crop";
+      return url;
+    }
+    return 'assets/images/placeholder.png';
+  }
+
   getUserAvatarColor(name?: string): string {
     if (!name) return '#6b7280';
     

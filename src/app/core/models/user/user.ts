@@ -2,7 +2,8 @@ export interface User {
     id?: number;
     firstName: string;
     lastName: string;
-    name: string;
+    name?: string;
+    fullName?: string;
     email: string;
     dateOfBirth?: Date;
     enabled: boolean;

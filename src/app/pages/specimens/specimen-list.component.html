@@ -93,7 +93,7 @@
                   [containerClass]="'galleria-container'">
                   <ng-template pTemplate="item" let-item>
                     <div class="galleria-image-container">
-                      <img [src]="'/api'+item" [alt]="specimen.speciesScientificName" class="galleria-image" />
+                      <img [src]="getUrlThumbnail(item)" [alt]="specimen.speciesScientificName" class="galleria-image" />
                     </div>
                   </ng-template>
                 </p-galleria>
@@ -170,6 +170,7 @@
                 <!-- Ações -->
                 <div class="card-actions">
                   <button
+                    [disabled]="true"
                     pButton
                     icon="pi pi-eye"
                     label="Ver"
@@ -178,6 +179,8 @@
                   ></button>
                   <button
                     pButton
+                    [disabled]="true"
+                    severity="info"
                     icon="pi pi-pencil"
                     class="p-button-outlined p-button-warning p-button-sm"
                     (click)="navigateToEdit(specimen.id!)"
@@ -202,6 +205,7 @@
   <!-- Paginador Separado -->
   <div *ngIf="!loading && specimens.length > 0" class="mt-8">
     <p-paginator
+      [first]="currentPage * pageSize"
       [rows]="pageSize"
       [totalRecords]="totalRecords"
       [rowsPerPageOptions]="[12, 24, 36]"

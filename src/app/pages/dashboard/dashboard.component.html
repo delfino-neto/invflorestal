@@ -12,27 +12,44 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <p-card *ngFor="let stat of stats" styleClass="shadow-sm border-gray-200 hover:shadow-md transition-shadow">
-            <div class="flex items-center justify-between">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div *ngFor="let stat of stats" 
+             class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+            <div class="flex items-start justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600">{{ stat.title }}</p>
-                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ stat.value }}</p>
-                    <p class="text-sm mt-2 flex items-center" [ngClass]="{
-                        'text-green-600': stat.changeType === 'positive',
-                        'text-red-600': stat.changeType === 'negative',
-                        'text-gray-600': stat.changeType === 'neutral'
-                        }">
-                        <i *ngIf="stat.changeType === 'positive'" class="pi pi-arrow-up mr-1"></i>
-                        {{ stat.change }}
-                    </p>
+                    <p class="text-sm font-medium text-gray-500 mb-2">{{ stat.title }}</p>
+                    <p class="text-3xl font-bold text-gray-900 mb-3">{{ stat.value }}</p>
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-medium px-2 py-1 rounded-lg" 
+                              [ngClass]="{
+                                'bg-emerald-50 text-emerald-700': stat.changeType === 'positive',
+                                'bg-rose-50 text-rose-700': stat.changeType === 'negative',
+                                'bg-gray-50 text-gray-700': stat.changeType === 'neutral'
+                              }">
+                            <i *ngIf="stat.changeType === 'positive'" class="pi pi-arrow-up mr-1 text-xs"></i>
+                            <i *ngIf="stat.changeType === 'negative'" class="pi pi-arrow-down mr-1 text-xs"></i>
+                            {{ stat.change }}
+                        </span>
+                        <!-- <span class="text-xs text-gray-400">vs. último mês</span> -->
+                    </div>
                 </div>
-                <div class="p-3 rounded-lg" [ngClass]="stat.color">
+                <div class="p-3 rounded-xl" [ngClass]="stat.color">
                     <i *ngIf="stat.icon" [class]="stat.icon + ' text-white text-2xl'"></i>
-                    <i *ngIf="stat.materialIcon" class="material-symbols-outlined text-white">{{ stat.materialIcon }}</i>
+                    <i *ngIf="stat.materialIcon" class="material-symbols-outlined text-white text-2xl">{{ stat.materialIcon }}</i>
                 </div>
             </div>
-        </p-card>
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <!-- <div class="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full" 
+                         [ngClass]="{
+                           'bg-emerald-500': stat.changeType === 'positive',
+                           'bg-rose-500': stat.changeType === 'negative',
+                           'bg-gray-400': stat.changeType === 'neutral'
+                         }"
+                         [style.width]="stat.progress || '60%'"></div>
+                </div> -->
+            </div>
+        </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

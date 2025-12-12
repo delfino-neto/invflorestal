@@ -33,7 +33,7 @@ export class AuthService {
     }
 
     getName(){
-        return this.currentUser()?.name;
+        return this.currentUser()?.fullName;
     }
 
     getUsername(){
