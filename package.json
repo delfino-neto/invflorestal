@@ -1,10 +1,10 @@
 {
-    "name": "sakai-ng",
-    "version": "20.0.0",
+    "name": "invflorestal",
+    "version": "1.0.0",
     "scripts": {
         "ng": "ng",
         "start": "ng serve --proxy-config proxy.conf.json",
-        "build": "ng build",
+        "build": "ng build --configuration=production --base-href /",
         "watch": "ng build --watch --configuration development",
         "format": "prettier --write \"**/*.{js,mjs,ts,mts,d.ts,html}\" --cache",
         "test": "ng test"

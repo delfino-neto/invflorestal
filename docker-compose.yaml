@@ -1,0 +1,16 @@
+services:
+  invflorestal-web:
+    image: invflorestal-web
+    container_name: invflorestal-web
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "80:80"
+    restart: unless-stopped
+    networks:
+      - inv-network
+
+networks:
+  inv-network:
+    external: true
