@@ -1,0 +1,159 @@
+<div class="map-container" [style]="{'height': '100%', 'width': '100%'}">
+<!-- Controles do mapa -->
+<div class="map-controls">
+</div>
+
+@if (loading && initialLoad) {
+    <div class="loading-overlay">
+    <div class="flex flex-col items-center gap-4">
+        <p-progressSpinner 
+        styleClass="w-16 h-16"
+        strokeWidth="4"
+        fill="transparent"
+        animationDuration=".8s"
+        ></p-progressSpinner>
+        <span class="text-lg font-medium text-gray-700">Carregando mapa...</span>
+    </div>
+    </div>
+}
+
+@if (!initialLoad) {
+    <app-map-visualizer
+    [height]="'100%'"
+    [centerLat]="centerLat"
+    [centerLon]="centerLon"
+    [initialZoom]="initialZoom"
+    [markers]="markers"
+    [enableClustering]="true"
+    [clusterDistance]="50"
+    [maxZoom]="18"
+    ></app-map-visualizer>
+}
+
+</div>
+<p-drawer
+    [(visible)]="showSpecimenDetails"
+    position="right"
+    [style]="{ width: '24rem' }"
+    [modal]="true"
+  >
+    <ng-template pTemplate="header">
+        <div class="drawer-header">
+        <h3 class="drawer-title">Detalhes do Espécime</h3>
+        <span class="drawer-subtitle">ID #{{ selectedSpecimen?.id }}</span>
+        </div>
+    </ng-template>
+
+    @if (selectedSpecimen) {
+        <div class="drawer-content">
+        <!-- Espécie -->
+        <div class="drawer-section">
+            <h4 class="section-title">Espécie</h4>
+            <div class="section-content">
+            <div class="field-group">
+                <label class="field-label">Nome Científico</label>
+                <p class="field-value field-value-primary">{{ selectedSpecimen.speciesScientificName || 'N/A' }}</p>
+            </div>
+            <div class="field-group">
+                <label class="field-label">Nome Comum</label>
+                <p class="field-value">{{ selectedSpecimen.speciesCommonName || 'N/A' }}</p>
+            </div>
+            </div>
+        </div>
+
+        <!-- Localização -->
+        <div class="drawer-section">
+            <h4 class="section-title">Localização</h4>
+            <div class="section-content">
+            <div class="field-group">
+                <label class="field-label">Área de Coleta</label>
+                <p class="field-value">{{ selectedSpecimen.areaName || 'N/A' }}</p>
+            </div>
+            <div class="field-group">
+                <label class="field-label">Parcela</label>
+                <p class="field-value">{{ selectedSpecimen.plotCode || 'N/A' }}</p>
+            </div>
+            <div class="field-row">
+                <div class="field-group">
+                <label class="field-label">Latitude</label>
+                <p class="field-value field-value-mono">{{ formatCoordinate(selectedSpecimen.latitude) }}</p>
+                </div>
+                <div class="field-group">
+                <label class="field-label">Longitude</label>
+                <p class="field-value field-value-mono">{{ formatCoordinate(selectedSpecimen.longitude) }}</p>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Observador -->
+        <div class="drawer-section">
+            <h4 class="section-title">Observador</h4>
+            <div class="section-content">
+            <div class="observer-info">
+                <p-avatar 
+                    class="metadata-avatar"
+                    [label]="getInitials(selectedSpecimen.observerFullName ?? 'N/A')" 
+                    shape="square"
+                    [style]="{ 'background-color': getUserAvatarColor(selectedSpecimen.observerFullName ?? 'N/A'), 'color': '#ffffff' }"
+                ></p-avatar>
+                <p class="field-value">{{ selectedSpecimen.observerFullName || 'N/A' }}</p>
+            </div>
+            </div>
+        </div>
+
+        <!-- Datas -->
+        <div class="drawer-section">
+            <h4 class="section-title">Registro</h4>
+            <div class="section-content">
+            <div class="field-group">
+                <label class="field-label">Criado em</label>
+                <p class="field-value">{{ formatDate(selectedSpecimen.createdAt) }}</p>
+            </div>
+            <div class="field-group">
+                <label class="field-label">Atualizado em</label>
+                <p class="field-value">{{ formatDate(selectedSpecimen.updatedAt) }}</p>
+            </div>
+            </div>
+        </div>
+
+        <!-- Imagens -->
+        @if (selectedSpecimen.imageUrls && selectedSpecimen.imageUrls.length > 0) {
+            <div class="drawer-section">
+            <h4 class="section-title">Imagens ({{ selectedSpecimen.imageUrls.length }})</h4>
+            <div class="section-content">
+                <div class="image-grid">
+                @for (imageUrl of selectedSpecimen.imageUrls; track imageUrl) {
+                    <div class="image-item">
+                    <img [src]="getUrlThumbnail(imageUrl)" [alt]="selectedSpecimen.speciesScientificName" />
+                    </div>
+                }
+                </div>
+            </div>
+            </div>
+        }
+        </div>
+    }
+</p-drawer>
+
+<p-popover #clusterPopover [dismissable]="true">
+    <div class="cluster-menu">
+        <span class="font-medium block mb-2">Objetos nessa localização</span>
+        <div class="cluster-menu-items">
+        @for (specimen of clusterSpecimens; track specimen.id) {
+            <button 
+            class="cluster-menu-item"
+            (click)="selectSpecimenFromCluster(specimen)"
+            >
+            <div class="cluster-avatar">
+                <i class="material-symbols-outlined" [style]="{'font-size': '10pt'}">potted_plant</i>
+            </div>
+            <div class="cluster-menu-content">
+                <span class="cluster-species-name">{{ specimen.speciesScientificName ?? 'Espécie não identificada' }}</span>
+                <span class="cluster-area-name">{{ specimen.areaName }}</span>
+            </div>
+            </button>
+        }
+        </div>
+    </div>
+</p-popover>

@@ -12,51 +12,40 @@
         </div>
     </div>
 
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div *ngFor="let stat of stats" 
-             class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-            <div class="flex items-start justify-between">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <p-card *ngFor="let stat of stats" styleClass="shadow-sm border-gray-200 hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-500 mb-2">{{ stat.title }}</p>
-                    <p class="text-3xl font-bold text-gray-900 mb-3">{{ stat.value }}</p>
-                    <div class="flex items-center gap-2">
-                        <span class="text-sm font-medium px-2 py-1 rounded-lg" 
-                              [ngClass]="{
-                                'bg-emerald-50 text-emerald-700': stat.changeType === 'positive',
-                                'bg-rose-50 text-rose-700': stat.changeType === 'negative',
-                                'bg-gray-50 text-gray-700': stat.changeType === 'neutral'
-                              }">
-                            <i *ngIf="stat.changeType === 'positive'" class="pi pi-arrow-up mr-1 text-xs"></i>
-                            <i *ngIf="stat.changeType === 'negative'" class="pi pi-arrow-down mr-1 text-xs"></i>
-                            {{ stat.change }}
-                        </span>
-                        <!-- <span class="text-xs text-gray-400">vs. último mês</span> -->
-                    </div>
+                    <p class="text-sm font-medium text-gray-600">{{ stat.title }}</p>
+                    <p class="text-2xl font-bold text-gray-900 mt-2">{{ stat.value }}</p>
+                    <p class="text-sm mt-2 flex items-center" [ngClass]="{
+                        'text-green-600': stat.changeType === 'positive',
+                        'text-red-600': stat.changeType === 'negative',
+                        'text-gray-600 bg-gray-100 font-bold justify-center rounded-lg': stat.changeType === 'neutral'
+                        }">
+                        <i *ngIf="stat.changeType === 'positive'" class="pi pi-arrow-up mr-1"></i>
+                        {{ stat.change }}
+                    </p>
                 </div>
-                <div class="p-3 rounded-xl" [ngClass]="stat.color">
+                <div class="p-3 rounded-lg" [ngClass]="stat.color">
                     <i *ngIf="stat.icon" [class]="stat.icon + ' text-white text-2xl'"></i>
-                    <i *ngIf="stat.materialIcon" class="material-symbols-outlined text-white text-2xl">{{ stat.materialIcon }}</i>
+                    <i *ngIf="stat.materialIcon" class="material-symbols-outlined text-white">{{ stat.materialIcon }}</i>
                 </div>
             </div>
-            <div class="mt-4 pt-4 border-t border-gray-100">
-                <!-- <div class="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                    <div class="h-full rounded-full" 
-                         [ngClass]="{
-                           'bg-emerald-500': stat.changeType === 'positive',
-                           'bg-rose-500': stat.changeType === 'negative',
-                           'bg-gray-400': stat.changeType === 'neutral'
-                         }"
-                         [style.width]="stat.progress || '60%'"></div>
-                </div> -->
-            </div>
-        </div>
+        </p-card>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 space-y-6">
-            <p-card header="Distribuição de Espécies" styleClass="shadow-sm border-gray-200">
-                <p-chart type="bar" [data]="speciesData" [options]="speciesChartOptions"></p-chart>
-            </p-card>
+
+        <div class="lg:col-span-2 flex flex-col gap-6">
+            <div class="w-full h-164 rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <app-map-viewer #viewer></app-map-viewer>
+            </div>
+            <div class="w-full space-y-6">
+                <p-card header="Distribuição de Espécies" styleClass="shadow-sm border-gray-200">
+                    <p-chart type="bar" [data]="speciesData" [options]="speciesChartOptions"></p-chart>
+                </p-card>
+            </div>
         </div>
 
         <div class="space-y-6">
@@ -78,7 +67,7 @@
                         
                         <!-- Content -->
                         <div class="flex-1 min-w-0">
-                            <h4 class="text-sm font-semibold text-gray-900 mb-1 leading-tight">{{ suggestion.title }}</h4>
+                            <div class="text-sm font-semibold text-gray-900 mb-1 leading-tight">{{ suggestion.title }}</div>
                             <p class="text-sm text-gray-600 leading-relaxed">{{ suggestion.content }}</p>
                         </div>
                     </div>
@@ -91,9 +80,9 @@
 
             <!-- Atividades Recentes -->
             <p-card header="Atividades Recentes" styleClass="shadow-sm border-gray-200">
-                <div class="space-y-2">
+                <div class="space-y-2" [style]="{'max-height': '750px', 'overflow': 'auto'}">
                     <div *ngFor="let activity of recentActivities" 
-                        class="group relative flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-all duration-200 cursor-pointer">
+                        class="group relative flex items-start gap-3 p-3 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer" (click)="viewer.selectedSpecimen = getFromId(viewer.allSpecimens, activity.id); viewer.showSpecimenDetails = true;">
                         <!-- Status Indicator -->
                         <div class="flex-shrink-0 mt-1.5">
                             <div class="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>

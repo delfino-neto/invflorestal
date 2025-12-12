@@ -8,11 +8,12 @@ import {ChartModule} from 'primeng/chart'
 import {ButtonModule} from 'primeng/button'
 import { SharedModule } from "@/shared/shared.module";
 import { GlobeComponent } from "@/shared/components/globe/globe.component";
+import { MapViewComponent } from "../map/map-viewer/map-view.component";
 
 @Component({
     templateUrl: './dashboard.component.html',
     standalone: true,
-    imports: [CommonModule, CardModule, ChartModule, ButtonModule, SharedModule]
+    imports: [CommonModule, CardModule, ChartModule, ButtonModule, SharedModule, MapViewComponent]
 })
 export class DashboardComponent implements OnInit {
 
@@ -178,6 +179,10 @@ export class DashboardComponent implements OnInit {
                 color: 'text-green-600'
             });
         }
+    }
+
+    getFromId(allSpecimens: any[], id: number): any {
+        return allSpecimens.find(specimen => specimen.id === id);
     }
 
     loadFallbackData(): void {
